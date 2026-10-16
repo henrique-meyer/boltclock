@@ -101,7 +101,7 @@ az containerapp env certificate list --resource-group $env:AZURE_RESOURCE_GROUP 
 ```
 
 3. Put `customDomainName`, `customDomainCertificateId` and `publicBaseUrl` in the private parameter file. Without them, the next Bicep deploy removes the binding.
-4. Restrict the Google Maps key: HTTP referrer `https://<hostname>/*`, APIs Maps JavaScript API and Places API (New). Use a separate key for `http://localhost:8080/*`.
+4. Restrict the Google Maps key: HTTP referrer `https://<hostname>/*`, APIs Maps JavaScript API and Places API (New). Use a separate key for local work, restricted to `http://localhost:5173/*` (`npm run dev`) and `http://localhost:8080/*`.
 
 ## Operations
 
