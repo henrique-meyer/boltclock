@@ -240,7 +240,7 @@ resource deployFederation 'Microsoft.ManagedIdentity/userAssignedIdentities/fede
   }
 }
 
-var readerRole = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'acdd72a7-3385-48ef-bd42-f6fdb9ab1f8c')
+var readerRole = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')
 var contributorRole = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b24988ac-6180-42a0-ab88-20f7382dd24c')
 
 // Read the group (the CLI looks up the environment), change only the container app.
