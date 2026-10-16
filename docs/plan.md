@@ -21,7 +21,10 @@ flowchart TD
   s6[BOLT-6 repo layout and plan]
   s7[BOLT-7 provision, DNS, domain]
   s8[BOLT-8 logo]
+  s10[BOLT-10 stack and scaffold]
   s2 --> s3
+  s4 --> s10
+  s5 --> s10
   s3 --> s4
   s3 --> s5
   s3 --> s7
@@ -77,3 +80,9 @@ A yellow-bolt alternate is kept next to them but not used: `logo-yellow.svg`, `l
 ### BOLT-9 — Keep the Jira site out of public text
 
 Tracked files, commit messages and pull request descriptions name no real resources, IDs, keys or environment-specific domains and URLs. Replace the board link in this plan with plain text, and change the Jira links in the pull request descriptions to plain `BOLT-N` keys.
+
+### BOLT-10 — Stack decision (ADR 0002) and app scaffold
+
+Node 24 LTS and TypeScript, Fastify, a Vite front end with no framework, Vitest, and `h5wasm` for GLM parsing, recorded in [decisions/0002-node-typescript.md](decisions/0002-node-typescript.md). The scaffold: a Fastify server with `/health`, config from the environment and the built client served from the same port; a placeholder display with the required disclaimers and data credits; Vitest, ESLint and a typecheck; `npm run dev` for local work; a multi-stage non-root `Dockerfile`; and `pr.yml` running lint, typecheck, tests and the build. The GLM parser, push channel and weather relay come in later stories.
+
+Blocked by BOLT-4 and BOLT-5.

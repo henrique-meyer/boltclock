@@ -7,6 +7,22 @@ permissions:
   contents: read
 
 jobs:
+  app:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
   check:
     runs-on: ubuntu-latest
     steps:
@@ -36,6 +52,16 @@ jobs:
         with:
           context: .
           push: false
+          load: true
           tags: boltclock:pr
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      # The image must start as a non-root process on 8080 and answer /health.
+      - name: Run the image and check /health
+        if: hashFiles('Dockerfile') != ''
+        run: |
+          docker run --detach --name boltclock --publish 8080:8080 boltclock:pr
+          trap 'docker logs boltclock; docker rm --force boltclock > /dev/null' EXIT
+          curl -fsS --retry 10 --retry-delay 1 --retry-all-errors http://localhost:8080/health
+          test "$(docker exec boltclock id -u)" != "0"

@@ -1,0 +1,16 @@
+# Only package files, src/ and assets/ go into the image. Never local secrets or notes.
+.git
+.github
+.vscode
+.idea
+node_modules
+dist
+coverage
+test
+docs
+infra
+*.md
+.env
+.env.*
+*.local.*
+*.log
