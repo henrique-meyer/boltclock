@@ -24,7 +24,12 @@ Weather: client → relay → api.weather.gov `/points/{lat,lon}` (cached) → h
 - GOES-East covers Florida well. GLM resolution is ~8 km, it detects total lightning (in-cloud + cloud-to-ground), and detection is <100%. Minimum sensible radius is ~10 mi. The UI and README must state "Strike locations are accurate within ±5 miles."
 
 ## Deployment shape
-One always-on server process (home device on the display's LAN or a small cloud host) serving the client, plus a browser in kiosk/full-screen mode.
+One container image serves the client, the push channel and the weather relay on one port, plus a browser in kiosk/full-screen mode. The reference deployment is Azure Container Apps with one always-on replica ([ADR 0001](decisions/0001-container-apps.md), [infra/README.md](../infra/README.md)). Any host that runs a container around the clock also works, such as a mini PC on the display's LAN.
+- Stateless: on start, ingest rebuilds the 60-min buffer from the GLM bucket, so restarts and new revisions lose nothing. No database or volume.
+- One replica. More would each ingest the same files.
+- `GET /health` reports process health only. Stale lightning data is shown on the display, never used to restart the container.
+- Proxies may cut long-lived requests (Azure Container Apps: 240 s). The client reconnects, the server replays the buffer, and flashes are deduplicated by id.
+- Run it close to AWS us-east-1 for the lowest GLM latency.
 
 ## Safety
 Not a certified lightning warning system. Disclose latency, positional error ("Strike locations are accurate within ±5 miles."), and missed detections.

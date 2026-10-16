@@ -1,0 +1,34 @@
+using 'main.bicep'
+
+// Copy to infra/main.bicepparam and fill the private values there. That file is gitignored.
+// Do not put resource names, the subscription, domain, emails, or keys in git.
+// Secrets are read from environment variables at deploy time. Load .env first (infra/README.md).
+
+param location = 'eastus'
+param logAnalyticsName = ''
+param environmentName = ''
+param containerAppName = ''
+
+// First deploy: false. After CI has published the image and the package is public: true.
+param deployApp = false
+param containerImage = ''
+param targetPort = 8080
+param healthPath = '/health'
+param cpuCores = '0.25'
+
+param googleMapsApiKey = readEnvironmentVariable('GOOGLE_MAPS_API_KEY')
+param nwsUserAgent = readEnvironmentVariable('NWS_USER_AGENT')
+param publicBaseUrl = ''
+
+// Fill after binding the hostname once (infra/README.md, "Custom domain and HTTPS").
+param customDomainName = ''
+param customDomainCertificateId = ''
+
+// GitHub Actions deploy identity. The subject may include immutable owner and repository IDs.
+param githubFederationSubject = ''
+param deployIdentityName = ''
+
+// Optional cost guard. Whoever deploys chooses the amount.
+param budgetAmount = 0
+param budgetContactEmails = []
+param budgetStartDate = ''
