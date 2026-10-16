@@ -8,7 +8,7 @@ For every story: the change merged through a pull request, CI green, Bicep and d
 
 ## How work is tracked
 
-Every piece of work that changes the tracked repo gets an entry here and a BOLT story on the [board](https://nitro.atlassian.net/jira/software/projects/BOLT/boards/112) before it starts. The entry and the story describe the same work. When the work changes, both change in the same pass. A story moves to In Progress when work starts and to Done when its pull request merges.
+Every piece of work that changes the tracked repo gets an entry here and a BOLT story on the project board before it starts. The entry and the story describe the same work. When the work changes, both change in the same pass. A story moves to In Progress when work starts and to Done when its pull request merges.
 
 ## Order
 
@@ -73,3 +73,7 @@ Blocked by BOLT-3 and BOLT-5.
 `assets/logo.svg` (navy tile, cream alarm clock with beige bells and a `#CDBFA8` rim, two-tone electric-cyan bolt striking to the centre; readable at 16 px), `assets/logo-mark.svg` (transparent, outlined), and PNG copies exported from them: `logo.png` 1024×1024 and `logo-mark.png` 912×1032.
 
 A yellow-bolt alternate is kept next to them but not used: `logo-yellow.svg`, `logo-mark-yellow.svg` and their PNG copies. Cyan is the brand for now.
+
+### BOLT-9 — Keep the Jira site out of public text
+
+Tracked files, commit messages and pull request descriptions name no real resources, IDs, keys or environment-specific domains and URLs. Replace the board link in this plan with plain text, and change the Jira links in the pull request descriptions to plain `BOLT-N` keys.
