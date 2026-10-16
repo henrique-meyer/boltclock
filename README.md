@@ -9,3 +9,9 @@ BoltClock runs as one always-on container. The reference deployment is Azure Con
 - Optional: a managed certificate for a custom domain, a GitHub OIDC deploy identity, and a budget alert
 
 Images are published to GitHub Container Registry by [deploy.yml](.github/workflows/deploy.yml).
+
+## Project layout
+- `assets/`: the logo. `logo.svg` is the app icon and favicon, `logo-mark.svg` has a transparent background, and both have PNG copies. The `-yellow` files are an alternate colourway that isn't in use.
+- `docs/`: the [system design](docs/system-design.md), the [plan](docs/plan.md), and decisions in [docs/decisions](docs/decisions/).
+- `infra/`: Bicep and the deploy guide.
+- `.github/workflows/`: pull request checks and the deploy.
