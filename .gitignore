@@ -1,0 +1,51 @@
+# ---- Local planning and agent notes (not published) ----
+/AGENTS.md
+/CLAUDE.md
+/requirements.md
+/infrastructure.md
+/PLAN*.md
+
+# ---- Local secrets, deploy config and domain (not published) ----
+.env
+.env.*
+!.env.example
+*.local.*
+deploy.local.*
+infra/**/*.local.*
+infra/**/*.bicepparam
+
+# ---- Node / frontend ----
+node_modules/
+dist/
+build/
+.vite/
+.next/
+coverage/
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# ---- Runtime data / caches (GLM downloads, buffers) ----
+.data/
+data/cache/
+*.nc
+!tests/fixtures/**/*.nc
+
+# ---- Logs, OS, editors ----
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
