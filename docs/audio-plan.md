@@ -1,8 +1,16 @@
 # Audio behavior
-- **Siren ("wheeoo")**: a rising-falling siren sweep (roughly low→high→low over ~1 s, repeated ~3×). It must be original or public-domain/CC0.
-- **Speech**: "Lightning detected {n} miles away" / "{n} kilometers away", n = whole number 0–100+, and "No lightning detected in the area." It must sound clear and consistent on a kiosk device with no internet voice services. If the primary voice method fails, fall back to any other available method rather than staying silent.
-- **Chime**: a short pleasant two- or three-tone chime before the all-clear message.
+- **Siren**, chosen in settings. "No siren" skips straight to the announcement. All three are original.
+  - **Two-tone**: hi-lo "nee-naw", two pitches a fourth apart, half a second each, about 3.4 s. The mildest.
+  - **Mechanical**: a slow civil-defense wail, low → high → low three times over about 4.4 s, with rotor flutter and two slightly detuned horns.
+  - **Yelp**: fast sweeps about four times a second, about 3.3 s. The most urgent.
+- **Speech**: "Lightning detected {n} miles away" / "{n} kilometers away", n = whole number 0–100 mi or 0–161 km (the 100 mi radius cap), and "No lightning detected in the area." Say "1 mile" / "1 kilometer", and "less than 1 mile" / "less than 1 kilometer" for 0. It must sound clear and consistent on a kiosk device with no internet voice services. If the primary voice method fails, fall back to any other available method rather than staying silent.
+- **Chime**: a short rising three-note bell (G–C–E), about 2 s, before the all-clear message.
 - **Sequencing**: A = siren → short gap → speech. B = chime → speech. Never overlap sounds; a newer event interrupts the current one.
 - **Autoplay**: browsers block sound until a user gesture. Provide a large "Start display" action (which also enters full screen) that enables audio. If audio is not enabled, show a persistent "click to enable sound" banner. Document a kiosk configuration that allows sound without a click.
 - Volume control and test buttons for A and B in settings.
 - Sound sets are built-in and selectable later. No uploads.
+
+## How the sounds are made
+- **Sirens and chime** are synthesized from scratch by [scripts/audio/synth.ts](../scripts/audio/synth.ts). `npm run audio:sounds` writes them to `assets/audio/` as 16-bit mono WAV files, and a test fails if the committed files no longer match the synthesizer.
+- **Speech** is rendered in advance with an ElevenLabs voice, one file per whole sentence. Splicing a separately recorded number into a sentence sounds robotic, because a number spoken on its own carries its own sentence intonation. The script runs at development time with the voice, model and settings fixed in it, and reads `ELEVENLABS_API_KEY` from `.env`. The running app never calls ElevenLabs: it loads only the clip it needs from `assets/audio/`.
+- The browser's built-in speech is the fallback when a clip fails to load.

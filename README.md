@@ -54,7 +54,8 @@ The sirens and the all-clear chime are generated in code by a script in this rep
 - `src/server/`: the Fastify server (`/health` now; lightning ingest, push channel and weather relay to come).
 - `src/client/`: the browser display, built with Vite.
 - `test/`: Vitest tests.
-- `assets/`: the logo. `logo.svg` is the app icon and favicon, `logo-mark.svg` has a transparent background, and both have PNG copies. The `-yellow` files are an alternate colourway that isn't in use.
+- `scripts/audio/`: the scripts that make the sounds ([audio plan](docs/audio-plan.md)).
+- `assets/`: the logo. `logo.svg` is the app icon and favicon, `logo-mark.svg` has a transparent background, and both have PNG copies. The `-yellow` files are an alternate colourway that isn't in use. `assets/audio/` holds the sirens, the chime and the announcements.
 - `docs/`: the [system design](docs/system-design.md), the [plan](docs/plan.md), and decisions in [docs/decisions](docs/decisions/).
 - `infra/`: Bicep and the deploy guide.
 - `.github/workflows/`: pull request checks and the deploy.
