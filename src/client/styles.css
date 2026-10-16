@@ -54,13 +54,19 @@ body {
   color: var(--bolt);
 }
 
+/* The credits-and-disclaimers line stays on one line on a display; the size floor lets it wrap on a phone. */
 .fineprint {
   padding: 1.5vh 4vw 2vh;
-  font-size: max(12px, 1.8vh);
+  font-size: max(11px, min(1.8vh, 0.68vw));
   color: var(--outline);
   text-align: center;
 }
 
 .fineprint p {
   margin: 0.3em 0;
+}
+
+.site-credit a {
+  color: inherit;
+  white-space: nowrap;
 }
