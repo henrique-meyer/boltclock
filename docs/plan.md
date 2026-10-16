@@ -22,6 +22,7 @@ flowchart TD
   s7[BOLT-7 provision, DNS, domain]
   s8[BOLT-8 logo]
   s10[BOLT-10 stack and scaffold]
+  s12[BOLT-12 audio assets]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -29,6 +30,7 @@ flowchart TD
   s3 --> s5
   s3 --> s7
   s5 --> s7
+  s10 --> s12
 ```
 
 ## Stories
@@ -86,3 +88,14 @@ Tracked files, commit messages and pull request descriptions name no real resour
 Node 24 LTS and TypeScript, Fastify, a Vite front end with no framework, Vitest, and `h5wasm` for GLM parsing, recorded in [decisions/0002-node-typescript.md](decisions/0002-node-typescript.md). The scaffold: a Fastify server with `/health`, config from the environment and the built client served from the same port; a placeholder display with the data credits and required disclaimers on one line and the same site credit as the sibling projects (designer and source links); Vitest, ESLint and a typecheck; `npm run dev` for local work; a multi-stage non-root `Dockerfile`; and `pr.yml` running lint, typecheck, tests and the build. The GLM parser, push channel and weather relay come in later stories.
 
 Blocked by BOLT-4 and BOLT-5.
+
+### BOLT-12 — Audio assets: selectable siren, announcements, chime
+
+The sound files only; playback, sequencing, the autoplay unlock and the settings screen come in a later story.
+
+- **Siren**, chosen in settings: No siren, Two-tone (hi-lo, mildest), Mechanical (slow civil-defense wail) or Yelp (fast sweeps, most urgent). A script synthesizes them, so they are original, and renders them to `assets/audio/`. "No siren" goes straight to the announcement.
+- **Announcements**: whole sentences rendered in advance with ElevenLabs instead of spliced numbers, so the intonation stays natural. "Lightning detected N miles away" for 0–100 and "N kilometers away" for 0–161, with "1 mile", "less than 1 mile" for 0, and "No lightning detected in the area." A development-time script fixes the voice, model and settings, and ffmpeg trims silence and evens out loudness. The mono MP3 files are committed and the app loads only the clip it needs. `ELEVENLABS_API_KEY` is read from `.env` by the script only, never by the running app.
+- **Chime**: a short two- or three-tone chime before the all-clear, synthesized like the sirens.
+- **Docs**: [audio-plan.md](audio-plan.md) updated for the siren choice and the pre-rendered clips, and the README credits the sounds.
+
+Blocked by BOLT-10.
