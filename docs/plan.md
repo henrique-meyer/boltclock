@@ -77,3 +77,7 @@ A yellow-bolt alternate is kept next to them but not used: `logo-yellow.svg`, `l
 ### BOLT-9 — Keep the Jira site out of public text
 
 Tracked files, commit messages and pull request descriptions name no real resources, IDs, keys or environment-specific domains and URLs. Replace the board link in this plan with plain text, and change the Jira links in the pull request descriptions to plain `BOLT-N` keys.
+
+### BOLT-11 — Fix the Reader role ID in the Bicep (bug)
+
+The deploy identity's Reader assignment on the resource group used a role definition ID that does not exist, so the first deploy failed on it with `RoleDefinitionDoesNotExist`. Use the built-in Reader ID, `acdd72a7-3385-48ef-bd42-f606fba81ae7`, and redeploy.
