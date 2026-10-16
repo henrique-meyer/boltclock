@@ -89,6 +89,10 @@ Node 24 LTS and TypeScript, Fastify, a Vite front end with no framework, Vitest,
 
 Blocked by BOLT-4 and BOLT-5.
 
+### BOLT-11 — Fix the Reader role ID in the Bicep (bug)
+
+The deploy identity's Reader assignment on the resource group used a role definition ID that does not exist, so the first deploy failed on it with `RoleDefinitionDoesNotExist`. Use the built-in Reader ID, `acdd72a7-3385-48ef-bd42-f606fba81ae7`, and redeploy.
+
 ### BOLT-12 — Audio assets: selectable siren, announcements, chime
 
 The sound files only; playback, sequencing, the autoplay unlock and the settings screen come in a later story.
