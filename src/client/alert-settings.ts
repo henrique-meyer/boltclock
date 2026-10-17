@@ -1,7 +1,7 @@
 import { DEFAULT_TIME_LIMIT_MINUTES, MAX_TIME_LIMIT_MINUTES } from '../shared/display-state.js';
 import type { KeyValueStore } from './location-settings.js';
 
-/** How the display alerts, kept on the display device next to its location (there are no accounts). */
+/** How the display alerts and shows units, kept on the display device next to its location (there are no accounts). */
 export const ALERT_STORAGE_KEY = 'boltclock.alerts';
 
 export const SIRENS = ['two-tone', 'mechanical', 'yelp', 'none'] as const;
@@ -14,7 +14,21 @@ export const SIREN_LABELS: Record<SirenId, string> = {
   none: 'No siren, announcement only',
 };
 
-export interface AlertSettings {
+export const CLOCKS = ['12h', '24h'] as const;
+export type ClockFormat = (typeof CLOCKS)[number];
+export const CLOCK_LABELS: Record<ClockFormat, string> = { '12h': '12-hour (1 PM)', '24h': '24-hour (13:00)' };
+
+export const TEMPERATURE_UNITS = ['F', 'C'] as const;
+export type TemperatureUnit = (typeof TEMPERATURE_UNITS)[number];
+export const TEMPERATURE_LABELS: Record<TemperatureUnit, string> = { F: 'Fahrenheit (°F)', C: 'Celsius (°C)' };
+
+/** How the display shows times and temperatures (BOLT-24). */
+export interface DisplayUnits {
+  clock: ClockFormat;
+  temperatureUnit: TemperatureUnit;
+}
+
+export interface AlertSettings extends DisplayUnits {
   siren: SirenId;
   /** 0 to 1. */
   volume: number;
@@ -32,6 +46,8 @@ export const DEFAULT_ALERT_SETTINGS: AlertSettings = {
   volume: 0.8,
   replayAudioDuringCountdown: false,
   timeLimitMinutes: DEFAULT_TIME_LIMIT_MINUTES,
+  clock: '12h',
+  temperatureUnit: 'F',
 };
 
 /** Fills anything missing or out of range with the default, so a hand-edited or old value never breaks the display. */
@@ -46,6 +62,10 @@ export function normalizeAlertSettings(input: Partial<Record<keyof AlertSettings
       typeof input.replayAudioDuringCountdown === 'boolean' ? input.replayAudioDuringCountdown : DEFAULT_ALERT_SETTINGS.replayAudioDuringCountdown,
     timeLimitMinutes:
       Number.isInteger(minutes) && minutes >= 1 && minutes <= MAX_TIME_LIMIT_MINUTES ? minutes : DEFAULT_ALERT_SETTINGS.timeLimitMinutes,
+    clock: CLOCKS.includes(input.clock as ClockFormat) ? (input.clock as ClockFormat) : DEFAULT_ALERT_SETTINGS.clock,
+    temperatureUnit: TEMPERATURE_UNITS.includes(input.temperatureUnit as TemperatureUnit)
+      ? (input.temperatureUnit as TemperatureUnit)
+      : DEFAULT_ALERT_SETTINGS.temperatureUnit,
   };
 }
 

@@ -76,6 +76,21 @@ describe('weather panel formatting', () => {
     expect(formatTemperature(null)).toBe('--°F');
   });
 
+  it('converts to Celsius when chosen', () => {
+    expect(formatTemperature(84, 'C')).toBe('29°C'); // 28.9
+    expect(formatTemperature(32, 'C')).toBe('0°C');
+    expect(formatTemperature(31.5, 'C')).toBe('0°C'); // -0.28, never "-0"
+    expect(formatTemperature(-40, 'C')).toBe('-40°C');
+    expect(formatTemperature(null, 'C')).toBe('--°C');
+  });
+
+  it('shows hours on a 24-hour clock when chosen', () => {
+    const threePm = Date.parse('2026-07-15T19:00:00Z');
+    expect(formatHour(threePm, 'America/New_York', '24h')).toBe('15:00');
+    expect(formatHour(Date.parse('2026-07-15T04:00:00Z'), 'America/New_York', '24h')).toBe('00:00');
+    expect(formatHour(Date.parse('2026-07-15T16:00:00Z'), 'America/New_York', '12h')).toBe('12 PM');
+  });
+
   it('describes the wind', () => {
     expect(formatWind(9.6, 21.2, 230)).toBe('SW 10 mph, gusts 21');
     expect(formatWind(10, 10.2, 'SW')).toBe('SW 10 mph');
@@ -107,6 +122,15 @@ describe('weather panel formatting', () => {
       credit: 'National Weather Service · observed 12 min ago',
       stale: false,
     });
+  });
+
+  it('builds the panel in the chosen clock and temperature units', () => {
+    const view = weatherPanelView(report(), NOW, 'America/New_York', { clock: '24h', temperatureUnit: 'C' });
+    expect(view.temperature).toBe('25°C');
+    expect(view.forecast.map(({ time, temperature }) => ({ time, temperature }))).toEqual([
+      { time: '15:00', temperature: '32°C' },
+      { time: '16:00', temperature: '31°C' },
+    ]);
   });
 
   it('marks old observations and cached copies as stale', () => {

@@ -32,6 +32,7 @@ flowchart TD
   s20[BOLT-20 display uses the saved location]
   s21[BOLT-21 alarm display]
   s22[BOLT-22 weather relay and panel]
+  s24[BOLT-24 clock and temperature units]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -51,6 +52,7 @@ flowchart TD
   s18 --> s21
   s20 --> s21
   s10 --> s22
+  s22 --> s24
 ```
 
 ## Stories
@@ -196,3 +198,9 @@ Blocked by BOLT-10.
 ### BOLT-23 — Replay the siren during a countdown: off by default
 
 The display's "Replay the siren for each new strike during a countdown" setting now defaults to off (Henrique, 2026-10-17). The first strike in the radius still sounds the full alarm, and every later strike still restarts the countdown; repeating the siren and announcement is opt-in in the settings. A device that already saved its alert settings keeps its saved choice.
+
+### BOLT-24 — Clock and temperature units; forecast times on one line
+
+The display's settings add a clock choice, 12-hour ("3 PM", the default) or 24-hour ("15:00"), and a temperature choice, °F (the default) or °C (Henrique, 2026-10-17). Both are saved on the device with the other alert settings and apply to the weather panel at once, without a reload. NWS still reports °F; the panel converts and rounds to a whole degree. A forecast row's time, temperature and chance of precipitation never wrap onto a second line; only the condition text may wrap.
+
+Blocked by BOLT-22.

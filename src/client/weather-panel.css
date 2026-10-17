@@ -72,13 +72,26 @@
   gap: 0.6em;
 }
 
+/* Time, temperature and chance never break across lines; only the condition text may wrap. */
+.weather .weather-hour-time,
+.weather .weather-hour-temp,
+.weather .weather-hour-precip {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 .weather .weather-hour-time {
   color: var(--outline, #cdbfa8);
+  font-variant-numeric: tabular-nums;
 }
 
 .weather .weather-hour-temp {
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+}
+
+.weather .weather-hour-text {
+  min-width: 0;
 }
 
 .weather .weather-hour-precip {
