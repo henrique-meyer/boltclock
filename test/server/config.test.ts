@@ -12,6 +12,7 @@ describe('loadConfig', () => {
       sessionLimitMinutes: 0,
       strikesTableEndpoint: '',
       testMode: false,
+      buttonIconsOnly: false,
     });
   });
 
@@ -25,6 +26,7 @@ describe('loadConfig', () => {
       SESSION_LIMIT_MINUTES: ' 15 ',
       STRIKES_TABLE_ENDPOINT: ' https://account.table.core.windows.net/ ',
       TEST_MODE: ' TRUE ',
+      BUTTON_ICONS_ONLY: ' true ',
     });
 
     expect(config).toEqual({
@@ -36,6 +38,7 @@ describe('loadConfig', () => {
       sessionLimitMinutes: 15,
       strikesTableEndpoint: 'https://account.table.core.windows.net',
       testMode: true,
+      buttonIconsOnly: true,
     });
   });
 
@@ -50,6 +53,10 @@ describe('loadConfig', () => {
 
   it.each(['-1', '2.5', 'ten'])('rejects SESSION_LIMIT_MINUTES=%s', (minutes) => {
     expect(() => loadConfig({ SESSION_LIMIT_MINUTES: minutes })).toThrow(/SESSION_LIMIT_MINUTES must be/);
+  });
+
+  it.each(['', 'false', '1', 'yes'])('keeps labels on the buttons for BUTTON_ICONS_ONLY=%s', (value) => {
+    expect(loadConfig({ BUTTON_ICONS_ONLY: value }).buttonIconsOnly).toBe(false);
   });
 
   it.each(['', 'false', '1', 'yes'])('keeps test mode off for TEST_MODE=%s', (value) => {

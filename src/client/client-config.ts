@@ -4,6 +4,8 @@ export interface ClientConfig {
   googleMapsMapId: string;
   /** The display may simulate a strike locally (BOLT-21). */
   testMode: boolean;
+  /** The display's top-right buttons show only their icons (BUTTON_ICONS_ONLY). */
+  buttonIconsOnly: boolean;
 }
 
 export async function fetchClientConfig(fetcher: typeof fetch = fetch): Promise<ClientConfig> {
@@ -14,6 +16,7 @@ export async function fetchClientConfig(fetcher: typeof fetch = fetch): Promise<
     googleMapsApiKey: typeof body.googleMapsApiKey === 'string' ? body.googleMapsApiKey : '',
     googleMapsMapId: typeof body.googleMapsMapId === 'string' && body.googleMapsMapId ? body.googleMapsMapId : 'DEMO_MAP_ID',
     testMode: body.testMode === true,
+    buttonIconsOnly: body.buttonIconsOnly === true,
   };
 }
 

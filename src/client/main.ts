@@ -53,6 +53,11 @@ const weather = location
     })
   : undefined;
 
+/** The deployment's settings for the browser, fetched once. */
+const clientConfig = fetchClientConfig();
+// BUTTON_ICONS_ONLY: the top-right buttons drop their text labels.
+void clientConfig.then((config) => document.body.classList.toggle('icons-only', config.buttonIconsOnly)).catch(() => {});
+
 const status = byId<HTMLParagraphElement>('status');
 const start = byId<HTMLDivElement>('start');
 
@@ -253,7 +258,7 @@ if (!location) {
   redraw();
 
   // Test mode: only when the deployment turns it on (TEST_MODE), never on a real display.
-  void fetchClientConfig()
+  void clientConfig
     .then((config) => {
       if (!config.testMode) return;
       testMode = true;

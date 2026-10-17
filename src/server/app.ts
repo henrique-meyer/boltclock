@@ -33,7 +33,10 @@ export async function buildApp(options: AppOptions = {}): Promise<FastifyInstanc
   // Process health only. It never reflects lightning-data freshness: stale data is a warning on the display.
   app.get('/health', async () => ({ status: 'ok' }));
 
-  registerClientConfig(app, options.clientConfig ?? { googleMapsApiKey: '', googleMapsMapId: DEMO_MAP_ID, testMode: false });
+  registerClientConfig(
+    app,
+    options.clientConfig ?? { googleMapsApiKey: '', googleMapsMapId: DEMO_MAP_ID, testMode: false, buttonIconsOnly: false },
+  );
   registerStream(app, options.stream ?? { sessionLimitMinutes: 0 });
   registerWeather(app, options.weather ?? { userAgent: '' });
 

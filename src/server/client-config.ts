@@ -10,11 +10,18 @@ export interface ClientConfig {
   googleMapsMapId: string;
   /** Test mode: the display may simulate a strike locally. Off in a real deployment. */
   testMode: boolean;
+  /** The display's top-right buttons show only their icons, without text labels. */
+  buttonIconsOnly: boolean;
 }
 
 /** GET /api/client-config: read at runtime, so one image serves any deployment and the key is never built in. */
 export function registerClientConfig(app: FastifyInstance, config: ClientConfig): void {
-  const body: ClientConfig = { googleMapsApiKey: config.googleMapsApiKey, googleMapsMapId: config.googleMapsMapId, testMode: config.testMode === true };
+  const body: ClientConfig = {
+    googleMapsApiKey: config.googleMapsApiKey,
+    googleMapsMapId: config.googleMapsMapId,
+    testMode: config.testMode === true,
+    buttonIconsOnly: config.buttonIconsOnly === true,
+  };
   app.get('/api/client-config', async (_request, reply) => {
     reply.header('cache-control', 'no-store');
     return body;
