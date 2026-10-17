@@ -8,7 +8,7 @@ export interface UrlSettings {
 }
 
 /**
- * Until the settings screen exists, the display reads its point from the page address:
+ * A point in the page address overrides the saved location, so a kiosk can be pinned by its URL:
  * ?lat=28.54&lon=-81.38&radius=10&unit=mi&minutes=30 (radius, unit and minutes are optional).
  * Returns undefined when lat or lon is missing or invalid.
  */

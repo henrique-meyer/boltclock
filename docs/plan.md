@@ -29,6 +29,7 @@ flowchart TD
   s17[BOLT-17 push channel]
   s18[BOLT-18 display state machine]
   s19[BOLT-19 location picker]
+  s20[BOLT-20 display uses the saved location]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -43,6 +44,8 @@ flowchart TD
   s15 --> s17
   s10 --> s18
   s10 --> s19
+  s17 --> s20
+  s19 --> s20
 ```
 
 ## Stories
@@ -155,3 +158,9 @@ Blocked by BOLT-10.
 `/location.html`, linked from the display, is where the user chooses the point and the radius that lightning distances are measured from. A Google Maps JavaScript API map shows a draggable pin and the radius as a circle; a click on the map or a drag of the pin sets the point. The map opens on the browser's location, then the saved point, then a continental-US view with a message. Address search uses Places API (New) `AutocompleteSuggestion` with a session token: typing is debounced and needs three characters, and choosing a result ends the session with one Place Details call that fetches only `location`. A search only moves the pin. The radius is a value and a unit (mi or km) stored exactly as entered, 10 mi by default and at most 100 mi or the km equivalent. Only the coordinates and the radius are saved, in the browser's local storage; the address and the search text are never stored or logged. The browser key and an optional Map ID reach the page from `GET /api/client-config` (`GOOGLE_MAPS_API_KEY`, `GOOGLE_MAPS_MAP_ID`). For local work a gitignored `.env.local` overrides `.env`, so a key restricted to localhost can sit next to the production one. Google's attribution stays on the map, and the page carries the display's credits and disclaimers. Tests cover the config route, saving and loading the point and radius, and the search session. Wiring the display to the saved point comes after BOLT-17.
 
 Blocked by BOLT-10.
+
+### BOLT-20 — Display watches the saved location
+
+The display stops requiring `?lat&lon` in the address and watches the point and radius saved by the BOLT-19 picker. `?lat&lon` (with optional `radius`, `unit` and `minutes`) still wins, so a kiosk can be pinned to a point by its URL; otherwise the saved location is used; with neither, the display links to `/location.html`. The saved radius, kept as entered, becomes the stream's `radiusKm` (miles converted, capped at the server limit), and the status line shows it in its own unit. The time window stays at the 30-minute default until the settings screen exists. `src/client/display-settings.ts` resolves this as a pure function, tested for the saved location, the address, both, and neither.
+
+Blocked by BOLT-17 and BOLT-19.
