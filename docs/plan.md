@@ -54,6 +54,7 @@ flowchart TD
   s44[BOLT-44 picker returns to the main screen]
   s43[BOLT-43 ALLOW_SIMULATION setting]
   s45[BOLT-45 alert screen fits 1080p]
+  s46[BOLT-46 SIMULATION flag]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -97,6 +98,7 @@ flowchart TD
   s38 --> s44
   s37 --> s43
   s28 --> s45
+  s45 --> s46
 ```
 
 ## Stories
@@ -368,3 +370,9 @@ Blocked by BOLT-37.
 Henrique, 2026-10-17. With the weather and forecast showing, the ALERT screen was about 65 px too tall for a 1920x1080 browser window, so it scrolled. Everything still scales with the screen height; the alarm text is a little smaller (countdown 25vh instead of 30vh, headline 9vh instead of 11vh, 1vh gaps). The stage's alarm row can no longer push the weather down (`minmax(0, 1fr) auto`), so the weather and its place line sit at the same height in ALL CLEAR and LIGHTNING NEARBY. The "Test strike" label moves into the top bar, next to the status, so a simulated strike adds no height.
 
 Blocked by BOLT-28.
+
+### BOLT-46 — SIMULATION flag in the top bar
+
+Henrique, 2026-10-17. The "Test strike: simulated, not real lightning" label gives way to a SIMULATION flag left of the Simulate buttons: as tall as those buttons, yellow border and yellow fill. It is outside the buttons' group, so it stays visible in full screen. It shows after either Simulate button, since both put fake information on screen, and goes away only when what the display shows is real again: when a real strike drives the screen (a real alert or repeat), or once a countdown length has passed since the last Simulate press, so no simulated strike or forced all-clear can still be part of it. The controller keeps that time (`simulatedUntilMs`) and its view reports `simulation`.
+
+Blocked by BOLT-45.

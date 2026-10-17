@@ -106,6 +106,27 @@ button {
   text-decoration: none;
 }
 
+/* SIMULATION: as tall as the top-bar buttons beside it, in the test buttons' yellow, filled. */
+.sim-flag {
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  height: calc(2.2em + 2px);
+  padding: 0 0.7em;
+  border: 1px solid var(--amber);
+  border-radius: 0.4em;
+  background: var(--amber);
+  color: var(--navy);
+  font-size: max(13px, 1.8vh);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.sim-flag[hidden] {
+  display: none;
+}
+
 .topbar-actions .test-button {
   border-color: var(--amber);
   color: var(--amber);
@@ -201,16 +222,6 @@ button {
 .detail {
   margin: 0;
   font-size: 4.5vh;
-}
-
-.test-tag {
-  margin: 0;
-  font-size: 2vh;
-  white-space: nowrap;
-  color: var(--navy);
-  background: var(--amber);
-  border-radius: 0.3em;
-  padding: 0.2em 0.6em;
 }
 
 .weather:empty {

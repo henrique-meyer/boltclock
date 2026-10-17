@@ -256,7 +256,7 @@ byId<HTMLButtonElement>('test-all-clear-sound').addEventListener('click', async 
 const headline = byId<HTMLParagraphElement>('headline');
 const countdown = byId<HTMLParagraphElement>('countdown');
 const detail = byId<HTMLParagraphElement>('detail');
-const testTag = byId<HTMLParagraphElement>('test-tag');
+const simFlag = byId<HTMLSpanElement>('sim-flag');
 const stale = byId<HTMLDivElement>('stale');
 const staleDetail = byId<HTMLParagraphElement>('stale-detail');
 const simulateAllClear = byId<HTMLButtonElement>('simulate-all-clear');
@@ -304,7 +304,7 @@ function render(view: ControllerView, connection: ConnectionState, radius: { val
   headline.textContent = alert ? 'LIGHTNING NEARBY' : 'All clear';
   countdown.hidden = !alert;
   countdown.textContent = view.countdown ?? '';
-  testTag.hidden = !view.testStrike;
+  simFlag.hidden = !view.simulation;
   // Test mode only: during a countdown, the sun button ends it at once.
   simulateAllClear.hidden = !(testMode && alert);
   detail.textContent = alert
@@ -404,7 +404,7 @@ function watch(watched: UrlSettings): void {
   // Simulation mode's buttons; they show only while it is on.
   simulateAllClear.addEventListener('click', () => {
     if (!testMode) return;
-    controller.simulateAllClear();
+    controller.simulateAllClear(Date.now());
     redraw();
   });
   simulateStrike.addEventListener('click', () => {
