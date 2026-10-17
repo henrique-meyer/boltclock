@@ -1,6 +1,6 @@
 # Cloud infrastructure
 
-BoltClock runs as one always-on container on Azure Container Apps. The definition is Bicep in [`main.bicep`](main.bicep). Why Container Apps, and why one replica that never scales to zero: [ADR 0001](../docs/decisions/0001-container-apps.md).
+BoltClock runs as one container on Azure Container Apps. The definition is Bicep in [`main.bicep`](main.bicep). Why Container Apps, and why a display deployment keeps one replica always on: [ADR 0001](../docs/decisions/0001-container-apps.md). Why a demo deployment scales to zero instead: [ADR 0003](../docs/decisions/0003-demo-scale-to-zero.md).
 
 Run commands from the repository root. Keep resource names, the subscription, tenant and client IDs, the domain, emails and keys in ignored files (`infra/main.bicepparam`, `.env`) or in GitHub secrets. Preview with `what-if` and get the owner's approval before provisioning anything that costs money.
 
@@ -12,7 +12,7 @@ One resource group, one region. East US is the default because the NOAA GOES buc
 | --- | --- | --- |
 | Log Analytics workspace | PerGB2018, 30-day retention, 0.1 GB/day cap | Container and system logs |
 | Container Apps environment | Workload profiles, Consumption profile only, no VNet | Hosts the app |
-| Container app | External HTTPS ingress (HTTP redirects), target port 8080, 0.25 vCPU / 0.5 GiB, min and max 1 replica, single revision mode, startup/readiness/liveness probes on `/health` | Serves the display, the push channel and the weather relay |
+| Container app | External HTTPS ingress (HTTP redirects), target port 8080, 0.25 vCPU / 0.5 GiB, at most 1 replica (minimum 1 for a display, 0 for a demo) with an HTTP scale rule, single revision mode, startup/readiness/liveness probes on `/health` | Serves the display, the push channel and the weather relay |
 | Container Apps secret `google-maps-api-key` | Set from `GOOGLE_MAPS_API_KEY` at deploy time | The deployer's browser key for Google Maps |
 | Managed certificate (optional) | Free, bound once with the CLI | HTTPS on a custom domain |
 | User-assigned identity + federated credential (optional) | Reader on the group, Contributor on the container app | GitHub Actions deploys with OIDC, with no stored Azure credentials |
@@ -24,7 +24,8 @@ The image comes from GitHub Container Registry as a public package, so the app n
 
 - Listens on `PORT` (8080).
 - `GET /health` answers `200 {"status":"ok"}` as soon as the process is up. It never depends on NOAA data freshness: stale lightning data is a warning on the display, not a reason to restart the container.
-- Reads `GOOGLE_MAPS_API_KEY`, `NWS_USER_AGENT` and `PUBLIC_BASE_URL` from the environment.
+- Reads `GOOGLE_MAPS_API_KEY`, `NWS_USER_AGENT`, `PUBLIC_BASE_URL` and `SESSION_LIMIT_MINUTES` from the environment.
+- With `SESSION_LIMIT_MINUTES` above 0, ends each display session after that many minutes, so a demo can scale back to zero.
 - Keeps no state on disk. On start it rebuilds the last 60 minutes of flashes from the GLM bucket, so restarts and new revisions lose nothing.
 - Logs to stdout. It never logs addresses or search text.
 - The ingress has a 240-second request timeout. The push channel sends a heartbeat every ~15 seconds, the browser reconnects when a stream drops, and the server replays its buffer on connect (flashes are deduplicated by id).
@@ -32,6 +33,8 @@ The image comes from GitHub Container Registry as a public package, so the app n
 ## Cost
 
 Checked 2026-10-16 against the Azure retail prices API (East US, Consumption): active vCPU $0.000024/s, memory $0.000003/GiB·s, and a monthly free grant of 180,000 vCPU·s and 360,000 GiB·s per subscription. One always-on 0.25 vCPU / 0.5 GiB replica is about $14 a month if the free grant is otherwise unused, and about $19 without it. An open display connection keeps the replica at the active rate. Log Analytics ingestion is free for the first 5 GB a month. Check current prices before you deploy.
+
+A demo with `minReplicas = 0` pays only while a replica runs: the free grant covers about 200 replica-hours a month at this size. With `sessionLimitMinutes = 15` and the five-minute scale-down cooldown, a visit uses about 20 minutes, so a lightly used demo costs nothing. The first request after an idle period waits for the replica to start, and the display shows "NO LIGHTNING DATA" until the server has rebuilt its 60-minute buffer.
 
 ## Load the secrets
 
@@ -79,7 +82,7 @@ Set `githubFederationSubject` to the exact subject GitHub emits for that environ
 ## Turn the app on
 
 1. After the first `deploy.yml` run publishes the image, make the package public: package settings, Danger Zone, Change visibility, Public. It is a one-time UI action with no API, and it cannot be undone. A public package still answers 401 to a manifest request without a token, so a raw 401 does not mean it is private.
-2. Set `deployApp = true` and `containerImage = 'ghcr.io/<owner>/boltclock:prod'`, then preview and deploy as above.
+2. Set `deployApp = true` and `containerImage = 'ghcr.io/<owner>/boltclock:prod'`. For a demo, also set `minReplicas = 0` and a short `sessionLimitMinutes` ([ADR 0003](../docs/decisions/0003-demo-scale-to-zero.md)). Then preview and deploy as above.
 3. Check the revision and the health endpoint:
 
 ```powershell

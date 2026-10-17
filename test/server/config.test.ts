@@ -8,6 +8,7 @@ describe('loadConfig', () => {
       googleMapsApiKey: '',
       nwsUserAgent: '',
       publicBaseUrl: 'http://localhost:8080',
+      sessionLimitMinutes: 0,
     });
   });
 
@@ -17,6 +18,7 @@ describe('loadConfig', () => {
       GOOGLE_MAPS_API_KEY: ' test-key ',
       NWS_USER_AGENT: ' (BoltClock, you@example.com) ',
       PUBLIC_BASE_URL: 'https://your-domain.example/',
+      SESSION_LIMIT_MINUTES: ' 15 ',
     });
 
     expect(config).toEqual({
@@ -24,7 +26,17 @@ describe('loadConfig', () => {
       googleMapsApiKey: 'test-key',
       nwsUserAgent: '(BoltClock, you@example.com)',
       publicBaseUrl: 'https://your-domain.example',
+      sessionLimitMinutes: 15,
     });
+  });
+
+  it('treats an empty or zero SESSION_LIMIT_MINUTES as no limit', () => {
+    expect(loadConfig({ SESSION_LIMIT_MINUTES: '' }).sessionLimitMinutes).toBe(0);
+    expect(loadConfig({ SESSION_LIMIT_MINUTES: '0' }).sessionLimitMinutes).toBe(0);
+  });
+
+  it.each(['-1', '2.5', 'ten'])('rejects SESSION_LIMIT_MINUTES=%s', (minutes) => {
+    expect(() => loadConfig({ SESSION_LIMIT_MINUTES: minutes })).toThrow(/SESSION_LIMIT_MINUTES must be/);
   });
 
   it('treats an empty PORT as unset', () => {
