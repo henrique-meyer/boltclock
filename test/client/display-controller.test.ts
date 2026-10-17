@@ -156,6 +156,20 @@ describe('DisplayController', () => {
     expect(controller.view(T0 + 60_000)).toMatchObject({ latestStrike: { distance: 9, unit: 'mi' }, testStrike: true });
   });
 
+  it('switches the distance unit in place, keeping the countdown, and announces in the new unit', () => {
+    const { controller, heard, beat } = setup();
+    controller.flashes([], T0);
+    beat(T0);
+    controller.flashes([flashNorth('a', 8.05, T0)], T0); // about 5 mi
+    expect(heard).toEqual([{ kind: 'strike', distance: 5, unit: 'mi' }]);
+
+    controller.setRadius({ value: 16.1, unit: 'km' });
+    expect(controller.view(T0 + 60_000)).toMatchObject({ mode: 'ALERT', countdown: '29:00', latestStrike: { distance: 8, unit: 'km' } });
+
+    controller.flashes([flashNorth('b', 12, T0 + 60_000)], T0 + 60_000); // replay is on in SETTINGS
+    expect(heard.at(-1)).toEqual({ kind: 'strike', distance: 12, unit: 'km' });
+  });
+
   it('keeps simulated flashes recognisable by their id prefix', () => {
     expect(TEST_FLASH_PREFIX).toBe('test-');
     expect(distanceKm(POINT.lat, POINT.lon, flashNorth('x', 9.656, T0).lat, POINT.lon)).toBeCloseTo(9.656, 3);
