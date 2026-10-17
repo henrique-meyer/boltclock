@@ -14,6 +14,7 @@ import {
   type Radius,
 } from './location-settings.js';
 import { googlePlacesBackend, PlaceSearch, type GoogleSuggestion } from './place-search.js';
+import { markReturnToDisplay } from './start-screen.js';
 
 /** The continental US, for when there is neither a saved point nor a browser location. */
 const DEFAULT_VIEW = { center: { lat: 39.5, lng: -98.35 }, zoom: 4 };
@@ -31,6 +32,9 @@ const useHere = el<HTMLButtonElement>('use-here');
 const saveButton = el<HTMLButtonElement>('save');
 const status = el<HTMLParagraphElement>('picker-status');
 const mapElement = el<HTMLDivElement>('map');
+
+// Back to the display's main screen, not its Start screen (BOLT-44).
+el<HTMLAnchorElement>('back-to-display').addEventListener('click', () => markReturnToDisplay());
 
 const saved = loadLocation(localStorage);
 let point: Point | undefined = saved?.point;
@@ -190,7 +194,8 @@ async function start(): Promise<void> {
       // The picker's unit is the display's distance setting too.
       saveAlertSettings(localStorage, { ...loadAlertSettings(localStorage), distanceUnit: stored.radius.unit });
       status.textContent = `Saved on this device: ${stored.radius.value} ${stored.radius.unit} around the pin.`;
-      // Straight back to the display, which starts watching the new point. A failed save stays here.
+      // Straight back to the display's main screen, which starts watching the new point. A failed save stays here.
+      markReturnToDisplay();
       window.location.assign('/');
     } catch {
       status.textContent = 'This browser would not save the location. Check that site data is allowed.';

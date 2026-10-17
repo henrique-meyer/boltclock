@@ -51,6 +51,7 @@ flowchart TD
   s41[BOLT-41 one forecast hour per line]
   s39[BOLT-39 picker at /location]
   s42[BOLT-42 replay off speaks only]
+  s44[BOLT-44 picker returns to the main screen]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -91,6 +92,7 @@ flowchart TD
   s22 --> s41
   s19 --> s39
   s29 --> s42
+  s38 --> s44
 ```
 
 ## Stories
@@ -344,3 +346,9 @@ Blocked by BOLT-19.
 Henrique, 2026-10-17. With "Replay the siren for each new strike during a countdown" off, a simulated strike during a countdown still played the siren (BOLT-29 made every test strike sound the full alarm). The rule is now the same for real and simulated strikes: the first strike plays the siren, then the announcement. Each new strike during the countdown restarts it and raises a `repeat` event whose `siren` is the replay setting. With replay on it plays the siren, then the announcement; with replay off it plays the announcement only, and nothing at all when "Speak the announcement" is off. An announcement with nothing to play never cuts off a sound already playing.
 
 Blocked by BOLT-29.
+
+### BOLT-44 — Leaving the location picker opens the main screen
+
+Henrique, 2026-10-17. From the picker, both "Save location" and "Back to the display" land on the display's main screen instead of the Start screen, unless no location is set (then the Start screen offers one). The picker leaves a one-time mark in session storage (`boltclock.returnToDisplay`), and the display skips the Start screen once when it finds it. The Start click is what turns on sound, so if the browser still blocks sound, the display shows its "Sound is off. Click to enable sound." banner.
+
+Blocked by BOLT-38.
