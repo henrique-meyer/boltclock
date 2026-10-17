@@ -11,7 +11,7 @@ export const SIREN_LABELS: Record<SirenId, string> = {
   'two-tone': 'Two-tone (mildest)',
   mechanical: 'Mechanical wail',
   yelp: 'Yelp (most urgent)',
-  none: 'No siren, announcement only',
+  none: 'No siren',
 };
 
 export const CLOCKS = ['12h', '24h'] as const;
@@ -37,6 +37,8 @@ export interface AlertSettings extends DisplayUnits {
    * strike sounds the alarm, and later ones only restart the countdown unless this is turned on.
    */
   replayAudioDuringCountdown: boolean;
+  /** Speak the announcement (the distance, and the all-clear sentence) after the siren or chime. On by default. */
+  announcement: boolean;
   /** All-clear countdown, from the latest strike's time. 1 to 120 minutes. */
   timeLimitMinutes: number;
 }
@@ -45,6 +47,7 @@ export const DEFAULT_ALERT_SETTINGS: AlertSettings = {
   siren: 'two-tone',
   volume: 0.8,
   replayAudioDuringCountdown: false,
+  announcement: true,
   timeLimitMinutes: DEFAULT_TIME_LIMIT_MINUTES,
   clock: '12h',
   temperatureUnit: 'F',
@@ -60,6 +63,7 @@ export function normalizeAlertSettings(input: Partial<Record<keyof AlertSettings
     volume: Number.isFinite(volume) ? Math.min(1, Math.max(0, volume)) : DEFAULT_ALERT_SETTINGS.volume,
     replayAudioDuringCountdown:
       typeof input.replayAudioDuringCountdown === 'boolean' ? input.replayAudioDuringCountdown : DEFAULT_ALERT_SETTINGS.replayAudioDuringCountdown,
+    announcement: typeof input.announcement === 'boolean' ? input.announcement : DEFAULT_ALERT_SETTINGS.announcement,
     timeLimitMinutes:
       Number.isInteger(minutes) && minutes >= 1 && minutes <= MAX_TIME_LIMIT_MINUTES ? minutes : DEFAULT_ALERT_SETTINGS.timeLimitMinutes,
     clock: CLOCKS.includes(input.clock as ClockFormat) ? (input.clock as ClockFormat) : DEFAULT_ALERT_SETTINGS.clock,

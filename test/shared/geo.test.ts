@@ -1,5 +1,21 @@
 import { describe, expect, it } from 'vitest';
-import { cellKey, cellsForCircle, distanceKm, EARTH_RADIUS_KM, normalizeLon } from '../../src/shared/geo.js';
+import { cellKey, cellsForCircle, destinationPoint, distanceKm, EARTH_RADIUS_KM, normalizeLon } from '../../src/shared/geo.js';
+
+describe('destinationPoint', () => {
+  it('lands the given distance away in the given direction', () => {
+    const start = { lat: 28.54, lon: -81.38 };
+    for (const bearing of [0, 45, 90, 180, 270, 333]) {
+      const end = destinationPoint(start.lat, start.lon, bearing, 12.5);
+      expect(distanceKm(start.lat, start.lon, end.lat, end.lon)).toBeCloseTo(12.5, 6);
+    }
+    expect(destinationPoint(0, 0, 90, 111.19).lat).toBeCloseTo(0, 6);
+    expect(destinationPoint(0, 0, 0, 111.19).lon).toBeCloseTo(0, 6);
+  });
+
+  it('folds longitude across the antimeridian', () => {
+    expect(destinationPoint(0, 179.9, 90, 50).lon).toBeLessThan(-179);
+  });
+});
 
 describe('distanceKm', () => {
   it('is zero for the same point', () => {

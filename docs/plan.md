@@ -38,6 +38,7 @@ flowchart TD
   s27[BOLT-27 top-bar icons and full screen]
   s28[BOLT-28 weather backgrounds and alert styling]
   s30[BOLT-30 picker opens on the saved pin]
+  s29[BOLT-29 test mode and announcement setting]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -64,6 +65,7 @@ flowchart TD
   s21 --> s28
   s22 --> s28
   s19 --> s30
+  s21 --> s29
 ```
 
 ## Stories
@@ -239,3 +241,11 @@ Blocked by BOLT-21 and BOLT-22.
 ### BOLT-30 — Location picker opens on the saved pin
 
 With a saved point, `/location.html` centers on that pin and frames its radius, and does not ask for the browser's location. Without one, it asks for the browser's location and places the pin there, ready to save; if that is denied or unavailable, it shows the continental-US view with a message. This replaces the BOLT-19 order (browser location first, then the saved point).
+
+### BOLT-29 — Test mode and the announcement setting
+
+- **Random test strikes:** "Simulate a strike" puts the flash at a random distance inside the radius (5 to 95% of it) in a random direction.
+- **Test strikes always sound:** each test strike plays the alert, even during a countdown with "Replay the siren" off (the default since BOLT-23), which made a second test look like broken sound. Real strikes keep the replay rule.
+- **Simulate all clear:** in test mode, during a countdown, a sun icon button left of the bolt ends the countdown at once with the all-clear sound. Simulated strikes are dropped; real ones stay for deduplication.
+- **Announcement on/off:** a checkbox under "Replay the siren" turns the spoken sentence on or off, on by default and saved with the other alert settings. With no siren and no announcement an alert is silent, and Settings says so. The "No siren" choice loses "announcement only" from its label.
+- **Hidden buttons stay hidden:** the BOLT-27 icon-button style overrode `hidden`, so the test buttons showed without a location or test mode. The hide rule now comes after it.

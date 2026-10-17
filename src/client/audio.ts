@@ -16,16 +16,21 @@ const SIREN_FILES: Record<Exclude<SirenId, 'none'>, string> = {
   yelp: 'siren-yelp.wav',
 };
 
-/** The sounds for one announcement, in order. "No siren" goes straight to the sentence. */
-export function sequenceFor(announcement: Announcement, siren: SirenId): Step[] {
+/**
+ * The sounds for one announcement, in order. "No siren" goes straight to the sentence; with `speak` off the sentence
+ * is left out, so no siren and no announcement is silent.
+ */
+export function sequenceFor(announcement: Announcement, siren: SirenId, speak = true): Step[] {
   if (announcement.kind === 'all-clear') {
-    return [{ type: 'sound', file: 'chime.wav' }, { type: 'gap', ms: 250 }, { type: 'speech', clip: ALL_CLEAR }];
+    const chime: Step = { type: 'sound', file: 'chime.wav' };
+    return speak ? [chime, { type: 'gap', ms: 250 }, { type: 'speech', clip: ALL_CLEAR }] : [chime];
   }
-  const speech: Step = {
-    type: 'speech',
-    clip: strikeAnnouncement(announcement.distance ?? Number.NaN, announcement.unit),
-  };
-  return siren === 'none' ? [speech] : [{ type: 'sound', file: SIREN_FILES[siren] }, { type: 'gap', ms: 400 }, speech];
+  const sentence: Step[] = speak
+    ? [{ type: 'speech', clip: strikeAnnouncement(announcement.distance ?? Number.NaN, announcement.unit) }]
+    : [];
+  if (siren === 'none') return sentence;
+  const sound: Step = { type: 'sound', file: SIREN_FILES[siren] };
+  return speak ? [sound, { type: 'gap', ms: 400 }, ...sentence] : [sound];
 }
 
 /** Where sound comes out. WebAudioOutput in the browser; a recorder in tests. */
@@ -45,6 +50,8 @@ export class Announcer {
     private readonly output: SoundOutput,
     private readonly siren: () => SirenId,
     private readonly onError: (message: string) => void = () => {},
+    /** Whether to speak the sentence (the announcement setting). */
+    private readonly speak: () => boolean = () => true,
   ) {}
 
   /** Resolves when the announcement finishes or is interrupted. */
@@ -54,7 +61,7 @@ export class Announcer {
     this.current = controller;
     const { signal } = controller;
 
-    for (const step of sequenceFor(announcement, this.siren())) {
+    for (const step of sequenceFor(announcement, this.siren(), this.speak())) {
       if (signal.aborted) return;
       try {
         if (step.type === 'gap') await this.output.wait(step.ms, signal);
