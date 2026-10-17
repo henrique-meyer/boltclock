@@ -12,6 +12,7 @@ const app = await buildApp({
 // Say what is missing, never the values.
 if (!config.googleMapsApiKey) app.log.warn('GOOGLE_MAPS_API_KEY is not set. The location picker will not load.');
 if (!config.nwsUserAgent) app.log.warn('NWS_USER_AGENT is not set. api.weather.gov requires one.');
+if (config.sessionLimitMinutes > 0) app.log.info(`Display sessions end after ${config.sessionLimitMinutes} minutes.`);
 
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
   process.once(signal, () => {

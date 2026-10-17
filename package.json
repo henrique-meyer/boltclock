@@ -23,7 +23,8 @@
   },
   "dependencies": {
     "@fastify/static": "^10.1.6",
-    "fastify": "^5.12.7"
+    "fastify": "^5.12.7",
+    "h5wasm": "^0.10.3"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

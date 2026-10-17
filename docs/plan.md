@@ -23,6 +23,9 @@ flowchart TD
   s8[BOLT-8 logo]
   s10[BOLT-10 stack and scaffold]
   s12[BOLT-12 audio assets]
+  s14[BOLT-14 demo scale to zero]
+  s15[BOLT-15 webhook ingest and flash storage]
+  s16[BOLT-16 GLM parser]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -31,6 +34,9 @@ flowchart TD
   s3 --> s7
   s5 --> s7
   s10 --> s12
+  s10 --> s14
+  s14 --> s7
+  s16 --> s15
 ```
 
 ## Stories
@@ -103,3 +109,21 @@ The sound files only; playback, sequencing, the autoplay unlock and the settings
 - **Docs**: [audio-plan.md](audio-plan.md) updated for the siren choice and the pre-rendered clips, and the README credits the sounds.
 
 Blocked by BOLT-10.
+
+### BOLT-14 — Demo hosting: scale to zero and a session time limit
+
+The hosted instance is a demo, so it scales to zero between visits instead of running around the clock ([decisions/0003-demo-scale-to-zero.md](decisions/0003-demo-scale-to-zero.md)). Bicep gains `minReplicas` (0 or 1) with an HTTP scale rule, and `sessionLimitMinutes`, passed to the app as `SESSION_LIMIT_MINUTES`. The server reads and validates it; the push channel story enforces it by ending the stream with a `session ended` event, after which the display stops reconnecting, treats the data as stale and asks for a reload. The deploy workflow wakes a scaled-to-zero revision while it waits for health. The system design, `infra/README.md`, the README and `.env.example` describe it.
+
+Blocked by BOLT-10. Blocks BOLT-7.
+
+### BOLT-15 — Lightning ingest by NOAA SNS webhook, flashes in Table Storage
+
+NOAA's public SNS topic for new GOES-19 objects posts each new GLM file to a small Azure Function on the Consumption plan, filtered to `GLM-L2-LCFA/` keys, so the scale-to-zero container is not woken every 20 seconds. The function verifies each SNS signature, parses the file with the BOLT-16 parser and stores one row per flash in Azure Table Storage: one table per UTC hour, PartitionKey a 1° latitude/longitude cell, RowKey the sortable flash time plus its id. A query for strikes within a radius in the last T minutes (the display's time limit, default 30, capped at 120) reads only the cells the circle overlaps, as RowKey range queries, then applies the exact great-circle distance. Data is kept for 120 minutes: when the hour rolls over, the function deletes hourly tables older than that, and readers always filter by time. Bicep for the Function App and storage account, an ADR, and updates to the system design and infra docs. No one-per-subscription free offer is used.
+
+Blocked by BOLT-16.
+
+### BOLT-16 — GLM-L2-LCFA parser
+
+`src/server/glm/parse.ts` reads one GOES-19 GLM-L2-LCFA file with `h5wasm` and returns its coverage window and flashes (id, time, latitude, longitude, quality), applying `_Unsigned`, `scale_factor`, `add_offset` and the `units` base time the way a NetCDF reader would. Degraded flashes are left out by default. `src/server/glm/filename.ts` reads times from object names and builds hourly prefixes, across day and year boundaries. Tests compare a committed real file with an independent `xarray` read of it and cover empty files, year rollover and unsigned ids. [glm-format.md](glm-format.md) documents the variables and the flash counts measured for BOLT-15.
+
+Blocks BOLT-15.

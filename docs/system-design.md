@@ -19,6 +19,7 @@ Weather: client → relay → api.weather.gov `/points/{lat,lon}` (cached) → h
 - Deduplicate flashes by id. Ignore flashes older than the time limit.
 
 ## Data characteristics (verified 2026-10-16)
+File layout, packing and measured flash counts: [glm-format.md](glm-format.md).
 - Files: `OR_GLM-L2-LCFA_G19_s…_e…_c….nc`, 20-s windows, under `GLM-L2-LCFA/YYYY/DDD/HH/`. Measured arrival was ~20–40 s after window end, so flash-to-availability is ~20–60 s.
 - New-object notifications: the SNS topic `arn:aws:sns:us-east-1:123901341784:NewGOES19Object`.
 - GOES-East covers Florida well. GLM resolution is ~8 km, it detects total lightning (in-cloud + cloud-to-ground), and detection is <100%. Minimum sensible radius is ~10 mi. The UI and README must state "Strike locations are accurate within ±5 miles."
@@ -30,6 +31,7 @@ One container image serves the client, the push channel and the weather relay on
 - `GET /health` reports process health only. Stale lightning data is shown on the display, never used to restart the container.
 - Proxies may cut long-lived requests (Azure Container Apps: 240 s). The client reconnects, the server replays the buffer, and flashes are deduplicated by id.
 - Run it close to AWS us-east-1 for the lowest GLM latency.
+- Demo deployments ([ADR 0003](decisions/0003-demo-scale-to-zero.md)) scale to zero between visits and set a session limit. When the limit is reached, the server ends the push stream with a "session ended" event. The client stops reconnecting, treats the data as stale (so it never announces all-clear), and asks for a reload. After a cold start the display shows "NO LIGHTNING DATA" until the buffer is rebuilt.
 
 ## Safety
 Not a certified lightning warning system. Disclose latency, positional error ("Strike locations are accurate within ±5 miles."), and missed detections.

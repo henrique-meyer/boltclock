@@ -99,6 +99,7 @@ jobs:
             --output none
 
       # A pulled image is not a running site. Wait for a healthy revision, then ask /health.
+      # A demo that scales to zero (ADR 0003) may have no replica yet, so each attempt requests /health to wake it.
       - name: Check the revision and /health
         if: steps.gate.outputs.build == 'true' && steps.gate.outputs.azure == 'true'
         env:
@@ -108,7 +109,9 @@ jobs:
         run: |
           app=(--subscription "$AZURE_SUBSCRIPTION_ID" --resource-group "$AZURE_RESOURCE_GROUP" --name "$AZURE_CONTAINERAPP_NAME")
           revision=$(az containerapp show "${app[@]}" --query properties.latestRevisionName --output tsv)
+          fqdn=$(az containerapp show "${app[@]}" --query properties.configuration.ingress.fqdn --output tsv)
           for attempt in $(seq 1 30); do
+            curl -s -o /dev/null --max-time 10 "https://$fqdn/health" || true
             state=$(az containerapp revision show "${app[@]}" --revision "$revision" \
               --query "[properties.runningState, properties.healthState]" --output tsv | tr '\n' ' ')
             read -r running health <<< "$state"
@@ -118,5 +121,4 @@ jobs:
             sleep 10
           done
           if [ "$health" != "Healthy" ]; then echo "::error::Revision $revision did not become healthy."; exit 1; fi
-          fqdn=$(az containerapp show "${app[@]}" --query properties.configuration.ingress.fqdn --output tsv)
           curl -fsS --retry 5 --retry-delay 5 --retry-all-errors "https://$fqdn/health"

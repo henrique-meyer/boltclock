@@ -39,10 +39,10 @@ Checks: `npm run lint`, `npm run typecheck` and `npm test`. The stack (Node and 
 - Maps: Google Maps Platform, with Google's attribution kept on the map. Each deployer supplies their own key; none is in this repository.
 
 ## Hosting
-BoltClock runs as one always-on container. The reference deployment is Azure Container Apps in a single resource group. Resource names, the subscription and any custom domain stay out of this repo. [infra/README.md](infra/README.md) lists each resource's settings and the deploy steps, and [ADR 0001](docs/decisions/0001-container-apps.md) explains the choice.
+BoltClock runs as one container. The reference deployment is Azure Container Apps in a single resource group. Resource names, the subscription and any custom domain stay out of this repo. [infra/README.md](infra/README.md) lists each resource's settings and the deploy steps, and [ADR 0001](docs/decisions/0001-container-apps.md) explains the choice. A demo can scale to zero between visits and limit how long each display session lasts, so it costs close to nothing ([ADR 0003](docs/decisions/0003-demo-scale-to-zero.md)).
 
 - A Log Analytics workspace (30-day retention, small daily cap)
-- A Container Apps environment (Consumption) and one container app with a single always-on replica
+- A Container Apps environment (Consumption) and one container app: always on for a real display, or scaling to zero for a demo
 - Optional: a managed certificate for a custom domain, a GitHub OIDC deploy identity, and a budget alert
 
 Images are published to GitHub Container Registry by [deploy.yml](.github/workflows/deploy.yml).
@@ -51,7 +51,7 @@ Images are published to GitHub Container Registry by [deploy.yml](.github/workfl
 The sirens and the all-clear chime are generated in code by a script in this repo. The spoken announcements use the voice "Brian" from [ElevenLabs](https://elevenlabs.io).
 
 ## Project layout
-- `src/server/`: the Fastify server (`/health` now; lightning ingest, push channel and weather relay to come).
+- `src/server/`: the Fastify server (`/health` now; lightning ingest, push channel and weather relay to come). `src/server/glm/` reads GOES-19 GLM files ([format notes](docs/glm-format.md)).
 - `src/client/`: the browser display, built with Vite.
 - `test/`: Vitest tests.
 - `scripts/audio/`: the scripts that make the sounds ([audio plan](docs/audio-plan.md)).
