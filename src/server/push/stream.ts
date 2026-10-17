@@ -64,6 +64,8 @@ export function registerStream(app: FastifyInstance, options: StreamOptions): vo
     let limitTimer: NodeJS.Timeout | undefined;
     const sent = new Set<string>();
     const windowStartMs = now() - query.minutes * 60_000;
+    // Each connection's session runs from its own start; every heartbeat says when it ends, for the display's footer.
+    const sessionEndsAtMs = options.sessionLimitMinutes > 0 ? now() + options.sessionLimitMinutes * 60_000 : null;
     let lastReadMs: number | undefined;
 
     const write = (text: string) => {
@@ -96,7 +98,7 @@ export function registerStream(app: FastifyInstance, options: StreamOptions): vo
         }
         // The first message always comes, even empty, so the display knows the replay is complete.
         if (fresh.length > 0 || lastReadMs === undefined) send({ type: 'flashes', flashes: fresh });
-        send({ type: 'heartbeat', latestFileEndMs: latestFileEnd ?? null, serverTimeMs: nowMs });
+        send({ type: 'heartbeat', latestFileEndMs: latestFileEnd ?? null, serverTimeMs: nowMs, sessionEndsAtMs });
         lastReadMs = nowMs;
       } catch (error) {
         // No heartbeat: the display's data ages and it shows "NO LIGHTNING DATA". The comment keeps the stream open.
@@ -106,11 +108,11 @@ export function registerStream(app: FastifyInstance, options: StreamOptions): vo
       if (!closed) pollTimer = setTimeout(() => void read(), pollMs);
     };
 
-    if (options.sessionLimitMinutes > 0) {
+    if (sessionEndsAtMs !== null) {
       limitTimer = setTimeout(() => {
         send({ type: 'session-ended' });
         close();
-      }, options.sessionLimitMinutes * 60_000);
+      }, sessionEndsAtMs - now());
     }
 
     await read();

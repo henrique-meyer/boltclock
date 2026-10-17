@@ -90,7 +90,7 @@ describe('GET /api/stream', () => {
     const messages = await readMessages(`${base}${query({ ...ORLANDO, radiusKm: 20, minutes: 30 })}`, (m) => m.length >= 2);
 
     expect(messages[0]).toEqual({ type: 'flashes', flashes: [] });
-    expect(messages[1]).toMatchObject({ type: 'heartbeat', latestFileEndMs: null });
+    expect(messages[1]).toMatchObject({ type: 'heartbeat', latestFileEndMs: null, sessionEndsAtMs: null });
   });
 
   it('sends each new flash once as it arrives', async () => {
@@ -117,6 +117,10 @@ describe('GET /api/stream', () => {
     const messages = await readMessages(`${base}${query({ ...ORLANDO, radiusKm: 20, minutes: 30 })}`, (m) => m.some((x) => x.type === 'session-ended'));
 
     expect(messages.at(-1)).toEqual({ type: 'session-ended' });
+    // Every heartbeat of a limited session says when it ends.
+    const beat = messages.find((m) => m.type === 'heartbeat') as { serverTimeMs: number; sessionEndsAtMs: number } | undefined;
+    expect(beat?.sessionEndsAtMs).toBeGreaterThan(beat!.serverTimeMs);
+    expect(beat!.sessionEndsAtMs - beat!.serverTimeMs).toBeLessThanOrEqual(120);
   });
 
   it('answers 503 without a flash store and 400 for bad parameters', async () => {
