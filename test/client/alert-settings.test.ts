@@ -90,13 +90,20 @@ describe('alert settings', () => {
     expect(loadAlertSettings(store)).toMatchObject({ clock: '24h', temperatureUnit: 'C', siren: 'two-tone' });
   });
 
-  it('follows TEST_MODE for Simulation mode until the device chooses', () => {
-    expect(simulationOn(DEFAULT_ALERT_SETTINGS, true)).toBe(true);
-    expect(simulationOn(DEFAULT_ALERT_SETTINGS, false)).toBe(false);
+  it('follows TEST_MODE for Simulation mode until the device chooses, where ALLOW_SIMULATION offers it', () => {
+    const allowed = (testMode: boolean) => ({ testMode, allowSimulation: true });
+    expect(simulationOn(DEFAULT_ALERT_SETTINGS, allowed(true))).toBe(true);
+    expect(simulationOn(DEFAULT_ALERT_SETTINGS, allowed(false))).toBe(false);
     const store = memoryStore();
     const off = saveAlertSettings(store, { ...DEFAULT_ALERT_SETTINGS, simulation: false });
-    expect(simulationOn(loadAlertSettings(store), true)).toBe(false);
-    expect(simulationOn({ ...off, simulation: true }, false)).toBe(true);
+    expect(simulationOn(loadAlertSettings(store), allowed(true))).toBe(false);
+    expect(simulationOn({ ...off, simulation: true }, allowed(false))).toBe(true);
+  });
+
+  it('never simulates without ALLOW_SIMULATION, whatever the device saved', () => {
+    const notAllowed = { testMode: true, allowSimulation: false };
+    expect(simulationOn(DEFAULT_ALERT_SETTINGS, notAllowed)).toBe(false);
+    expect(simulationOn({ ...DEFAULT_ALERT_SETTINGS, simulation: true }, notAllowed)).toBe(false);
   });
 
   it('survives unreadable storage', () => {

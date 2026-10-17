@@ -35,7 +35,7 @@ export async function buildApp(options: AppOptions = {}): Promise<FastifyInstanc
 
   registerClientConfig(
     app,
-    options.clientConfig ?? { googleMapsApiKey: '', googleMapsMapId: DEMO_MAP_ID, testMode: false, buttonIconsOnly: false },
+    options.clientConfig ?? { googleMapsApiKey: '', googleMapsMapId: DEMO_MAP_ID, testMode: false, allowSimulation: false, buttonIconsOnly: false },
   );
   registerStream(app, options.stream ?? { sessionLimitMinutes: 0 });
   registerWeather(app, options.weather ?? { userAgent: '' });

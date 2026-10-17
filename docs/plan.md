@@ -52,6 +52,7 @@ flowchart TD
   s39[BOLT-39 picker at /location]
   s42[BOLT-42 replay off speaks only]
   s44[BOLT-44 picker returns to the main screen]
+  s43[BOLT-43 ALLOW_SIMULATION setting]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -93,6 +94,7 @@ flowchart TD
   s19 --> s39
   s29 --> s42
   s38 --> s44
+  s37 --> s43
 ```
 
 ## Stories
@@ -352,3 +354,9 @@ Blocked by BOLT-29.
 Henrique, 2026-10-17. From the picker, both "Save location" and "Back to the display" land on the display's main screen instead of the Start screen, unless no location is set (then the Start screen offers one). The picker leaves a one-time mark in session storage (`boltclock.returnToDisplay`), and the display skips the Start screen once when it finds it. The Start click is what turns on sound, so if the browser still blocks sound, the display shows its "Sound is off. Click to enable sound." banner.
 
 Blocked by BOLT-38.
+
+### BOLT-43 — Simulation mode: ALLOW_SIMULATION, and TEST_MODE as the default
+
+Henrique, 2026-10-17. A new deployment setting, `ALLOW_SIMULATION` (Bicep `allowSimulation`, default `false`), decides whether displays offer Simulation mode at all. Off: Settings has no Simulation mode checkbox and the Simulate buttons never show, whatever a device saved. On: the checkbox is offered, and `TEST_MODE` (Bicep `testMode`) is its default, which each device can change. The server passes both in `GET /api/client-config`. The demo runs with `ALLOW_SIMULATION=true` and `TEST_MODE=false`. `.env.example`, `infra/README.md` and the README describe both.
+
+Blocked by BOLT-37.

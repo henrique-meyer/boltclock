@@ -22,6 +22,7 @@ param minReplicas = 1
 param sessionLimitMinutes = 0
 // true shows the display's "Simulate a strike" button. Useful on a demo; keep false for a real display.
 param testMode = false
+param allowSimulation = false
 param buttonIconsOnly = false
 
 param googleMapsApiKey = readEnvironmentVariable('GOOGLE_MAPS_API_KEY')

@@ -2,8 +2,10 @@
 export interface ClientConfig {
   googleMapsApiKey: string;
   googleMapsMapId: string;
-  /** The display may simulate a strike locally (BOLT-21). */
+  /** Simulation mode's default (TEST_MODE). */
   testMode: boolean;
+  /** Settings offers Simulation mode at all (ALLOW_SIMULATION, BOLT-43). */
+  allowSimulation: boolean;
   /** The display's top-right buttons show only their icons (BUTTON_ICONS_ONLY). */
   buttonIconsOnly: boolean;
 }
@@ -16,6 +18,7 @@ export async function fetchClientConfig(fetcher: typeof fetch = fetch): Promise<
     googleMapsApiKey: typeof body.googleMapsApiKey === 'string' ? body.googleMapsApiKey : '',
     googleMapsMapId: typeof body.googleMapsMapId === 'string' && body.googleMapsMapId ? body.googleMapsMapId : 'DEMO_MAP_ID',
     testMode: body.testMode === true,
+    allowSimulation: body.allowSimulation === true,
     buttonIconsOnly: body.buttonIconsOnly === true,
   };
 }

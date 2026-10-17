@@ -8,8 +8,10 @@ export interface ClientConfig {
    */
   googleMapsApiKey: string;
   googleMapsMapId: string;
-  /** Test mode: the display may simulate a strike locally. Off in a real deployment. */
+  /** Simulation mode's default on each display (TEST_MODE). */
   testMode: boolean;
+  /** Displays offer Simulation mode at all (ALLOW_SIMULATION). Off in a real deployment. */
+  allowSimulation: boolean;
   /** The display's top-right buttons show only their icons, without text labels. */
   buttonIconsOnly: boolean;
 }
@@ -20,6 +22,7 @@ export function registerClientConfig(app: FastifyInstance, config: ClientConfig)
     googleMapsApiKey: config.googleMapsApiKey,
     googleMapsMapId: config.googleMapsMapId,
     testMode: config.testMode === true,
+    allowSimulation: config.allowSimulation === true,
     buttonIconsOnly: config.buttonIconsOnly === true,
   };
   app.get('/api/client-config', async (_request, reply) => {

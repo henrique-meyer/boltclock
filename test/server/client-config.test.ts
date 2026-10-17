@@ -18,7 +18,7 @@ describe('GET /api/client-config', () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.headers['cache-control']).toBe('no-store');
-    expect(response.json()).toEqual({ googleMapsApiKey: 'test-key', googleMapsMapId: 'test-map-id', testMode: false, buttonIconsOnly: false });
+    expect(response.json()).toEqual({ googleMapsApiKey: 'test-key', googleMapsMapId: 'test-map-id', testMode: false, allowSimulation: false, buttonIconsOnly: false });
   });
 
   it('shows icons only when BUTTON_ICONS_ONLY is true', async () => {
@@ -35,6 +35,13 @@ describe('GET /api/client-config', () => {
     expect(response.json()).toMatchObject({ testMode: true });
   });
 
+  it('offers simulation only when ALLOW_SIMULATION is true', async () => {
+    app = await buildApp({ clientConfig: loadConfig({ ALLOW_SIMULATION: 'true' }) });
+    const response = await app.inject({ method: 'GET', url: '/api/client-config' });
+
+    expect(response.json()).toMatchObject({ allowSimulation: true, testMode: false });
+  });
+
   it('sends nothing else from the configuration', async () => {
     const config = loadConfig({
       GOOGLE_MAPS_API_KEY: 'test-key',
@@ -44,7 +51,7 @@ describe('GET /api/client-config', () => {
     app = await buildApp({ clientConfig: config });
     const response = await app.inject({ method: 'GET', url: '/api/client-config' });
 
-    expect(Object.keys(response.json()).sort()).toEqual(['buttonIconsOnly', 'googleMapsApiKey', 'googleMapsMapId', 'testMode']);
+    expect(Object.keys(response.json()).sort()).toEqual(['allowSimulation', 'buttonIconsOnly', 'googleMapsApiKey', 'googleMapsMapId', 'testMode']);
     expect(response.body).not.toContain('you@example.com');
   });
 
@@ -52,6 +59,6 @@ describe('GET /api/client-config', () => {
     app = await buildApp();
     const response = await app.inject({ method: 'GET', url: '/api/client-config' });
 
-    expect(response.json()).toEqual({ googleMapsApiKey: '', googleMapsMapId: 'DEMO_MAP_ID', testMode: false, buttonIconsOnly: false });
+    expect(response.json()).toEqual({ googleMapsApiKey: '', googleMapsMapId: 'DEMO_MAP_ID', testMode: false, allowSimulation: false, buttonIconsOnly: false });
   });
 });
