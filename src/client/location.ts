@@ -1,6 +1,7 @@
 import './styles.css';
 import './location.css';
 import { fetchClientConfig, loadGoogleMaps } from './client-config.js';
+import { currentPosition } from './geolocation.js';
 import {
   DEFAULT_RADIUS,
   loadLocation,
@@ -16,7 +17,6 @@ import { googlePlacesBackend, PlaceSearch, type GoogleSuggestion } from './place
 /** The continental US, for when there is neither a saved point nor a browser location. */
 const DEFAULT_VIEW = { center: { lat: 39.5, lng: -98.35 }, zoom: 4 };
 const POINT_ZOOM = 10;
-const GEOLOCATION_TIMEOUT_MS = 10_000;
 
 const el = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const searchInput = el<HTMLInputElement>('search-input');
@@ -40,18 +40,6 @@ radiusValue.value = String(radius.value);
 radiusUnit.value = radius.unit;
 
 const toLatLng = (p: Point): google.maps.LatLngLiteral => ({ lat: p.lat, lng: p.lon });
-
-/** The browser's location, or undefined when it is denied, unavailable or slow. Never stored unless saved. */
-function currentPosition(): Promise<Point | undefined> {
-  if (!('geolocation' in navigator)) return Promise.resolve(undefined);
-  return new Promise((resolve) => {
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => resolve({ lat: coords.latitude, lon: coords.longitude }),
-      () => resolve(undefined),
-      { timeout: GEOLOCATION_TIMEOUT_MS, maximumAge: 10 * 60_000 },
-    );
-  });
-}
 
 function readRadius(): void {
   const input = parseRadius(radiusValue.value, radiusUnit.value === 'km' ? 'km' : 'mi');

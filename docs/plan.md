@@ -43,6 +43,7 @@ flowchart TD
   s31[BOLT-31 use current location link]
   s33[BOLT-33 alert without hazard bands]
   s34[BOLT-34 alert text matches the announcement]
+  s35[BOLT-35 first-visit Start screen]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -74,6 +75,8 @@ flowchart TD
   s19 --> s31
   s28 --> s33
   s29 --> s34
+  s21 --> s35
+  s20 --> s35
 ```
 
 ## Stories
@@ -279,3 +282,9 @@ Blocked by BOLT-28.
 After two simulated strikes the screen said "Nearest strike 22 mi away" while the announcement said 80 (Henrique, 2026-10-17). The announcement names the strike that started or restarted the countdown (the nearest new flash of that batch), but the screen showed the nearest strike in the whole window. The state now keeps that strike's id (`latestStrikeId`, cleared at all-clear), the view's `latestStrike` replaces `nearestStrike`, and the alert reads "Latest strike N mi away", the same distance that was spoken. The test-strike tag follows the same strike.
 
 Blocked by BOLT-29.
+
+### BOLT-35 — First visit: Start screen offers the browser's location or the picker
+
+With no saved location and no `?lat&lon`, the display shows the Start screen instead of "No location yet" (Henrique, 2026-10-17). It asks for the browser's location on load. Until a position arrives the button reads "Set location", which opens the picker; when one arrives it reads "Start display", which saves that point with the default 10 mi radius and starts the display (sound on, main screen) without a reload. If storage refuses, the display still watches for this visit. A saved location is used as stored: the browser's location is not asked for and never replaces it. `currentPosition` moves to `src/client/geolocation.ts`, shared with the picker.
+
+Blocked by BOLT-20 and BOLT-21.

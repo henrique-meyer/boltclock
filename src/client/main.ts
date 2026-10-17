@@ -17,11 +17,13 @@ import {
 import { Announcer, WebAudioOutput, type Announcement } from './audio.js';
 import { mountBackdrop } from './backdrop.js';
 import { DisplayController, type ControllerView } from './display-controller.js';
-import { resolveDisplaySettings } from './display-settings.js';
-import type { KeyValueStore } from './location-settings.js';
+import { resolveDisplaySettings, startAtBrowserLocation } from './display-settings.js';
+import { currentPosition } from './geolocation.js';
+import { DEFAULT_RADIUS, type KeyValueStore } from './location-settings.js';
 import { openStream, type ConnectionState } from './stream.js';
+import type { UrlSettings } from './url-settings.js';
 import { backgroundOverride, backgroundScene, type BackgroundScene } from './weather-background.js';
-import { mountWeatherPanel } from './weather-panel.js';
+import { mountWeatherPanel, type WeatherPanel } from './weather-panel.js';
 
 const byId = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -36,7 +38,8 @@ function deviceStore(): KeyValueStore | undefined {
 
 const store = deviceStore();
 let alerts = loadAlertSettings(store);
-const location = resolveDisplaySettings(window.location.search, store);
+/** What the display watches. Undefined on a first visit until the Start screen sets it. */
+let location = resolveDisplaySettings(window.location.search, store);
 
 // ---- Weather background: follows the weather panel's answers, unless ?background= pins a scene ----
 const backdrop = mountBackdrop(document.getElementById('backdrop'));
@@ -47,11 +50,7 @@ function showBackground(scene: BackgroundScene): void {
 }
 showBackground(pinnedBackground ?? 'neutral');
 
-const weather = location
-  ? mountWeatherPanel(document.getElementById('weather'), location.query, () => alerts, (report) => {
-      if (!pinnedBackground) showBackground(backgroundScene(report));
-    })
-  : undefined;
+let weather: WeatherPanel | undefined;
 
 /** The deployment's settings for the browser, fetched once. */
 const clientConfig = fetchClientConfig();
@@ -88,7 +87,35 @@ async function enableSound(): Promise<void> {
   output.preload(['siren-two-tone.wav', 'siren-mechanical.wav', 'siren-yelp.wav', 'chime.wav', 'speech/all-clear.mp3', 'speech/strike-nearby.mp3']);
 }
 
-byId<HTMLButtonElement>('start-button').addEventListener('click', () => {
+// First visit (no saved location, no ?lat&lon): the Start screen offers the browser's location. With it, "Start
+// display" watches it at the default radius and saves it; without it, "Set location" opens the picker. A saved
+// location is used as stored, and the browser's location is not asked for.
+const startButton = byId<HTMLButtonElement>('start-button');
+const startHint = byId<HTMLParagraphElement>('start-hint');
+const SOUND_HINT = 'Turns on sound. The alarm needs sound to warn you.';
+let browserLocation: { lat: number; lon: number } | undefined;
+if (!location) {
+  startButton.textContent = 'Set location';
+  startHint.textContent = 'Allow your location to watch where you are, or choose a place on the map.';
+  void currentPosition().then((here) => {
+    if (location) return;
+    browserLocation = here;
+    startButton.textContent = here ? 'Start display' : 'Set location';
+    startHint.textContent = here
+      ? `Watches ${DEFAULT_RADIUS.value} ${DEFAULT_RADIUS.unit} around your location. ${SOUND_HINT}`
+      : 'Choose a place on the map to watch for lightning.';
+  });
+}
+
+startButton.addEventListener('click', () => {
+  if (!location) {
+    if (!browserLocation) {
+      window.location.assign('/location.html');
+      return;
+    }
+    location = startAtBrowserLocation(store, browserLocation);
+    watch(location);
+  }
   started = true;
   start.hidden = true;
   void enableSound();
@@ -207,32 +234,40 @@ function render(view: ControllerView, connection: ConnectionState, radius: { val
   status.textContent = `${live} · ${age} · watching ${radius.value} ${radius.unit}`;
 }
 
-if (!location) {
-  start.hidden = true;
+if (location) {
+  watch(location);
+} else {
   headline.textContent = 'No location yet';
   const link = document.createElement('a');
   link.href = '/location.html';
   link.textContent = 'Choose a location';
   detail.replaceChildren(link, ' to watch for lightning.');
   status.textContent = 'Not watching anywhere yet.';
-} else {
+}
+
+/** Starts watching a point: the weather, the push stream and the state machine. Called once. */
+function watch(watched: UrlSettings): void {
+  weather = mountWeatherPanel(document.getElementById('weather'), watched.query, () => alerts, (report) => {
+    if (!pinnedBackground) showBackground(backgroundScene(report));
+  });
+
   // ?minutes= in the address pins a kiosk's countdown; otherwise the saved alert setting decides.
-  const pinnedMinutes = new URLSearchParams(window.location.search).has('minutes') ? location.query.minutes : undefined;
+  const pinnedMinutes = new URLSearchParams(window.location.search).has('minutes') ? watched.query.minutes : undefined;
   const timeLimitMinutes = pinnedMinutes ?? alerts.timeLimitMinutes;
   const controller = new DisplayController(
     {
-      point: { lat: location.query.lat, lon: location.query.lon },
-      radius: location.radius,
+      point: { lat: watched.query.lat, lon: watched.query.lon },
+      radius: watched.radius,
       timeLimitMinutes,
       replayAudioDuringCountdown: alerts.replayAudioDuringCountdown,
     },
     announce,
   );
   let connection: ConnectionState = 'connecting';
-  const redraw = () => render(controller.view(Date.now()), connection, location.radius, timeLimitMinutes);
+  const redraw = () => render(controller.view(Date.now()), connection, watched.radius, timeLimitMinutes);
 
   openStream(
-    { ...location.query, minutes: timeLimitMinutes },
+    { ...watched.query, minutes: timeLimitMinutes },
     {
       onFlashes: (flashes) => {
         controller.flashes(flashes, Date.now());

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { resolveDisplaySettings } from '../../src/client/display-settings.js';
-import { LOCATION_STORAGE_KEY, type KeyValueStore } from '../../src/client/location-settings.js';
+import { resolveDisplaySettings, startAtBrowserLocation } from '../../src/client/display-settings.js';
+import { loadLocation, LOCATION_STORAGE_KEY, type KeyValueStore } from '../../src/client/location-settings.js';
 import { KM_PER_MILE, MAX_RADIUS_KM } from '../../src/shared/display-state.js';
 
 function storeWith(saved?: unknown): KeyValueStore {
@@ -58,5 +58,31 @@ describe('resolveDisplaySettings', () => {
     expect(resolveDisplaySettings('', storeWith())).toBeUndefined();
     expect(resolveDisplaySettings('', undefined)).toBeUndefined();
     expect(resolveDisplaySettings('?unit=km', storeWith({ point: { lat: 99, lon: 0 }, radius: { value: 10, unit: 'mi' } }))).toBeUndefined();
+  });
+});
+
+describe('startAtBrowserLocation', () => {
+  function memoryStore(): KeyValueStore {
+    const data = new Map<string, string>();
+    return { getItem: (k) => data.get(k) ?? null, setItem: (k, v) => void data.set(k, v) };
+  }
+
+  it('watches the browser location at the default 10 mi and saves it for later visits', () => {
+    const store = memoryStore();
+    const settings = startAtBrowserLocation(store, { lat: 28.538412345, lon: -81.378912345 });
+
+    expect(settings).toEqual({
+      query: { lat: 28.538412, lon: -81.378912, radiusKm: 10 * KM_PER_MILE, minutes: 30 },
+      radius: { value: 10, unit: 'mi' },
+    });
+    expect(loadLocation(store)).toEqual({ point: { lat: 28.538412, lon: -81.378912 }, radius: { value: 10, unit: 'mi' } });
+    // The next visit uses the stored location as it is.
+    expect(resolveDisplaySettings('', store)).toEqual(settings);
+  });
+
+  it('still starts when storage refuses or is missing', () => {
+    const refusing: KeyValueStore = { getItem: () => null, setItem: () => { throw new Error('blocked'); } };
+    expect(startAtBrowserLocation(refusing, { lat: 1, lon: 2 })?.radius).toEqual({ value: 10, unit: 'mi' });
+    expect(startAtBrowserLocation(undefined, { lat: 1, lon: 2 }).query).toMatchObject({ lat: 1, lon: 2 });
   });
 });
