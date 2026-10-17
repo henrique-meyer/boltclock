@@ -48,7 +48,7 @@ BoltClock runs as one always-on container. The reference deployment is Azure Con
 Images are published to GitHub Container Registry by [deploy.yml](.github/workflows/deploy.yml).
 
 ## Sounds
-The sirens and the all-clear chime are generated in code by a script in this repo. The spoken announcements use a voice from [ElevenLabs](https://elevenlabs.io).
+The sirens and the all-clear chime are generated in code by a script in this repo. The spoken announcements use the voice "Brian" from [ElevenLabs](https://elevenlabs.io).
 
 ## Project layout
 - `src/server/`: the Fastify server (`/health` now; lightning ingest, push channel and weather relay to come).

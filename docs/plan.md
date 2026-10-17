@@ -98,8 +98,8 @@ The deploy identity's Reader assignment on the resource group used a role defini
 The sound files only; playback, sequencing, the autoplay unlock and the settings screen come in a later story.
 
 - **Siren**, chosen in settings: No siren, Two-tone (hi-lo, mildest), Mechanical (slow civil-defense wail) or Yelp (fast sweeps, most urgent). A script synthesizes them, so they are original, and renders them to `assets/audio/`. "No siren" goes straight to the announcement.
-- **Announcements**: whole sentences rendered in advance with ElevenLabs instead of spliced numbers, so the intonation stays natural. "Lightning detected N miles away" for 0–100 and "N kilometers away" for 0–161, with "1 mile", "less than 1 mile" for 0, and "No lightning detected in the area." A development-time script fixes the voice, model and settings, and ffmpeg trims silence and evens out loudness. The mono MP3 files are committed and the app loads only the clip it needs. `ELEVENLABS_API_KEY` is read from `.env` by the script only, never by the running app.
-- **Chime**: a short two- or three-tone chime before the all-clear, synthesized like the sirens.
+- **Announcements**: whole sentences rendered in advance with ElevenLabs instead of spliced numbers, so the intonation stays natural. "Lightning detected N miles away" for 0–100 and "N kilometers away" for 0–161, with "1 mile", "less than 1 mile" for 0, plus "Lightning detected in the area." without a distance and "No lightning detected in the area." A development-time script fixes the voice, model and settings. The 265 MP3 files are committed as rendered, and the app loads only the clip it needs. `ELEVENLABS_API_KEY` is read from `.env` by the script only, never by the running app.
+- **Chime**: a rising three-note bell before the all-clear, synthesized like the sirens.
 - **Docs**: [audio-plan.md](audio-plan.md) updated for the siren choice and the pre-rendered clips, and the README credits the sounds.
 
 Blocked by BOLT-10.
