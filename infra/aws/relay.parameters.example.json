@@ -1,0 +1,6 @@
+[
+  { "ParameterKey": "FunctionName", "ParameterValue": "" },
+  { "ParameterKey": "TargetUrl", "ParameterValue": "https://<function-app>.azurewebsites.net/api/glm" },
+  { "ParameterKey": "ProjectTag", "ParameterValue": "" },
+  { "ParameterKey": "ResourceGroupName", "ParameterValue": "" }
+]

@@ -13,6 +13,8 @@
 deploy.local.*
 infra/**/*.local.*
 infra/**/*.bicepparam
+infra/aws/*.parameters.json
+!infra/aws/*.parameters.example.json
 
 # ---- Node / frontend ----
 node_modules/

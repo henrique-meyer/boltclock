@@ -33,6 +33,14 @@ param customDomainCertificateId = ''
 param githubFederationSubject = ''
 param deployIdentityName = ''
 
+// Lightning ingest (ADR 0004): NOAA SNS -> Function App -> flash tables. Names are globally unique.
+param deployIngest = false
+param ingestStorageAccountName = ''
+param ingestFunctionAppName = ''
+param ingestPlanName = ''
+param ingestInsightsName = ''
+param ingestMaxInstances = 4
+
 // Optional cost guard. Whoever deploys chooses the amount.
 param budgetAmount = 0
 param budgetContactEmails = []
