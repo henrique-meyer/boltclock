@@ -112,11 +112,11 @@ button {
 }
 
 .icon-button svg {
-  width: 1.3em;
-  height: 1.3em;
+  width: 1.6em;
+  height: 1.6em;
   fill: none;
   stroke: currentColor;
-  stroke-width: 2;
+  stroke-width: 1.8;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
