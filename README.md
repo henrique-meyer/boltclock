@@ -65,6 +65,9 @@ browser display ◀── Azure Container App (Fastify) ◀── reads nearby f
 
 [deploy.yml](.github/workflows/deploy.yml) publishes each image to GitHub Container Registry and deploys the container and the function.
 
+## Sounds
+The sirens and the all-clear chime are generated in code by a script in this repo. The spoken announcements use the voice "Brian" from [ElevenLabs](https://elevenlabs.io).
+
 ## Project layout
 - `src/server/`: the Fastify server (`/health` now; push channel and weather relay to come). Also:
   - `glm/` reads GOES-19 GLM files;
@@ -75,7 +78,8 @@ browser display ◀── Azure Container App (Fastify) ◀── reads nearby f
 - `src/shared/`: code for both server and browser (great-circle distance, grid cells).
 - `src/client/`: the browser display, built with Vite.
 - `test/`: Vitest tests.
-- `assets/`: the logo. `logo.svg` is the app icon and favicon, `logo-mark.svg` has a transparent background, and both have PNG copies. The `-yellow` files are an alternate colourway that isn't in use.
+- `scripts/audio/`: the scripts that make the sounds ([audio plan](docs/audio-plan.md)).
+- `assets/`: the logo. `logo.svg` is the app icon and favicon, `logo-mark.svg` has a transparent background, and both have PNG copies. The `-yellow` files are an alternate colourway that isn't in use. `assets/audio/` holds the sirens, the chime and the announcements.
 - `docs/`: the [system design](docs/system-design.md), the [plan](docs/plan.md), and decisions in [docs/decisions](docs/decisions/).
 - `infra/`: Bicep and the deploy guide. `infra/aws/` holds the CloudFormation relay.
 - `.github/workflows/`: pull request checks and the deploy.

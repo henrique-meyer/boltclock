@@ -22,6 +22,7 @@ flowchart TD
   s7[BOLT-7 provision, DNS, domain]
   s8[BOLT-8 logo]
   s10[BOLT-10 stack and scaffold]
+  s12[BOLT-12 audio assets]
   s14[BOLT-14 demo scale to zero]
   s15[BOLT-15 webhook ingest and flash storage]
   s16[BOLT-16 GLM parser]
@@ -32,6 +33,7 @@ flowchart TD
   s3 --> s5
   s3 --> s7
   s5 --> s7
+  s10 --> s12
   s10 --> s14
   s14 --> s7
   s16 --> s15
@@ -96,6 +98,17 @@ Blocked by BOLT-4 and BOLT-5.
 ### BOLT-11 — Fix the Reader role ID in the Bicep (bug)
 
 The deploy identity's Reader assignment on the resource group used a role definition ID that does not exist, so the first deploy failed on it with `RoleDefinitionDoesNotExist`. Use the built-in Reader ID, `acdd72a7-3385-48ef-bd42-f606fba81ae7`, and redeploy.
+
+### BOLT-12 — Audio assets: selectable siren, announcements, chime
+
+The sound files only; playback, sequencing, the autoplay unlock and the settings screen come in a later story.
+
+- **Siren**, chosen in settings: No siren, Two-tone (hi-lo, mildest), Mechanical (slow civil-defense wail) or Yelp (fast sweeps, most urgent). A script synthesizes them, so they are original, and renders them to `assets/audio/`. "No siren" goes straight to the announcement.
+- **Announcements**: whole sentences rendered in advance with ElevenLabs instead of spliced numbers, so the intonation stays natural. "Lightning detected N miles away" for 0–100 and "N kilometers away" for 0–161, with "1 mile", "less than 1 mile" for 0, plus "Lightning detected in the area." without a distance and "No lightning detected in the area." A development-time script fixes the voice, model and settings. The 265 MP3 files are committed as rendered, and the app loads only the clip it needs. `ELEVENLABS_API_KEY` is read from `.env` by the script only, never by the running app.
+- **Chime**: a rising three-note bell before the all-clear, synthesized like the sirens.
+- **Docs**: [audio-plan.md](audio-plan.md) updated for the siren choice and the pre-rendered clips, and the README credits the sounds.
+
+Blocked by BOLT-10.
 
 ### BOLT-14 — Demo hosting: scale to zero and a session time limit
 

@@ -18,7 +18,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "audio:sounds": "tsx scripts/audio/render-sounds.ts",
+    "audio:speech": "tsx --env-file-if-exists=.env scripts/audio/render-speech.ts"
   },
   "dependencies": {
     "@azure/data-tables": "^13.3.2",
