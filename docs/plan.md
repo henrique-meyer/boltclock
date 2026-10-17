@@ -36,6 +36,7 @@ flowchart TD
   s25[BOLT-25 save returns to the display]
   s26[BOLT-26 footer disclaimer line]
   s27[BOLT-27 top-bar icons and full screen]
+  s29[BOLT-29 test mode and announcement setting]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -59,6 +60,7 @@ flowchart TD
   s19 --> s25
   s21 --> s26
   s21 --> s27
+  s21 --> s29
 ```
 
 ## Stories
@@ -224,3 +226,11 @@ In the footer of the display and the location picker, the disclaimers ("Strike l
 ### BOLT-27 — Top bar: icon buttons and full screen on request
 
 **Start display** turns on sound only and no longer enters full screen. The top-bar buttons become icons with tooltips and accessible names: a lightning bolt for the test strike, a gear for Settings, a map pin for Location, and a new full-screen button to the right of Location, hidden where the browser cannot go full screen. In full screen, whether from the button or F11, the top-right buttons (test strike, Settings, Location, full screen) are hidden; Esc or F11 brings them back.
+
+### BOLT-29 — Test mode and the announcement setting
+
+- **Random test strikes:** "Simulate a strike" puts the flash at a random distance inside the radius (5 to 95% of it) in a random direction.
+- **Test strikes always sound:** each test strike plays the alert, even during a countdown with "Replay the siren" off (the default since BOLT-23), which made a second test look like broken sound. Real strikes keep the replay rule.
+- **Simulate all clear:** in test mode, during a countdown, a sun icon button left of the bolt ends the countdown at once with the all-clear sound. Simulated strikes are dropped; real ones stay for deduplication.
+- **Announcement on/off:** a checkbox under "Replay the siren" turns the spoken sentence on or off, on by default and saved with the other alert settings. With no siren and no announcement an alert is silent, and Settings says so. The "No siren" choice loses "announcement only" from its label.
+- **Hidden buttons stay hidden:** the BOLT-27 icon-button style overrode `hidden`, so the test buttons showed without a location or test mode. The hide rule now comes after it.

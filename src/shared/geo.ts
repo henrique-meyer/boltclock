@@ -12,6 +12,17 @@ export function distanceKm(lat1: number, lon1: number, lat2: number, lon2: numbe
   return 2 * EARTH_RADIUS_KM * Math.asin(Math.min(1, Math.sqrt(a)));
 }
 
+/** The point `km` from a start point along an initial bearing (degrees clockwise from north), on a sphere. */
+export function destinationPoint(lat: number, lon: number, bearingDeg: number, km: number): { lat: number; lon: number } {
+  const angular = km / EARTH_RADIUS_KM;
+  const bearing = toRad(bearingDeg);
+  const lat1 = toRad(lat);
+  const lat2 = Math.asin(Math.sin(lat1) * Math.cos(angular) + Math.cos(lat1) * Math.sin(angular) * Math.cos(bearing));
+  const lon2 =
+    toRad(lon) + Math.atan2(Math.sin(bearing) * Math.sin(angular) * Math.cos(lat1), Math.cos(angular) - Math.sin(lat1) * Math.sin(lat2));
+  return { lat: toDeg(lat2), lon: normalizeLon(toDeg(lon2)) };
+}
+
 /** Longitude folded into [-180, 180). */
 export function normalizeLon(lon: number): number {
   const folded = ((((lon + 180) % 360) + 360) % 360) - 180;

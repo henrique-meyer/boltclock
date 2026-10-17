@@ -15,6 +15,9 @@
       <span class="topbar-name">BoltClock</span>
       <p class="status" id="status" role="status">Checking the server…</p>
       <nav class="topbar-actions">
+        <button type="button" id="simulate-all-clear" class="icon-button test-button" aria-label="Simulate all clear" title="Simulate all clear" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>
+        </button>
         <button type="button" id="simulate" class="icon-button test-button" aria-label="Simulate a strike" title="Simulate a strike" hidden>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>
         </button>
@@ -66,6 +69,11 @@
           <input id="setting-replay" type="checkbox">
           Replay the siren for each new strike during a countdown
         </label>
+        <label class="checkbox">
+          <input id="setting-announcement" type="checkbox">
+          Speak the announcement (distance and all-clear)
+        </label>
+        <p class="settings-warning" id="setting-silent" role="status" hidden>No siren and no announcement: alerts will be silent.</p>
         <label>All-clear countdown, minutes (1–120)
           <input id="setting-minutes" type="number" min="1" max="120" step="1" inputmode="numeric">
         </label>

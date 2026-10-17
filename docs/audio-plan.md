@@ -1,5 +1,5 @@
 # Audio behavior
-- **Siren**, chosen in settings. "No siren" skips straight to the announcement. All three are original.
+- **Siren**, chosen in settings. "No siren" skips straight to the announcement. A separate setting turns the spoken announcement off (siren or chime only). All three are original.
   - **Two-tone**: hi-lo "nee-naw", two pitches a fourth apart, half a second each, about 3.4 s. The mildest.
   - **Mechanical**: a slow civil-defense wail, low → high → low three times over about 4.4 s, with rotor flutter and two slightly detuned horns.
   - **Yelp**: fast sweeps about four times a second, about 3.3 s. The most urgent.

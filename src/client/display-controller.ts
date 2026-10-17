@@ -12,7 +12,7 @@ import {
   type Flash,
   type Heartbeat,
 } from '../shared/display-state.js';
-import { EARTH_RADIUS_KM } from '../shared/geo.js';
+import { destinationPoint } from '../shared/geo.js';
 import type { Announcement } from './audio.js';
 
 /** Simulated strikes carry this id prefix, so the display can label them and nothing mistakes them for real ones. */
@@ -37,6 +37,7 @@ export class DisplayController {
   constructor(
     private readonly settings: DisplaySettings,
     private readonly announce: (announcement: Announcement) => void,
+    private readonly random: () => number = Math.random,
   ) {
     this.state = createDisplayState(settings);
   }
@@ -65,18 +66,29 @@ export class DisplayController {
   }
 
   /**
-   * Test mode: a flash due north of the point at 60% of the radius, timed now on the server's clock. It goes through
-   * the state machine like a real one (alert, countdown, replay), but exists only in this page.
+   * Test mode: a flash at a random distance inside the radius (5 to 95% of it) in a random direction, timed now on
+   * the server's clock. It goes through the state machine like a real one (alert, countdown) and exists only in this
+   * page. Unlike a real strike it always sounds, even during a countdown with replay off: the button is there to
+   * test the alarm.
    */
   simulateStrike(nowMs: number): void {
-    const km = radiusKm(this.settings) * 0.6;
-    const flash: Flash = {
-      id: `${TEST_FLASH_PREFIX}${++this.testCount}`,
-      timeMs: serverNow(this.state, nowMs),
-      lat: this.settings.point.lat + (km / EARTH_RADIUS_KM) * (180 / Math.PI),
-      lon: this.settings.point.lon,
-    };
-    this.apply(step(this.state, { type: 'flashes', flashes: [flash] }, nowMs));
+    const km = radiusKm(this.settings) * (0.05 + 0.9 * this.random());
+    const { lat, lon } = destinationPoint(this.settings.point.lat, this.settings.point.lon, 360 * this.random(), km);
+    const flash: Flash = { id: `${TEST_FLASH_PREFIX}${++this.testCount}`, timeMs: serverNow(this.state, nowMs), lat, lon };
+    const { settings } = this.state;
+    const loud = { ...this.state, settings: { ...settings, replayAudioDuringCountdown: true } };
+    const result = step(loud, { type: 'flashes', flashes: [flash] }, nowMs);
+    this.apply({ state: { ...result.state, settings }, events: result.events });
+  }
+
+  /**
+   * Test mode: ends a countdown at once with the all-clear sound, so a test can start over. Simulated strikes are
+   * dropped; real ones stay, so a replayed real flash is still recognised.
+   */
+  simulateAllClear(): void {
+    if (this.state.mode !== 'ALERT') return;
+    const strikes = new Map([...this.state.strikes].filter(([id]) => !id.startsWith(TEST_FLASH_PREFIX)));
+    this.apply({ state: { ...this.state, mode: 'NORMAL', countdownEndMs: null, strikes }, events: [{ type: 'all-clear' }] });
   }
 
   view(nowMs: number): ControllerView {

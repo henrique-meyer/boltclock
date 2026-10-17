@@ -3,6 +3,15 @@ import { Announcer, sequenceFor, type SoundOutput } from '../../src/client/audio
 import { strikeAnnouncement } from '../../src/shared/announcements.js';
 
 describe('sequenceFor', () => {
+  it('leaves out the sentence when the announcement is off', () => {
+    expect(sequenceFor({ kind: 'strike', distance: 7, unit: 'mi' }, 'yelp', false)).toEqual([
+      { type: 'sound', file: 'siren-yelp.wav' },
+    ]);
+    expect(sequenceFor({ kind: 'all-clear' }, 'two-tone', false)).toEqual([{ type: 'sound', file: 'chime.wav' }]);
+    // No siren and no announcement: silent.
+    expect(sequenceFor({ kind: 'strike', distance: 7, unit: 'mi' }, 'none', false)).toEqual([]);
+  });
+
   it('plays A as siren, a short gap, then the distance sentence', () => {
     expect(sequenceFor({ kind: 'strike', distance: 7, unit: 'mi' }, 'yelp')).toEqual([
       { type: 'sound', file: 'siren-yelp.wav' },
