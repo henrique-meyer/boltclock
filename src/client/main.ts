@@ -20,7 +20,7 @@ function deviceStore(): KeyValueStore | undefined {
 }
 
 const settings = resolveDisplaySettings(window.location.search, deviceStore());
-if (settings) mountWeatherPanel('weather', settings.query);
+if (settings) mountWeatherPanel(document.getElementById('weather'), settings.query);
 
 if (status && !settings) {
   const link = document.createElement('a');

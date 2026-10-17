@@ -65,13 +65,15 @@ function render(root: HTMLElement, view: WeatherPanelView): void {
 }
 
 /**
- * Shows current weather and the next hours for a point in an element (or the element with that id), refreshing about
- * every 10 minutes like the relay's observations. Returns a function that stops it.
+ * Shows current weather and the next hours for a point in the display's weather slot (`.weather`), refreshing about
+ * every 10 minutes like the relay's observations. The panel draws inside its own wrapper, so the slot's place in the
+ * display's layout stays the layout's business. Does nothing without a slot. Returns a function that stops it.
  */
-export function mountWeatherPanel(target: HTMLElement | string, point: { lat: number; lon: number }): () => void {
-  const root = typeof target === 'string' ? document.getElementById(target) : target;
-  if (!root) return () => {};
-  root.classList.add('weather-panel');
+export function mountWeatherPanel(slot: HTMLElement | null, point: { lat: number; lon: number }): () => void {
+  if (!slot) return () => {};
+  slot.classList.add('weather');
+  const root = el('div', 'weather-panel');
+  slot.replaceChildren(root);
   render(root, messageView('Loading the weather…'));
 
   let last: WeatherResponse | undefined;
