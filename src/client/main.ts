@@ -7,6 +7,7 @@ import {
   DISTANCE_UNITS,
   loadAlertSettings,
   saveAlertSettings,
+  simulationOn,
   SIREN_LABELS,
   SIRENS,
   TEMPERATURE_LABELS,
@@ -194,6 +195,8 @@ function readSettingsForm(): AlertSettings {
     temperatureUnit: temperatureSelect.value as TemperatureUnit,
     // Changed through setDistanceUnit when the dialog closes, which also converts the saved radius.
     distanceUnit: alerts.distanceUnit,
+    // Saved only when its own checkbox changes, so other settings never pin the deployment's default.
+    simulation: alerts.simulation,
   });
 }
 
@@ -240,8 +243,35 @@ const testTag = byId<HTMLParagraphElement>('test-tag');
 const stale = byId<HTMLDivElement>('stale');
 const staleDetail = byId<HTMLParagraphElement>('stale-detail');
 const simulateAllClear = byId<HTMLButtonElement>('simulate-all-clear');
-/** Set once the server says test mode is on (TEST_MODE). */
+const simulateStrike = byId<HTMLButtonElement>('simulate');
+const simulationInput = byId<HTMLInputElement>('setting-simulation');
+/** The deployment's TEST_MODE, once the server has said. The default for Simulation mode. */
+let deploymentTestMode = false;
+/** Simulation mode: the Simulate buttons show. */
 let testMode = false;
+/** Redraws the display after a mode change; set once the display is watching a point. */
+let redrawDisplay: (() => void) | undefined;
+
+function applySimulation(): void {
+  testMode = simulationOn(alerts, deploymentTestMode);
+  simulationInput.checked = testMode;
+  simulateStrike.hidden = !testMode || !redrawDisplay;
+  if (redrawDisplay) redrawDisplay();
+  else simulateAllClear.hidden = true;
+}
+
+// Simulation mode: TEST_MODE is the default, and each device can turn it off or on in Settings (BOLT-37).
+simulationInput.addEventListener('change', () => {
+  alerts = saveAlertSettings(store, { ...alerts, simulation: simulationInput.checked });
+  applySimulation();
+});
+void clientConfig
+  .then((config) => {
+    deploymentTestMode = config.testMode;
+    applySimulation();
+  })
+  .catch(() => {});
+applySimulation();
 
 function render(view: ControllerView, connection: ConnectionState, radius: { value: number; unit: string }, minutes: number): void {
   const alert = view.mode === 'ALERT';
@@ -342,21 +372,17 @@ function watch(watched: UrlSettings): void {
   }, 1000);
   redraw();
 
-  // Test mode: only when the deployment turns it on (TEST_MODE), never on a real display.
-  void clientConfig
-    .then((config) => {
-      if (!config.testMode) return;
-      testMode = true;
-      simulateAllClear.addEventListener('click', () => {
-        controller.simulateAllClear();
-        redraw();
-      });
-      const simulate = byId<HTMLButtonElement>('simulate');
-      simulate.hidden = false;
-      simulate.addEventListener('click', () => {
-        controller.simulateStrike(Date.now());
-        redraw();
-      });
-    })
-    .catch(() => {});
+  // Simulation mode's buttons; they show only while it is on.
+  simulateAllClear.addEventListener('click', () => {
+    if (!testMode) return;
+    controller.simulateAllClear();
+    redraw();
+  });
+  simulateStrike.addEventListener('click', () => {
+    if (!testMode) return;
+    controller.simulateStrike(Date.now());
+    redraw();
+  });
+  redrawDisplay = redraw;
+  applySimulation();
 }

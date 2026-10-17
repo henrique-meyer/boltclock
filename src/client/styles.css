@@ -407,8 +407,16 @@ button {
   color: var(--paper);
 }
 
+/* Simulation mode on the left, Done on the right. */
+.settings-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1em;
+}
+
 .settings-close {
-  align-self: flex-end;
+  margin-left: auto;
   background: var(--bolt);
   color: var(--navy);
   border: 0;

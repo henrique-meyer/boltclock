@@ -49,6 +49,11 @@ export interface AlertSettings extends DisplayUnits {
    * with. Distances on screen and in announcements follow the radius's unit.
    */
   distanceUnit: RadiusUnit;
+  /**
+   * Simulation mode (BOLT-37): the Simulate a strike and Simulate all clear buttons. Null follows the deployment's
+   * TEST_MODE; true or false is this device's own choice.
+   */
+  simulation: boolean | null;
 }
 
 export const DEFAULT_ALERT_SETTINGS: AlertSettings = {
@@ -60,6 +65,7 @@ export const DEFAULT_ALERT_SETTINGS: AlertSettings = {
   clock: '12h',
   temperatureUnit: 'F',
   distanceUnit: 'mi',
+  simulation: null,
 };
 
 /** Fills anything missing or out of range with the default, so a hand-edited or old value never breaks the display. */
@@ -80,6 +86,7 @@ export function normalizeAlertSettings(input: Partial<Record<keyof AlertSettings
       ? (input.temperatureUnit as TemperatureUnit)
       : DEFAULT_ALERT_SETTINGS.temperatureUnit,
     distanceUnit: DISTANCE_UNITS.includes(input.distanceUnit as RadiusUnit) ? (input.distanceUnit as RadiusUnit) : DEFAULT_ALERT_SETTINGS.distanceUnit,
+    simulation: typeof input.simulation === 'boolean' ? input.simulation : null,
   };
 }
 
@@ -103,4 +110,9 @@ export function saveAlertSettings(store: KeyValueStore | undefined, settings: Al
     // Private mode or blocked site data: the settings last for this page only.
   }
   return normalized;
+}
+
+/** Whether the Simulate buttons show: this device's choice, else the deployment's TEST_MODE. */
+export function simulationOn(settings: AlertSettings, deploymentTestMode: boolean): boolean {
+  return settings.simulation ?? deploymentTestMode;
 }
