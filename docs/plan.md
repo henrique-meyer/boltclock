@@ -42,6 +42,7 @@ flowchart TD
   s32[BOLT-32 icon-only buttons setting]
   s31[BOLT-31 use current location link]
   s33[BOLT-33 alert without hazard bands]
+  s34[BOLT-34 alert text matches the announcement]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -72,6 +73,7 @@ flowchart TD
   s27 --> s32
   s19 --> s31
   s28 --> s33
+  s29 --> s34
 ```
 
 ## Stories
@@ -271,3 +273,9 @@ Blocked by BOLT-19.
 In ALERT the whole screen turns red, and that is enough (Henrique, 2026-10-17). The amber-and-black hazard bands BOLT-28 drew at the top and bottom are gone, so the countdown and the strike text get the full height back. The red field still replaces the weather art, so ALERT never looks like the thunderstorm scene.
 
 Blocked by BOLT-28.
+
+### BOLT-34 — Alert text matches the announcement (bug)
+
+After two simulated strikes the screen said "Nearest strike 22 mi away" while the announcement said 80 (Henrique, 2026-10-17). The announcement names the strike that started or restarted the countdown (the nearest new flash of that batch), but the screen showed the nearest strike in the whole window. The state now keeps that strike's id (`latestStrikeId`, cleared at all-clear), the view's `latestStrike` replaces `nearestStrike`, and the alert reads "Latest strike N mi away", the same distance that was spoken. The test-strike tag follows the same strike.
+
+Blocked by BOLT-29.

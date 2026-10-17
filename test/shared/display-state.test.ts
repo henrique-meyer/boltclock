@@ -73,7 +73,7 @@ describe('NORMAL to ALERT', () => {
       mode: 'NORMAL',
       countdown: null,
       countdownRemainingMs: null,
-      nearestStrike: null,
+      latestStrike: null,
       stale: true,
       sessionEnded: false,
     });
@@ -93,7 +93,7 @@ describe('NORMAL to ALERT', () => {
     const { state, events } = run(fresh(settings()), [[flashes(flash('far', T0, 17)), T0]]);
     expect(events).toEqual([]);
     expect(state.mode).toBe('NORMAL');
-    expect(displayView(state, T0).nearestStrike).toBeNull();
+    expect(displayView(state, T0).latestStrike).toBeNull();
   });
 
   it('uses the radius in the unit it was entered in', () => {
@@ -131,7 +131,7 @@ describe('distance rounding', () => {
     const s = settings({ radius: { value: 100, unit: 'mi' } });
     const { events, state } = run(fresh(s), [[flashes(flash('a', T0, KM_PER_DEGREE)), T0]]);
     expect(events[0]).toMatchObject({ distance: 69, unit: 'mi' });
-    expect(displayView(state, T0).nearestStrike).toEqual({ distance: 69, unit: 'mi' });
+    expect(displayView(state, T0).latestStrike).toEqual({ distance: 69, unit: 'mi' });
   });
 
   it('rounds kilometres to a whole number', () => {
@@ -188,7 +188,7 @@ describe('all-clear', () => {
 
     const at = run(before.state, [[tick, T0 + 30 * MIN]]);
     expect(at.events).toEqual([{ type: 'all-clear' }]);
-    expect(displayView(at.state, T0 + 30 * MIN)).toMatchObject({ mode: 'NORMAL', countdown: null, nearestStrike: null });
+    expect(displayView(at.state, T0 + 30 * MIN)).toMatchObject({ mode: 'NORMAL', countdown: null, latestStrike: null });
 
     // Only once.
     expect(run(at.state, [[tick, T0 + 30 * MIN + 1_000]]).events).toEqual([]);
@@ -300,17 +300,35 @@ describe('dedupe and old flashes', () => {
     expect(timeLimitMs(settings({ timeLimitMinutes: 500 }))).toBe(120 * MIN);
   });
 
-  it('shows the nearest strike still inside the time limit', () => {
-    const { state } = run(fresh(settings()), [
-      [flashes(flash('near', T0, 2)), T0],
+  it('shows the strike that last restarted the countdown, as the announcement does, not an earlier nearer one', () => {
+    const s = settings({ replayAudioDuringCountdown: true });
+    const first = run(fresh(s), [[flashes(flash('near', T0, 2)), T0]]);
+    const { state, events } = run(first.state, [
       [flashes(flash('far', T0 + 10 * MIN, 12)), T0 + 10 * MIN],
       [heartbeat(T0 + 29 * MIN), T0 + 29 * MIN],
     ]);
-    expect(displayView(state, T0 + 29 * MIN).nearestStrike).toEqual({ distance: 1, unit: 'mi' });
+    expect(events[0]).toMatchObject({ type: 'repeat', distance: 7, unit: 'mi' });
+    expect(displayView(state, T0 + 29 * MIN).latestStrike).toEqual({ distance: 7, unit: 'mi' });
 
+    // The nearer, older strike passing the time limit changes nothing.
     const later = run(state, [[heartbeat(T0 + 31 * MIN), T0 + 31 * MIN]]).state;
     expect(later.mode).toBe('ALERT');
-    expect(displayView(later, T0 + 31 * MIN).nearestStrike).toEqual({ distance: 7, unit: 'mi' });
+    expect(displayView(later, T0 + 31 * MIN).latestStrike).toEqual({ distance: 7, unit: 'mi' });
+
+    // Within one batch it is the nearest new flash, the one announced.
+    const batch = run(later, [[flashes(flash('b1', T0 + 32 * MIN, 20), flash('b2', T0 + 32 * MIN, 4)), T0 + 32 * MIN]]);
+    expect(batch.events[0]).toMatchObject({ distance: 2 });
+    expect(displayView(batch.state, T0 + 32 * MIN).latestStrike).toEqual({ distance: 2, unit: 'mi' });
+  });
+
+  it('clears the latest strike with the all-clear', () => {
+    const { state } = run(fresh(settings()), [
+      [flashes(flash('a', T0, 8)), T0],
+      [heartbeat(T0 + 30 * MIN), T0 + 30 * MIN],
+    ]);
+    expect(state.mode).toBe('NORMAL');
+    expect(state.latestStrikeId).toBeNull();
+    expect(displayView(state, T0 + 30 * MIN).latestStrike).toBeNull();
   });
 });
 
@@ -337,7 +355,7 @@ describe('reload', () => {
       mode: 'ALERT',
       countdown: '24:00',
       countdownRemainingMs: 24 * MIN,
-      nearestStrike: { distance: 3, unit: 'mi' },
+      latestStrike: { distance: 3, unit: 'mi' },
       stale: false,
       sessionEnded: false,
     });

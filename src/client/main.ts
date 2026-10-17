@@ -192,7 +192,7 @@ function render(view: ControllerView, connection: ConnectionState, radius: { val
   // Test mode only: during a countdown, the sun button ends it at once.
   simulateAllClear.hidden = !(testMode && alert);
   detail.textContent = alert
-    ? `${view.nearestStrike ? `Nearest strike ${view.nearestStrike.distance} ${view.nearestStrike.unit} away. ` : ''}Stay indoors until the countdown ends.`
+    ? `${view.latestStrike ? `Latest strike ${view.latestStrike.distance} ${view.latestStrike.unit} away. ` : ''}Stay indoors until the countdown ends.`
     : `No lightning within ${radius.value} ${radius.unit} in the last ${minutes} minutes.`;
 
   stale.hidden = !view.stale;
