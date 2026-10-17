@@ -1,14 +1,17 @@
 /* Brand colors, matching assets/logo.svg: navy tile, paper, mark outline, light bolt. Alert colors are warning
-   colors, not brand: amber and red read as danger from across a room. */
+   colors, not brand: amber and red read as danger from across a room. No weather scene uses red or amber, so ALERT
+   never looks like weather. The reds are dark enough for amber text at 4.5:1 and paper at 7:1 (tested). */
 :root {
   --navy: #0c2340;
   --paper: #f4f0e6;
   --outline: #cdbfa8;
   --bolt: #4cc9f0;
   --bolt-dark: #1e8fd5;
-  --alert: #b3261e;
-  --alert-deep: #6e1410;
+  --alert: #8f1c14;
+  --alert-deep: #5c100c;
   --amber: #ffb300;
+  --hazard-dark: #1a0806;
+  --hazard-band: 2.4vh;
   color-scheme: dark;
 }
 
@@ -30,8 +33,37 @@ body {
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
+/* In NORMAL the weather backdrop (backdrop.css) draws behind everything; a soft shadow keeps text crisp over its art. */
+.mode-normal .topbar,
+.mode-normal .stage,
+.mode-normal .fineprint {
+  text-shadow: 0 0.04em 0.3em rgb(4 11 26 / 0.6);
+}
+
+/* ALERT: a red field framed by amber-and-black hazard bands, top and bottom, over any weather. */
 body.mode-alert {
   background: radial-gradient(circle at 50% 40%, var(--alert), var(--alert-deep));
+  padding-block: var(--hazard-band);
+}
+
+body.mode-alert::before,
+body.mode-alert::after {
+  content: "";
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: var(--hazard-band);
+  background: repeating-linear-gradient(-45deg, var(--amber) 0 1.7vh, var(--hazard-dark) 1.7vh 3.4vh);
+  /* Over the "NO LIGHTNING DATA" overlay too: data going stale does not end an alert. */
+  z-index: 11;
+}
+
+body.mode-alert::before {
+  top: 0;
+}
+
+body.mode-alert::after {
+  bottom: 0;
 }
 
 button,
@@ -89,7 +121,8 @@ button {
 .topbar-actions a,
 .topbar-actions button {
   color: var(--paper);
-  background: transparent;
+  /* Translucent navy, so the buttons stay readable over clouds, the sun or the alert red. */
+  background: rgb(12 35 64 / 0.55);
   border: 1px solid var(--outline);
   border-radius: 0.4em;
   padding: 0.3em 0.8em;
@@ -103,6 +136,33 @@ button {
 
 .topbar-actions [hidden] {
   display: none;
+}
+
+.topbar-actions .icon-button {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3em 0.45em;
+}
+
+.icon-button svg {
+  width: 1.6em;
+  height: 1.6em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* In full screen, from the button or from F11, the buttons hide. Esc or F11 leaves full screen. */
+:root:fullscreen .topbar-actions {
+  display: none;
+}
+
+@media (display-mode: fullscreen) {
+  .topbar-actions {
+    display: none;
+  }
 }
 
 /* ---- Stage: built to be read from 20 ft on a 21" monitor, so sizes follow the screen height ---- */

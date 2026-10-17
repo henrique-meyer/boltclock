@@ -15,10 +15,12 @@ import {
   type TemperatureUnit,
 } from './alert-settings.js';
 import { Announcer, WebAudioOutput, type Announcement } from './audio.js';
+import { mountBackdrop } from './backdrop.js';
 import { DisplayController, type ControllerView } from './display-controller.js';
 import { resolveDisplaySettings } from './display-settings.js';
 import type { KeyValueStore } from './location-settings.js';
 import { openStream, type ConnectionState } from './stream.js';
+import { backgroundOverride, backgroundScene, type BackgroundScene } from './weather-background.js';
 import { mountWeatherPanel } from './weather-panel.js';
 
 const byId = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -35,7 +37,21 @@ function deviceStore(): KeyValueStore | undefined {
 const store = deviceStore();
 let alerts = loadAlertSettings(store);
 const location = resolveDisplaySettings(window.location.search, store);
-const weather = location ? mountWeatherPanel(document.getElementById('weather'), location.query, () => alerts) : undefined;
+
+// ---- Weather background: follows the weather panel's answers, unless ?background= pins a scene ----
+const backdrop = mountBackdrop(document.getElementById('backdrop'));
+const pinnedBackground = backgroundOverride(window.location.search);
+function showBackground(scene: BackgroundScene): void {
+  document.body.dataset.weather = scene;
+  backdrop.show(scene);
+}
+showBackground(pinnedBackground ?? 'neutral');
+
+const weather = location
+  ? mountWeatherPanel(document.getElementById('weather'), location.query, () => alerts, (report) => {
+      if (!pinnedBackground) showBackground(backgroundScene(report));
+    })
+  : undefined;
 
 const status = byId<HTMLParagraphElement>('status');
 const start = byId<HTMLDivElement>('start');
@@ -66,10 +82,16 @@ byId<HTMLButtonElement>('start-button').addEventListener('click', () => {
   started = true;
   start.hidden = true;
   void enableSound();
-  // Full screen is best effort: a kiosk browser may already be full screen, or refuse.
-  void document.documentElement.requestFullscreen?.().catch(() => {});
 });
 soundBanner.addEventListener('click', () => void enableSound());
+
+// Full screen only on request. In full screen the top-bar buttons hide (styles.css); Esc or F11 brings them back.
+const fullscreenButton = byId<HTMLButtonElement>('fullscreen');
+fullscreenButton.hidden = !document.fullscreenEnabled;
+fullscreenButton.addEventListener('click', () => {
+  // Best effort: a kiosk browser may refuse.
+  void document.documentElement.requestFullscreen().catch(() => {});
+});
 
 // ---- Settings dialog ----
 const dialog = byId<HTMLDialogElement>('settings');

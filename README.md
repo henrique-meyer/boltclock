@@ -49,10 +49,10 @@ Only the pin's coordinates and the radius are saved, in the browser's local stor
 The display watches the saved location. A kiosk can be pinned to a point by its address instead, which overrides the saved one: `/?lat=28.54&lon=-81.38&radius=10&unit=mi&minutes=30` (`radius`, `unit` and `minutes` are optional).
 
 ## Using the display
-Press **Start display**. That one click turns on sound, which browsers only allow after a user gesture, and enters full screen. If sound is still off, a "click to enable sound" banner stays up until it's on.
+Press **Start display**. That one click turns on sound, which browsers only allow after a user gesture. The full-screen button at the top right, next to the gear (Settings) and map pin (Location) buttons, or F11, fills the screen and hides the top-bar buttons; Esc or F11 brings them back. If sound is still off, a "click to enable sound" banner stays up until it's on.
 
-- **All clear:** the calm navy screen.
-- **Lightning nearby:** a strike inside the radius turns the screen red and starts an MM:SS countdown, counted from the strike's own time. It plays the siren, then "Lightning detected N miles away" (in the unit the radius was entered in). Each new strike in the radius restarts the countdown.
+- **All clear:** the background matches the current weather from the National Weather Service: clear day, clear night, cloudy, rain, thunderstorm, fog, snow or wind, and plain navy while the weather is unknown. Clouds, rain and snow move slowly; with the system's "reduce motion" setting on they stay still. Add `background=` and a scene name to the address (for example `/?background=snow`) to preview one.
+- **Lightning nearby:** a strike inside the radius replaces the weather with a red screen between amber-and-black hazard bands and starts an MM:SS countdown, counted from the strike's own time. It plays the siren, then "Lightning detected N miles away" (in the unit the radius was entered in). Each new strike in the radius restarts the countdown.
 - **All-clear sound:** when the countdown ends, a chime plays, then "No lightning detected in the area."
 - **NO LIGHTNING DATA:** shown over everything when the newest satellite file is more than 3 minutes old. The display never announces an all-clear while it shows.
 
@@ -91,6 +91,7 @@ The display still shows the Start button once. With that flag, the alarm can sou
 - Lightning: NOAA GOES-19 Geostationary Lightning Mapper (GLM-L2-LCFA), public domain, from NOAA Open Data on AWS. No account needed.
 - Weather: the National Weather Service API (api.weather.gov).
 - Maps: Google Maps Platform, with Google's attribution kept on the map. Each deployer supplies their own key; none is in this repository.
+- Background art: original, drawn in code for this project (`src/client/backdrop-art.ts`) under the project's licence. No stock images.
 
 ## Tech stack
 - **Language and runtime:** TypeScript on Node 24 LTS for the server, the ingest function and the browser client ([ADR 0002](docs/decisions/0002-node-typescript.md)).
@@ -132,7 +133,7 @@ The sirens and the all-clear chime are generated in code by a script in this rep
   - `weather/` relays api.weather.gov with the required User-Agent, cached and retried politely.
 - `src/functions/`: the Azure Function entry point for lightning ingest.
 - `src/shared/`: code for both server and browser (great-circle distance, grid cells, message and weather shapes).
-- `src/client/`: the browser display and the location picker (`location.html`), built with Vite. `stream.ts` is the push channel client. `display-settings.ts` picks the point the display watches: `?lat&lon` in the address, else the location saved by the picker (`location-settings.ts`). `display-controller.ts` runs the state machine (`src/shared/display-state.ts`) for the page. `audio.ts` plays the sirens and announcements. `alert-settings.ts` keeps the sound, countdown, clock and temperature settings. `weather-panel.ts` shows the weather for the point.
+- `src/client/`: the browser display and the location picker (`location.html`), built with Vite. `stream.ts` is the push channel client. `display-settings.ts` picks the point the display watches: `?lat&lon` in the address, else the location saved by the picker (`location-settings.ts`). `display-controller.ts` runs the state machine (`src/shared/display-state.ts`) for the page. `audio.ts` plays the sirens and announcements. `alert-settings.ts` keeps the sound, countdown, clock and temperature settings. `weather-panel.ts` shows the weather for the point. `weather-background.ts` picks the background scene from it, and `backdrop.ts` draws the art from `backdrop-art.ts`.
 - `test/`: Vitest tests.
 - `scripts/audio/`: the scripts that make the sounds ([audio plan](docs/audio-plan.md)).
 - `assets/`: the logo. `logo.svg` is the app icon and favicon, `logo-mark.svg` has a transparent background, and both have PNG copies. The `-yellow` files are an alternate colourway that isn't in use. `assets/audio/` holds the sirens, the chime and the announcements.
