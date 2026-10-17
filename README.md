@@ -61,7 +61,7 @@ The Start screen shows the name of the place being watched. Press **Start displa
 **Settings** (saved on this device):
 - the siren: two-tone, mechanical, yelp, or none;
 - the volume;
-- whether new strikes replay the siren during a countdown (off by default: later strikes only restart the countdown);
+- whether new strikes replay the siren during a countdown. Off by default: a later strike restarts the countdown and speaks the announcement without the siren (silent if the announcement is off). Simulated strikes follow the same rule;
 - whether the announcement is spoken after the siren or chime (on by default; with no siren and no announcement, alerts are silent);
 - the countdown length: 30 minutes by default, at most 120. An address with `minutes=` pins it on a kiosk;
 - the clock for forecast times: 12-hour (the default) or 24-hour;

@@ -9,9 +9,9 @@
  * (serverTimeMs minus the display time it arrived), so a display whose clock is off cannot clear early. Before the
  * first heartbeat the offset is zero, and the data counts as stale anyway.
  *
- * Batches: one `flashes` input is one push message, usually one GLM file. It raises at most one event: "alert" when
- * it starts a countdown, else "repeat" when the replay setting is on, with the distance of the nearest new flash
- * within the radius.
+ * Batches: one `flashes` input is one push message, usually one GLM file. It raises at most one event, with the
+ * distance of the nearest new flash within the radius: "alert" when it starts a countdown, else "repeat". A repeat
+ * plays the siren only when the replay setting is on; otherwise it is the announcement alone (BOLT-42).
  *
  * Reload: `rebuildDisplayState` replays the flashes the server sends on connect without raising events. A fresh page
  * load with an active countdown shows the countdown and stays silent: the page cannot tell whether that strike was
@@ -88,7 +88,8 @@ export type DisplayInput =
 
 export type DisplayEvent =
   | { type: 'alert'; distance: number; unit: RadiusUnit; flashId: string }
-  | { type: 'repeat'; distance: number; unit: RadiusUnit; flashId: string }
+  /** A new strike during a countdown. `siren` is the replay setting: off means the announcement only. */
+  | { type: 'repeat'; distance: number; unit: RadiusUnit; flashId: string; siren: boolean }
   | { type: 'all-clear' };
 
 export interface DisplayView {
@@ -276,8 +277,8 @@ function applyFlashes(
   const distance = roundedDistance(nearestNew.distanceKm, unit);
   if (state.mode === 'NORMAL') {
     events.push({ type: 'alert', distance, unit, flashId: nearestNew.id });
-  } else if (settings.replayAudioDuringCountdown) {
-    events.push({ type: 'repeat', distance, unit, flashId: nearestNew.id });
+  } else {
+    events.push({ type: 'repeat', distance, unit, flashId: nearestNew.id, siren: settings.replayAudioDuringCountdown });
   }
   return { ...state, mode: 'ALERT', countdownEndMs: latestEnd, strikes, latestStrikeId: nearestNew.id };
 }

@@ -50,6 +50,7 @@ flowchart TD
   s40[BOLT-40 distance unit applies in place]
   s41[BOLT-41 one forecast hour per line]
   s39[BOLT-39 picker at /location]
+  s42[BOLT-42 replay off speaks only]
   s44[BOLT-44 picker returns to the main screen]
   s2 --> s3
   s4 --> s10
@@ -90,6 +91,7 @@ flowchart TD
   s36 --> s40
   s22 --> s41
   s19 --> s39
+  s29 --> s42
   s38 --> s44
 ```
 
@@ -338,6 +340,12 @@ Blocked by BOLT-22.
 Henrique, 2026-10-17. The picker's address is `/location` instead of `/location.html`. The server serves `location.html` there, and `/location.html` redirects permanently (301) to `/location`, keeping its query string, so old links and bookmarks still work. Every link to the picker (the top bar's Location button, "Set location", "Choose a location") uses `/location`, and `npm run dev` rewrites `/location` the same way. The README and the system design use the new address.
 
 Blocked by BOLT-19.
+
+### BOLT-42 — Replay off: a new strike during a countdown speaks the announcement only
+
+Henrique, 2026-10-17. With "Replay the siren for each new strike during a countdown" off, a simulated strike during a countdown still played the siren (BOLT-29 made every test strike sound the full alarm). The rule is now the same for real and simulated strikes: the first strike plays the siren, then the announcement. Each new strike during the countdown restarts it and raises a `repeat` event whose `siren` is the replay setting. With replay on it plays the siren, then the announcement; with replay off it plays the announcement only, and nothing at all when "Speak the announcement" is off. An announcement with nothing to play never cuts off a sound already playing.
+
+Blocked by BOLT-29.
 
 ### BOLT-44 — Leaving the location picker opens the main screen
 

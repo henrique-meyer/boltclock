@@ -149,12 +149,15 @@ describe('distance rounding', () => {
 });
 
 describe('ALERT plus another flash', () => {
-  it('extends the countdown to the newer strike time plus the limit, silently with replay off', () => {
+  it('extends the countdown to the newer strike time plus the limit, without the siren when replay is off', () => {
     const { state, events } = run(fresh(settings()), [
       [flashes(flash('a', T0, 8)), T0],
       [flashes(flash('b', T0 + 5 * MIN, 12)), T0 + 5 * MIN],
     ]);
-    expect(events.map((e) => e.type)).toEqual(['alert']);
+    expect(events).toEqual([
+      { type: 'alert', distance: 5, unit: 'mi', flashId: 'a' },
+      { type: 'repeat', distance: 7, unit: 'mi', flashId: 'b', siren: false },
+    ]);
     expect(state.countdownEndMs).toBe(T0 + 35 * MIN);
     expect(displayView(state, T0 + 5 * MIN).countdown).toBe('30:00');
   });
@@ -166,7 +169,7 @@ describe('ALERT plus another flash', () => {
     ]);
     expect(events).toEqual([
       { type: 'alert', distance: 5, unit: 'mi', flashId: 'a' },
-      { type: 'repeat', distance: 7, unit: 'mi', flashId: 'b' },
+      { type: 'repeat', distance: 7, unit: 'mi', flashId: 'b', siren: true },
     ]);
   });
 
@@ -379,7 +382,7 @@ describe('reload', () => {
     const s = settings({ replayAudioDuringCountdown: true });
     const state = rebuildDisplayState(s, replay, now, hb(now));
     const next = run(state, [[flashes(flash('c', now, 6)), now + 20_000]]);
-    expect(next.events).toEqual([{ type: 'repeat', distance: 4, unit: 'mi', flashId: 'c' }]);
+    expect(next.events).toEqual([{ type: 'repeat', distance: 4, unit: 'mi', flashId: 'c', siren: true }]);
   });
 
   it('does not re-announce when a reconnect replays flashes it already has', () => {

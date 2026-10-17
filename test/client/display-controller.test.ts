@@ -98,17 +98,28 @@ describe('DisplayController', () => {
     for (const d of distances) expect(d).toBeLessThanOrEqual(10);
   });
 
-  it('sounds every simulated strike, even during a countdown with replay off', () => {
+  it('with replay off, a new strike during a countdown is the announcement only, simulated or real', () => {
     const { controller, heard, beat } = setup({ ...SETTINGS, replayAudioDuringCountdown: false }, () => 0.5);
     controller.flashes([], T0);
     beat(T0);
     controller.simulateStrike(T0);
     controller.simulateStrike(T0 + 60_000);
-
-    expect(heard).toHaveLength(2);
-    // Real strikes during the countdown still follow the setting: silent.
     controller.flashes([flashNorth('real', 3 * KM_PER_MILE, T0 + 61_000)], T0 + 61_000);
-    expect(heard).toHaveLength(2);
+
+    expect(heard).toEqual([
+      { kind: 'strike', distance: 5, unit: 'mi' },
+      { kind: 'strike', distance: 5, unit: 'mi', speechOnly: true },
+      { kind: 'strike', distance: 3, unit: 'mi', speechOnly: true },
+    ]);
+  });
+
+  it('with replay on, a new strike during a countdown plays the siren again', () => {
+    const { controller, heard, beat } = setup(SETTINGS, () => 0.5);
+    controller.flashes([], T0);
+    beat(T0);
+    controller.simulateStrike(T0);
+    controller.simulateStrike(T0 + 60_000);
+    expect(heard.map((a) => a.kind === 'strike' && a.speechOnly)).toEqual([undefined, undefined]);
   });
 
   it('simulates the all-clear during a countdown, keeping real strikes for dedupe', () => {
@@ -151,7 +162,7 @@ describe('DisplayController', () => {
 
     expect(heard).toEqual([
       { kind: 'strike', distance: 1, unit: 'mi' },
-      { kind: 'strike', distance: 9, unit: 'mi' },
+      { kind: 'strike', distance: 9, unit: 'mi', speechOnly: true },
     ]);
     expect(controller.view(T0 + 60_000)).toMatchObject({ latestStrike: { distance: 9, unit: 'mi' }, testStrike: true });
   });
