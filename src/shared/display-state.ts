@@ -71,6 +71,8 @@ export interface DisplayState {
   readonly countdownEndMs: number | null;
   /** Strikes within the radius younger than the time limit, by id. Also the dedupe set: older flashes are ignored. */
   readonly strikes: ReadonlyMap<string, Strike>;
+  /** The strike that last started or restarted the countdown: the one an announcement names. Null in NORMAL. */
+  readonly latestStrikeId: string | null;
   readonly heartbeat: { latestFileEndMs: number; serverTimeMs: number; receivedAtMs: number } | null;
   readonly sessionEnded: boolean;
 }
@@ -92,8 +94,11 @@ export interface DisplayView {
   /** "MM:SS", rounded up to the whole second. Null in NORMAL. */
   countdown: string | null;
   countdownRemainingMs: number | null;
-  /** The nearest strike within the radius and the time limit, rounded, in the unit the radius was entered in. */
-  nearestStrike: { distance: number; unit: RadiusUnit } | null;
+  /**
+   * The strike that last started or restarted the countdown, rounded, in the unit the radius was entered in: the
+   * same distance the announcement speaks. Null in NORMAL, or once that strike is past the time limit.
+   */
+  latestStrike: { distance: number; unit: RadiusUnit } | null;
   /** Show "NO LIGHTNING DATA". All-clear waits while this is true. */
   stale: boolean;
   /** The demo session ended: the display should ask for a reload. Also stale. */
@@ -128,7 +133,15 @@ export function formatCountdown(ms: number): string {
 }
 
 export function createDisplayState(settings: DisplaySettings): DisplayState {
-  return { settings, mode: 'NORMAL', countdownEndMs: null, strikes: new Map(), heartbeat: null, sessionEnded: false };
+  return {
+    settings,
+    mode: 'NORMAL',
+    countdownEndMs: null,
+    strikes: new Map(),
+    latestStrikeId: null,
+    heartbeat: null,
+    sessionEnded: false,
+  };
 }
 
 /** The display's clock moved onto the server's, using the newest heartbeat. */
@@ -198,16 +211,13 @@ export function rebuildDisplayState(
 
 export function displayView(state: DisplayState, nowMs: number): DisplayView {
   const remaining = state.countdownEndMs === null ? null : Math.max(0, state.countdownEndMs - serverNow(state, nowMs));
-  let nearest: Strike | null = null;
-  for (const strike of state.strikes.values()) {
-    if (!nearest || strike.distanceKm < nearest.distanceKm) nearest = strike;
-  }
+  const latest = state.latestStrikeId === null ? undefined : state.strikes.get(state.latestStrikeId);
   const unit = state.settings.radius.unit;
   return {
     mode: state.mode,
     countdown: remaining === null ? null : formatCountdown(remaining),
     countdownRemainingMs: remaining,
-    nearestStrike: nearest ? { distance: roundedDistance(nearest.distanceKm, unit), unit } : null,
+    latestStrike: latest ? { distance: roundedDistance(latest.distanceKm, unit), unit } : null,
     stale: isStale(state, nowMs),
     sessionEnded: state.sessionEnded,
   };
@@ -221,7 +231,7 @@ function settle(state: DisplayState, nowMs: number, events: DisplayEvent[]): Dis
   let next = kept.length === state.strikes.size ? state : { ...state, strikes: new Map(kept.map((s) => [s.id, s])) };
 
   if (next.mode === 'ALERT' && next.countdownEndMs !== null && now >= next.countdownEndMs && !isStale(next, nowMs)) {
-    next = { ...next, mode: 'NORMAL', countdownEndMs: null };
+    next = { ...next, mode: 'NORMAL', countdownEndMs: null, latestStrikeId: null };
     events.push({ type: 'all-clear' });
   }
   return next;
@@ -264,5 +274,5 @@ function applyFlashes(
   } else if (settings.replayAudioDuringCountdown) {
     events.push({ type: 'repeat', distance, unit, flashId: nearestNew.id });
   }
-  return { ...state, mode: 'ALERT', countdownEndMs: latestEnd, strikes };
+  return { ...state, mode: 'ALERT', countdownEndMs: latestEnd, strikes, latestStrikeId: nearestNew.id };
 }

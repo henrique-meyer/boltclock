@@ -19,7 +19,7 @@ import type { Announcement } from './audio.js';
 export const TEST_FLASH_PREFIX = 'test-';
 
 export interface ControllerView extends DisplayView {
-  /** The nearest strike in the window is a simulated one. */
+  /** The strike the alert shows (the latest one) is a simulated one. */
   testStrike: boolean;
   /** Seconds since the newest GLM file, or null before the first heartbeat. */
   dataAgeSeconds: number | null;
@@ -88,23 +88,18 @@ export class DisplayController {
   simulateAllClear(): void {
     if (this.state.mode !== 'ALERT') return;
     const strikes = new Map([...this.state.strikes].filter(([id]) => !id.startsWith(TEST_FLASH_PREFIX)));
-    this.apply({ state: { ...this.state, mode: 'NORMAL', countdownEndMs: null, strikes }, events: [{ type: 'all-clear' }] });
+    this.apply({
+      state: { ...this.state, mode: 'NORMAL', countdownEndMs: null, strikes, latestStrikeId: null },
+      events: [{ type: 'all-clear' }],
+    });
   }
 
   view(nowMs: number): ControllerView {
     const view = displayView(this.state, nowMs);
-    let nearestId: string | undefined;
-    let nearestKm = Infinity;
-    for (const strike of this.state.strikes.values()) {
-      if (strike.distanceKm < nearestKm) {
-        nearestKm = strike.distanceKm;
-        nearestId = strike.id;
-      }
-    }
     const heartbeat = this.state.heartbeat;
     return {
       ...view,
-      testStrike: nearestId?.startsWith(TEST_FLASH_PREFIX) ?? false,
+      testStrike: view.latestStrike !== null && (this.state.latestStrikeId?.startsWith(TEST_FLASH_PREFIX) ?? false),
       dataAgeSeconds: heartbeat ? Math.max(0, Math.round((serverNow(this.state, nowMs) - heartbeat.latestFileEndMs) / 1000)) : null,
     };
   }

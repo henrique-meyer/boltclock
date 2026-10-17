@@ -141,6 +141,21 @@ describe('DisplayController', () => {
     expect(controller.view(T0 + 60_000).countdown).toBe('30:00');
   });
 
+  it('shows the distance the announcement spoke, not an earlier nearer strike', () => {
+    // A near test strike (5% + 90% x 0.1 = 14% of 10 mi), then a far one (5% + 90% x 0.9 = 86%).
+    const { controller, heard, beat } = setup({ ...SETTINGS, replayAudioDuringCountdown: false }, sequence(0.1, 0, 0.9, 0));
+    controller.flashes([], T0);
+    beat(T0);
+    controller.simulateStrike(T0);
+    controller.simulateStrike(T0 + 60_000);
+
+    expect(heard).toEqual([
+      { kind: 'strike', distance: 1, unit: 'mi' },
+      { kind: 'strike', distance: 9, unit: 'mi' },
+    ]);
+    expect(controller.view(T0 + 60_000)).toMatchObject({ latestStrike: { distance: 9, unit: 'mi' }, testStrike: true });
+  });
+
   it('keeps simulated flashes recognisable by their id prefix', () => {
     expect(TEST_FLASH_PREFIX).toBe('test-');
     expect(distanceKm(POINT.lat, POINT.lon, flashNorth('x', 9.656, T0).lat, POINT.lon)).toBeCloseTo(9.656, 3);

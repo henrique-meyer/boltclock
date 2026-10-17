@@ -41,6 +41,7 @@ flowchart TD
   s29[BOLT-29 test mode and announcement setting]
   s32[BOLT-32 icon-only buttons setting]
   s31[BOLT-31 use current location link]
+  s34[BOLT-34 alert text matches the announcement]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -70,6 +71,7 @@ flowchart TD
   s21 --> s29
   s27 --> s32
   s19 --> s31
+  s29 --> s34
 ```
 
 ## Stories
@@ -263,3 +265,9 @@ Each top-right button shows its icon and a text label (Simulate all clear, Simul
 Under the picker's "Point: lat, lon" readout, a "Use current location" link moves the pin to the browser's current location and centres the map on it, framing the radius circle (Henrique, 2026-10-17). The link shows only while the browser's location is allowed: after the page got a position, or when the geolocation permission is granted, and it hides at once if the permission is revoked. If no position comes back, the picker says so and the pin stays put. Like any pin move, the new point is kept only after "Save location".
 
 Blocked by BOLT-19.
+
+### BOLT-34 — Alert text matches the announcement (bug)
+
+After two simulated strikes the screen said "Nearest strike 22 mi away" while the announcement said 80 (Henrique, 2026-10-17). The announcement names the strike that started or restarted the countdown (the nearest new flash of that batch), but the screen showed the nearest strike in the whole window. The state now keeps that strike's id (`latestStrikeId`, cleared at all-clear), the view's `latestStrike` replaces `nearestStrike`, and the alert reads "Latest strike N mi away", the same distance that was spoken. The test-strike tag follows the same strike.
+
+Blocked by BOLT-29.
