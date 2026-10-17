@@ -25,6 +25,7 @@ flowchart TD
   s14[BOLT-14 demo scale to zero]
   s15[BOLT-15 webhook ingest and flash storage]
   s16[BOLT-16 GLM parser]
+  s18[BOLT-18 display state machine]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -35,6 +36,7 @@ flowchart TD
   s10 --> s14
   s14 --> s7
   s16 --> s15
+  s10 --> s18
 ```
 
 ## Stories
@@ -114,3 +116,9 @@ Blocked by BOLT-16.
 `src/server/glm/parse.ts` reads one GOES-19 GLM-L2-LCFA file with `h5wasm` and returns its coverage window and flashes (id, time, latitude, longitude, quality), applying `_Unsigned`, `scale_factor`, `add_offset` and the `units` base time the way a NetCDF reader would. Degraded flashes are left out by default. `src/server/glm/filename.ts` reads times from object names and builds hourly prefixes, across day and year boundaries. Tests compare a committed real file with an independent `xarray` read of it and cover empty files, year rollover and unsigned ids. [glm-format.md](glm-format.md) documents the variables and the flash counts measured for BOLT-15.
 
 Blocks BOLT-15.
+
+### BOLT-18 — Display state machine
+
+`src/shared/display-state.ts` is the display's state machine as a pure module with no DOM, timers or network. It takes flashes, heartbeats, the session-ended signal, the clock and the display settings, and returns the next state, the events to announce (alert, repeat, all-clear) and a view model (state, MM:SS countdown, nearest recent strike in the unit the radius was entered in, stale flag). The countdown runs from the strike time on the server's clock; another strike extends it, with a repeat only when the replay setting is on; all-clear waits while the data is stale (newest GLM file over 3 minutes old, no heartbeat yet, or the session ended). Flashes are deduplicated by id and ignored once older than the time limit. A page load rebuilds the state from the server's replay without announcing; a reconnect's replay is deduplicated. Tests cover each rule.
+
+Blocked by BOLT-10.

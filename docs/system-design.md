@@ -15,8 +15,11 @@ Weather: client → relay → api.weather.gov `/points/{lat,lon}` (cached) → h
 - **NORMAL** → a flash within radius → **ALERT** (countdownEnd = flash.time + limit; audio A).
 - **ALERT** + a flash within radius → countdownEnd = max(countdownEnd, flash.time + limit); audio if the replay setting is on.
 - **ALERT** and now ≥ countdownEnd and data fresh → **NORMAL** (audio B).
-- **STALE** overlay: heartbeat age >3 min. It suppresses all-clear until fresh again.
+- **STALE** overlay: the newest GLM file is more than 3 min old on the server's clock, no heartbeat has arrived yet, or the session has ended. It suppresses all-clear until fresh again.
 - Deduplicate flashes by id. Ignore flashes older than the time limit.
+- Times are measured on the server's clock: each heartbeat carries the server time, so a display with a wrong clock cannot clear early.
+- A page load rebuilds the state from the flashes the server replays, and shows an active countdown without sounding it again. A reconnect's replay is deduplicated, so it announces only strikes the display has not seen.
+- Implemented in `src/shared/display-state.ts`.
 
 ## Data characteristics (verified 2026-10-16)
 File layout, packing and measured flash counts: [glm-format.md](glm-format.md).
