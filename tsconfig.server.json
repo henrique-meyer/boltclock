@@ -7,5 +7,5 @@
     "rootDir": "src",
     "outDir": "dist"
   },
-  "include": ["src/server"]
+  "include": ["src/server", "src/shared", "src/functions"]
 }

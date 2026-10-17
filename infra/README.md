@@ -106,6 +106,45 @@ az containerapp env certificate list --resource-group $env:AZURE_RESOURCE_GROUP 
 3. Put `customDomainName`, `customDomainCertificateId` and `publicBaseUrl` in the private parameter file. Without them, the next Bicep deploy removes the binding.
 4. Restrict the Google Maps key: HTTP referrer `https://<hostname>/*`, APIs Maps JavaScript API and Places API (New). Use a separate key for local work, restricted to `http://localhost:5173/*` (`npm run dev`) and `http://localhost:8080/*`.
 
+## Lightning ingest
+
+NOAA's GOES-19 SNS topic, an AWS Lambda relay and an Azure Function feed the flash tables ([ADR 0004](../docs/decisions/0004-webhook-ingest-table-storage.md)). There are two parts: Azure first, so the relay has somewhere to post.
+
+### Azure
+
+1. In the private parameter file set `deployIngest = true` and the globally unique `ingestStorageAccountName` and `ingestFunctionAppName`, then preview and deploy as above. This creates:
+   - a storage account with shared keys disabled;
+   - a Flex Consumption plan and Function App (Node 24, at most `ingestMaxInstances` instances);
+   - Application Insights on the existing workspace;
+   - these role assignments:
+     - the Function App's identity: Storage Blob Data Owner and Storage Table Data Contributor on the account;
+     - the container app, which now gets an identity: Storage Table Data Reader;
+     - the deploy identity: Website Contributor on the Function App.
+2. Add the Function App's name to the GitHub `production` environment as `AZURE_FUNCTIONAPP_NAME`. The next run of [`deploy.yml`](../.github/workflows/deploy.yml) packages and deploys the function. It then checks that an unsigned POST to `/api/glm` is refused with 403.
+3. Note the `ingestWebhookUrl` deployment output: `https://<function-app>.azurewebsites.net/api/glm`.
+
+### AWS
+
+Copy `infra/aws/relay.parameters.example.json` to `infra/aws/relay.parameters.json` (ignored by git) and fill it in. `TargetUrl` is the `ingestWebhookUrl` from above. Then preview and deploy the stack in us-east-1:
+
+```powershell
+aws cloudformation create-change-set --region us-east-1 --stack-name <stack> --change-set-name preview --change-set-type CREATE --template-body file://infra/aws/relay.yaml --parameters file://infra/aws/relay.parameters.json --capabilities CAPABILITY_IAM --tags Key=Project,Value=<project-tag>
+aws cloudformation describe-change-set --region us-east-1 --stack-name <stack> --change-set-name preview --query "Changes[].ResourceChange.{action:Action, type:ResourceType, id:LogicalResourceId}" --output table
+aws cloudformation execute-change-set --region us-east-1 --stack-name <stack> --change-set-name preview
+```
+
+The stack holds:
+- the relay function: Node 24, arm64, 128 MB;
+- its role, which may only write its own logs;
+- a log group kept for one day;
+- the permission for NOAA's topic, and only that topic, to invoke the function;
+- the filtered subscription;
+- a tag-based Resource Group.
+
+Lambda subscriptions need no confirmation step. Within a minute the function's Application Insights should show "Stored … flashes" about three times a minute.
+
+To stop ingest, delete the stack. That removes the subscription. The Azure resources stay until you set `deployIngest = false`, or until teardown.
+
 ## Operations
 
 - Logs: `az containerapp logs show --resource-group $env:AZURE_RESOURCE_GROUP --name <app> --follow`
