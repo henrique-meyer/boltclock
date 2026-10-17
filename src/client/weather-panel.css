@@ -114,3 +114,45 @@
 .weather .weather-panel--stale .weather-forecast {
   opacity: 0.6;
 }
+
+/* Phones and very narrow windows (BOLT-50): sized by width, with the forecast's condition column taking what is left. */
+@media (max-width: 720px) {
+  .weather .weather-panel {
+    gap: 10px;
+  }
+
+  .weather .weather-place {
+    font-size: 14px;
+  }
+
+  .weather .weather-message {
+    font-size: 16px;
+  }
+
+  .weather .weather-now {
+    gap: 16px;
+  }
+
+  .weather .weather-temp {
+    font-size: 18vw;
+  }
+
+  .weather .weather-condition {
+    font-size: 5.5vw;
+  }
+
+  .weather .weather-wind {
+    font-size: 4.5vw;
+  }
+
+  .weather .weather-forecast {
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
+    gap: 8px 0.5em;
+    width: 100%;
+    font-size: 4.2vw;
+  }
+
+  .weather .weather-credit {
+    font-size: 12px;
+  }
+}

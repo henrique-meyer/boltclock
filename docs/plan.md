@@ -59,6 +59,7 @@ flowchart TD
   s48[BOLT-48 use current location shows]
   s49[BOLT-49 loading spinner]
   s52[BOLT-52 Settings reset and title]
+  s50[BOLT-50 phone layout]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -107,6 +108,7 @@ flowchart TD
   s31 --> s48
   s21 --> s49
   s37 --> s52
+  s45 --> s50
 ```
 
 ## Stories
@@ -408,3 +410,9 @@ Blocked by BOLT-31.
 Henrique, 2026-10-17. The dialog's title is "Settings" instead of "Alerts and sound". A Reset button left of Done, an outline so it is quieter than Done, puts every setting on the screen back to its default at once: siren, volume, replay, announcement, countdown length, clock, temperature, distance unit, and Simulation mode (back to the deployment's default). The location stays: a distance unit that changes back is applied on Done like any other change, converting the saved radius so the circle stays where it is, and a changed countdown length reconnects as usual.
 
 Blocked by BOLT-37.
+
+### BOLT-50 — Display layout for phones and very narrow windows
+
+Henrique, 2026-10-17. On a phone or a very narrow window the display's text overlapped: its sizes follow the screen height, for a wall display read from across the room. Below 720px wide the display now stacks instead. Sizes follow the width, and the top bar wraps: the logo and name sit with the buttons (icons only) on the first row, and the SIMULATION flag and the status go on the next. The alarm, the weather and the footer stack in order, the forecast's condition column takes the width that is left, and the page scrolls if it must. Screens 720px and wider are untouched. The Start screen, Settings and the location page already worked.
+
+Blocked by BOLT-45.
