@@ -58,6 +58,7 @@ flowchart TD
   s47[BOLT-47 countdown length in the status]
   s48[BOLT-48 use current location shows]
   s49[BOLT-49 loading spinner]
+  s52[BOLT-52 Settings reset and title]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -105,6 +106,7 @@ flowchart TD
   s21 --> s47
   s31 --> s48
   s21 --> s49
+  s37 --> s52
 ```
 
 ## Stories
@@ -400,3 +402,9 @@ Blocked by BOLT-21.
 Henrique, 2026-10-17. With a saved pin the picker does not ask for the location on load (BOLT-30), so the BOLT-31 link showed only when the Permissions API said "granted". Chrome's "Allow this time" and Safari report "prompt" even when location works, so the link stayed hidden. It now shows whenever the browser has geolocation and the permission is not "denied", hides at once if the permission becomes denied, and a click asks for the location when needed.
 
 Blocked by BOLT-31.
+
+### BOLT-52 — Settings: Reset button and "Settings" title
+
+Henrique, 2026-10-17. The dialog's title is "Settings" instead of "Alerts and sound". A Reset button left of Done, an outline so it is quieter than Done, puts every setting on the screen back to its default at once: siren, volume, replay, announcement, countdown length, clock, temperature, distance unit, and Simulation mode (back to the deployment's default). The location stays: a distance unit that changes back is applied on Done like any other change, converting the saved radius so the circle stays where it is, and a changed countdown length reconnects as usual.
+
+Blocked by BOLT-37.

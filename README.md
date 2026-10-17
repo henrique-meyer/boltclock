@@ -58,7 +58,7 @@ The Start screen shows the name of the place being watched. Press **Start displa
 - **All-clear sound:** when the countdown ends, a chime plays, then "No lightning detected in the area."
 - **NO LIGHTNING DATA:** shown over everything when the newest satellite file is more than 3 minutes old. The display never announces an all-clear while it shows.
 
-**Settings** (saved on this device):
+**Settings** (saved on this device; **Reset** puts them all back to their defaults and keeps the location):
 - the siren: two-tone, mechanical, yelp, or none;
 - the volume;
 - whether new strikes replay the siren during a countdown. Off by default: a later strike restarts the countdown and speaks the announcement without the siren (silent if the announcement is off). Simulated strikes follow the same rule;
