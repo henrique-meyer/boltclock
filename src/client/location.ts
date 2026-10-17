@@ -13,7 +13,7 @@ import {
 } from './location-settings.js';
 import { googlePlacesBackend, PlaceSearch, type GoogleSuggestion } from './place-search.js';
 
-/** The continental US, for when there is neither a browser location nor a saved point. */
+/** The continental US, for when there is neither a saved point nor a browser location. */
 const DEFAULT_VIEW = { center: { lat: 39.5, lng: -98.35 }, zoom: 4 };
 const POINT_ZOOM = 10;
 const GEOLOCATION_TIMEOUT_MS = 10_000;
@@ -80,8 +80,9 @@ async function start(): Promise<void> {
     return;
   }
 
+  // A saved pin wins, so the browser's location is asked for only when there is none.
   const [here] = await Promise.all([
-    currentPosition(),
+    point ? Promise.resolve(undefined) : currentPosition(),
     loadGoogleMaps(config.googleMapsApiKey, () => {
       status.textContent = 'Google Maps refused the key for this address. Check the key\'s website restrictions.';
     }),
@@ -92,8 +93,8 @@ async function start(): Promise<void> {
     google.maps.importLibrary('places'),
   ]);
 
-  // Open on the browser's location, then the saved point, then the default view.
-  const center = here ?? point;
+  // Open on the saved pin, then the browser's location, then the default view.
+  const center = point ?? here;
   const map = new Map(mapElement, {
     center: center ? toLatLng(center) : DEFAULT_VIEW.center,
     zoom: center ? POINT_ZOOM : DEFAULT_VIEW.zoom,
@@ -103,15 +104,13 @@ async function start(): Promise<void> {
     mapTypeControl: false,
     fullscreenControl: false,
   });
-  if (!here) {
-    status.textContent = point
-      ? 'Your location is not available, so the map shows your saved point.'
-      : 'Your location is not available. Find your area, then click the map or search to set the point.';
-  }
-  // With nothing saved yet, start the pin at the browser's location. It is kept only if the user saves.
+  // With nothing saved yet, the pin starts at the browser's location. It is kept only if the user saves.
   if (!point && here) {
     point = normalizePoint(here);
     dirty = true;
+    status.textContent = 'The pin is at your location. Move it if needed, then save.';
+  } else if (!point) {
+    status.textContent = 'Your location is not available. Find your area, then click the map or search to set the point.';
   }
 
   const marker = new AdvancedMarkerElement({ gmpDraggable: true, title: 'Lightning point. Drag to move.' });
@@ -211,10 +210,8 @@ async function start(): Promise<void> {
   });
 
   draw();
-  // Frame the circle, except when the map opened on the browser's location and the saved point is elsewhere:
-  // the browser's location comes first.
-  const centredAwayFromPin = here !== undefined && saved !== undefined;
-  if (point && radius && !centredAwayFromPin) {
+  // Frame the pin's circle.
+  if (point && radius) {
     const bounds = circle.getBounds();
     if (bounds) map.fitBounds(bounds);
   }
