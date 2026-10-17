@@ -34,6 +34,7 @@ flowchart TD
   s22[BOLT-22 weather relay and panel]
   s24[BOLT-24 clock and temperature units]
   s25[BOLT-25 save returns to the display]
+  s26[BOLT-26 footer disclaimer line]
   s27[BOLT-27 full-screen button]
   s2 --> s3
   s4 --> s10
@@ -56,6 +57,7 @@ flowchart TD
   s10 --> s22
   s22 --> s24
   s19 --> s25
+  s21 --> s26
   s21 --> s27
 ```
 
@@ -214,6 +216,10 @@ Blocked by BOLT-22.
 After a successful "Save location" on the picker, the browser goes straight back to the display, which starts watching the new point (Henrique, 2026-10-17). If the browser will not save (site data blocked), the picker stays open and shows the error as before.
 
 Blocked by BOLT-19.
+
+### BOLT-26 — Footer: disclaimers on their own line
+
+In the footer of the display and the location picker, the disclaimers ("Strike locations are accurate within ±5 miles. Not a certified lightning warning system. When thunder roars, go indoors. Strikes can be missed or arrive up to a minute late.") get their own line below the data credits. The picker's footer drops "Map and place search: Google Maps.": Google's attribution is the logo and data credit on the map, which stays, and the search suggestions already say "Search results from Google Maps".
 
 ### BOLT-27 — Full screen from a top-bar button
 
