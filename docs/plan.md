@@ -365,6 +365,6 @@ Blocked by BOLT-37.
 
 ### BOLT-45 — Lightning nearby screen fits 1920x1080 (bug)
 
-Henrique, 2026-10-17. With the weather and forecast showing, the ALERT screen was about 65 px too tall for a 1920x1080 browser window, so it scrolled. Everything still scales with the screen height; the alarm text is a little smaller (countdown 25vh instead of 30vh, headline 9vh instead of 11vh, 1vh gaps). The stage's alarm row can no longer push the weather down (`minmax(0, 1fr) auto`), so the weather and its place line sit at the same height in ALL CLEAR and LIGHTNING NEARBY.
+Henrique, 2026-10-17. With the weather and forecast showing, the ALERT screen was about 65 px too tall for a 1920x1080 browser window, so it scrolled. Everything still scales with the screen height; the alarm text is a little smaller (countdown 25vh instead of 30vh, headline 9vh instead of 11vh, 1vh gaps). The stage's alarm row can no longer push the weather down (`minmax(0, 1fr) auto`), so the weather and its place line sit at the same height in ALL CLEAR and LIGHTNING NEARBY. The "Test strike" label moves into the top bar, next to the status, so a simulated strike adds no height.
 
 Blocked by BOLT-28.
