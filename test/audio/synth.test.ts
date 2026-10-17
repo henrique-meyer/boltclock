@@ -8,12 +8,13 @@ import {
   encodeWav,
   mechanicalFreq,
   renderAll,
-  renderChime,
-  renderSiren,
   sweep,
   twoToneFreq,
   yelpFreq,
 } from '../../scripts/audio/synth.js';
+
+// Rendered once for the whole file: synthesis is CPU-heavy and other suites run alongside.
+const rendered = renderAll();
 
 const seconds = (samples: ArrayLike<number>) => samples.length / SAMPLE_RATE;
 const peak = (samples: Float64Array) => samples.reduce((m, x) => Math.max(m, Math.abs(x)), 0);
@@ -62,21 +63,21 @@ describe('rendered sounds', () => {
     ['mechanical', 4.35],
     ['yelp', 3.27],
   ] as const)('%s lasts about %f s and is normalized', (id, length) => {
-    const samples = renderSiren(id);
+    const samples = rendered[`siren-${id}.wav`]!;
     expect(seconds(samples)).toBeCloseTo(length, 1);
     expect(peak(samples)).toBeCloseTo(0.8, 6);
     expect(samples.every(Number.isFinite)).toBe(true);
   });
 
   it('every sound starts and ends in silence, so playback never clicks', () => {
-    for (const samples of Object.values(renderAll())) {
+    for (const samples of Object.values(rendered)) {
       expect(Math.abs(samples[0] ?? 1)).toBeLessThan(1e-3);
       expect(Math.abs(samples.at(-1) ?? 1)).toBe(0);
     }
   });
 
   it('the chime rings for its full length', () => {
-    const samples = renderChime();
+    const samples = rendered['chime.wav']!;
     expect(seconds(samples)).toBeCloseTo(CHIME_DURATION, 2);
     expect(peak(samples)).toBeCloseTo(0.7, 6);
   });
@@ -99,7 +100,7 @@ describe('WAV encoding', () => {
 describe('committed sound files', () => {
   // Fails when synth.ts changed without `npm run audio:sounds`. A small tolerance absorbs
   // last-digit floating-point differences between machines.
-  it.each(Object.entries(renderAll()))('assets/audio/%s matches the synthesizer', (name, samples) => {
+  it.each(Object.entries(rendered))('assets/audio/%s matches the synthesizer', (name, samples) => {
     const committed = decodeWav(readFileSync(join(import.meta.dirname, '..', '..', 'assets', 'audio', name)));
     const fresh = decodeWav(encodeWav(samples));
     expect(committed.length).toBe(fresh.length);
