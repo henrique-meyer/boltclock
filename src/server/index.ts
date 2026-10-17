@@ -15,11 +15,12 @@ const app = await buildApp({
   assetsDir: resolve('assets'),
   logger: true,
   stream: { store, sessionLimitMinutes: config.sessionLimitMinutes },
+  weather: { userAgent: config.nwsUserAgent },
 });
 
 // Say what is missing, never the values.
 if (!config.googleMapsApiKey) app.log.warn('GOOGLE_MAPS_API_KEY is not set. The location picker will not load.');
-if (!config.nwsUserAgent) app.log.warn('NWS_USER_AGENT is not set. api.weather.gov requires one.');
+if (!config.nwsUserAgent) app.log.warn('NWS_USER_AGENT is not set. api.weather.gov requires one, so /api/weather answers 503.');
 if (config.sessionLimitMinutes > 0) app.log.info(`Display sessions end after ${config.sessionLimitMinutes} minutes.`);
 if (config.testMode) app.log.info('TEST_MODE is on: the display offers a simulated strike.');
 if (!store) app.log.warn('STRIKES_TABLE_ENDPOINT is not set. /api/stream answers 503.');

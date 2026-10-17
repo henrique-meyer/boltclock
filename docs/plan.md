@@ -31,6 +31,7 @@ flowchart TD
   s19[BOLT-19 location picker]
   s20[BOLT-20 display uses the saved location]
   s21[BOLT-21 alarm display]
+  s22[BOLT-22 weather relay and panel]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -49,6 +50,7 @@ flowchart TD
   s19 --> s20
   s18 --> s21
   s20 --> s21
+  s10 --> s22
 ```
 
 ## Stories
@@ -184,3 +186,9 @@ The display becomes the alarm (build steps 7 and 9, plus the test mode from step
 - **Docs:** the README covers the display and a kiosk autoplay setup.
 
 Blocked by BOLT-18 and BOLT-20.
+
+### BOLT-22 — Weather relay and weather panel
+
+Build step 4. Browsers cannot set the User-Agent api.weather.gov requires, so the server relays it. `GET /api/weather?lat&lon` validates the point, then calls NWS `/points` (cached for 6 hours, keyed by the point at NWS's 4-decimal precision), the nearest station's latest observation (every 10 minutes; the next of the three nearest stations when one has no temperature in the last 2 hours) and the hourly forecast (every 30 minutes). It answers the shape in `src/shared/weather.ts`: the current temperature, condition text, NWS icon, a normalized condition (clear day or night, cloudy, rain, thunderstorm, fog, snow, wind) for the backgrounds story, wind speed, gusts and direction, the observation time, and the next 2 forecast hours, in °F and mph. Every NWS request carries `NWS_USER_AGENT`; without it the route answers 503 and the server warns once at startup. Caches are in memory, per process. On 429, a 5xx or a network failure the relay waits about 5 s (longer if Retry-After says so) and tries up to 3 times, then serves the cached copy marked stale and leaves NWS alone for a minute. Points NWS has no grid for get an "outside coverage" answer, cached like any other. Coordinates are never logged. The display's weather panel (`src/client/weather-panel.ts`, its own CSS) shows the temperature, condition, wind and the next 2 hours, readable at 20 ft, refreshes every 10 minutes, shows the observation's age and credits the National Weather Service. It draws into the `#weather` slot that the BOLT-21 alarm layout provides, mounted by one call, `mountWeatherPanel(document.getElementById('weather'), point)`, with its styles scoped under `.weather`.
+
+Blocked by BOLT-10.

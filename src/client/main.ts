@@ -6,6 +6,7 @@ import { DisplayController, type ControllerView } from './display-controller.js'
 import { resolveDisplaySettings } from './display-settings.js';
 import type { KeyValueStore } from './location-settings.js';
 import { openStream, type ConnectionState } from './stream.js';
+import { mountWeatherPanel } from './weather-panel.js';
 
 const byId = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -21,6 +22,7 @@ function deviceStore(): KeyValueStore | undefined {
 const store = deviceStore();
 let alerts = loadAlertSettings(store);
 const location = resolveDisplaySettings(window.location.search, store);
+if (location) mountWeatherPanel(document.getElementById('weather'), location.query);
 
 const status = byId<HTMLParagraphElement>('status');
 const start = byId<HTMLDivElement>('start');
