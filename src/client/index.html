@@ -45,6 +45,11 @@
       <section id="weather" class="weather" aria-label="Weather"></section>
     </main>
 
+    <!-- While the first data loads: a spinner, not "NO LIGHTNING DATA" (BOLT-49). -->
+    <div class="loading" id="loading" role="status" aria-label="Loading lightning data" hidden>
+      <div class="spinner"></div>
+    </div>
+
     <div class="stale" id="stale" role="alert" hidden>
       <p class="stale-title">NO LIGHTNING DATA</p>
       <p class="stale-detail" id="stale-detail">No all-clear while data is missing.</p>
