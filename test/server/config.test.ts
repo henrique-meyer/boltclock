@@ -9,6 +9,7 @@ describe('loadConfig', () => {
       nwsUserAgent: '',
       publicBaseUrl: 'http://localhost:8080',
       sessionLimitMinutes: 0,
+      strikesTableEndpoint: '',
     });
   });
 
@@ -19,6 +20,7 @@ describe('loadConfig', () => {
       NWS_USER_AGENT: ' (BoltClock, you@example.com) ',
       PUBLIC_BASE_URL: 'https://your-domain.example/',
       SESSION_LIMIT_MINUTES: ' 15 ',
+      STRIKES_TABLE_ENDPOINT: ' https://account.table.core.windows.net/ ',
     });
 
     expect(config).toEqual({
@@ -27,6 +29,7 @@ describe('loadConfig', () => {
       nwsUserAgent: '(BoltClock, you@example.com)',
       publicBaseUrl: 'https://your-domain.example',
       sessionLimitMinutes: 15,
+      strikesTableEndpoint: 'https://account.table.core.windows.net',
     });
   });
 

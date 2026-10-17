@@ -2,7 +2,7 @@
 
 ## Components
 1. **Lightning ingest service** (server-side): learns of each new GLM-L2-LCFA file from GOES-19, downloads it, and extracts each flash (id, absolute time, lat, lon) into shared storage that every display reads. The reference deployment ([ADR 0004](decisions/0004-webhook-ingest-table-storage.md)) receives NOAA's new-object notifications through a small AWS Lambda relay. An Azure Function verifies NOAA's signature and stores the flashes in hourly tables partitioned by 1° grid cell, kept for 120 minutes.
-2. **Push channel**: a persistent server→browser connection that streams new flashes and a periodic heartbeat (including the end time of the latest processed file). On connect, it replays the 60-min buffer.
+2. **Push channel**: a persistent server→browser connection (server-sent events, `GET /api/stream?lat&lon&radiusKm&minutes`). It streams the flashes within the display's radius and a heartbeat about every 15 s carrying the end time of the newest ingested file. On connect it replays the display's time-limit window. Message shapes are in `src/shared/messages.ts`.
 3. **Weather relay** (server-side): fetches api.weather.gov with the required User-Agent and caches responses. It exists because browsers cannot set User-Agent.
 4. **Location picker** (browser): Google Maps JavaScript API map + draggable pin + Places Autocomplete, using the deployer-supplied key from config. It defaults to browser geolocation, falling back to the saved point, then a default view. Search only repositions the pin. Only the pin's lat/lon is persisted. There is no server-side geocoding.
 5. **Display client** (browser): settings, distance filtering, state machine, countdown, audio, rendering.
