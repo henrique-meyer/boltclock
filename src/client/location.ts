@@ -26,6 +26,7 @@ const radiusValue = el<HTMLInputElement>('radius-value');
 const radiusUnit = el<HTMLSelectElement>('radius-unit');
 const radiusError = el<HTMLParagraphElement>('radius-error');
 const pointReadout = el<HTMLParagraphElement>('point-readout');
+const useHere = el<HTMLButtonElement>('use-here');
 const saveButton = el<HTMLButtonElement>('save');
 const status = el<HTMLParagraphElement>('picker-status');
 const mapElement = el<HTMLDivElement>('map');
@@ -144,6 +145,33 @@ async function start(): Promise<void> {
       map.panTo(toLatLng(point));
     }
   };
+
+  // "Use current location" shows only while the browser's location is allowed: after a position came back, or when
+  // the permission is granted. A permission change (revoked in the site settings, say) shows or hides it at once.
+  const allowLocation = (allowed: boolean) => {
+    useHere.hidden = !allowed;
+  };
+  allowLocation(here !== undefined);
+  navigator.permissions
+    ?.query({ name: 'geolocation' })
+    .then((permission) => {
+      allowLocation(here !== undefined ? permission.state !== 'denied' : permission.state === 'granted');
+      permission.addEventListener('change', () => allowLocation(permission.state === 'granted'));
+    })
+    .catch(() => {});
+
+  useHere.addEventListener('click', async () => {
+    useHere.disabled = true;
+    status.textContent = 'Finding your location…';
+    const position = await currentPosition();
+    useHere.disabled = false;
+    if (position) {
+      // Like any pin move, kept only after Save location.
+      setPoint(position, true);
+    } else {
+      status.textContent = 'Your location is not available right now.';
+    }
+  });
 
   map.addListener('click', (event: google.maps.MapMouseEvent) => {
     if (event.latLng) setPoint({ lat: event.latLng.lat(), lon: event.latLng.lng() });

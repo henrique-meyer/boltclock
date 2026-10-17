@@ -37,6 +37,7 @@ flowchart TD
   s26[BOLT-26 footer disclaimer line]
   s27[BOLT-27 top-bar icons and full screen]
   s28[BOLT-28 weather backgrounds and alert styling]
+  s31[BOLT-31 use current location link]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -62,6 +63,7 @@ flowchart TD
   s21 --> s27
   s21 --> s28
   s22 --> s28
+  s19 --> s31
 ```
 
 ## Stories
@@ -233,3 +235,9 @@ In the footer of the display and the location picker, the disclaimers ("Strike l
 Build step 8. The display's full-screen background matches the current weather: clear day, clear night, cloudy, rain, thunderstorm, fog, snow and wind, plus a neutral navy while the weather is unknown. `src/client/weather-background.ts` picks the scene as a pure function: the current observation's condition, else the first forecast hour's, else neutral (also outside NWS coverage and before the first answer). A failed refresh keeps the last scene, and `?background=<scene>` previews one. The weather panel reports each answer through a callback, so there is no second poller; the display sets `data-weather` on the body and draws the scene. The art is original inline SVG and CSS in the brand colours, with no images. Every sky keeps paper text at 7:1 contrast or better, motion is slow and stops under `prefers-reduced-motion`, and scenes crossfade. ALERT hides the weather art and shows a red field with amber-and-black hazard bands, so it never looks like the thunderstorm scene (dark indigo, no red or amber). Tests cover the mapping, the preview parameter, the sky and alert contrast, and the art markup.
 
 Blocked by BOLT-21 and BOLT-22.
+
+### BOLT-31 — Location picker: "Use current location" link
+
+Under the picker's "Point: lat, lon" readout, a "Use current location" link moves the pin to the browser's current location and centres the map on it, framing the radius circle (Henrique, 2026-10-17). The link shows only while the browser's location is allowed: after the page got a position, or when the geolocation permission is granted, and it hides at once if the permission is revoked. If no position comes back, the picker says so and the pin stays put. Like any pin move, the new point is kept only after "Save location".
+
+Blocked by BOLT-19.

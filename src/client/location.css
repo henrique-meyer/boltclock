@@ -148,6 +148,29 @@
   min-height: 1.4em;
 }
 
+/* "Use current location": a link under the point readout, not a second button beside Save. */
+.picker-panel .link-button {
+  display: block;
+  margin: 4px 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--bolt);
+  font-size: 0.9em;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.picker-panel .link-button[hidden] {
+  display: none;
+}
+
+.picker-panel .link-button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
 #save {
   align-self: flex-start;
   padding: 10px 18px;
