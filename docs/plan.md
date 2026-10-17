@@ -35,6 +35,7 @@ flowchart TD
   s24[BOLT-24 clock and temperature units]
   s25[BOLT-25 save returns to the display]
   s26[BOLT-26 footer disclaimer line]
+  s30[BOLT-30 picker opens on the saved pin]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -57,6 +58,7 @@ flowchart TD
   s22 --> s24
   s19 --> s25
   s21 --> s26
+  s19 --> s30
 ```
 
 ## Stories
@@ -218,3 +220,7 @@ Blocked by BOLT-19.
 ### BOLT-26 — Footer: disclaimers on their own line
 
 In the footer of the display and the location picker, the disclaimers ("Strike locations are accurate within ±5 miles. Not a certified lightning warning system. When thunder roars, go indoors. Strikes can be missed or arrive up to a minute late.") get their own line below the data credits. The picker's footer drops "Map and place search: Google Maps.": Google's attribution is the logo and data credit on the map, which stays, and the search suggestions already say "Search results from Google Maps".
+
+### BOLT-30 — Location picker opens on the saved pin
+
+With a saved point, `/location.html` centers on that pin and frames its radius, and does not ask for the browser's location. Without one, it asks for the browser's location and places the pin there, ready to save; if that is denied or unavailable, it shows the continental-US view with a message. This replaces the BOLT-19 order (browser location first, then the saved point).
