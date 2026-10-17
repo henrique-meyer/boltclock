@@ -1,6 +1,19 @@
 import './styles.css';
 import { fetchClientConfig } from './client-config.js';
-import { loadAlertSettings, saveAlertSettings, SIREN_LABELS, SIRENS, type AlertSettings, type SirenId } from './alert-settings.js';
+import {
+  CLOCK_LABELS,
+  CLOCKS,
+  loadAlertSettings,
+  saveAlertSettings,
+  SIREN_LABELS,
+  SIRENS,
+  TEMPERATURE_LABELS,
+  TEMPERATURE_UNITS,
+  type AlertSettings,
+  type ClockFormat,
+  type SirenId,
+  type TemperatureUnit,
+} from './alert-settings.js';
 import { Announcer, WebAudioOutput, type Announcement } from './audio.js';
 import { DisplayController, type ControllerView } from './display-controller.js';
 import { resolveDisplaySettings } from './display-settings.js';
@@ -22,7 +35,7 @@ function deviceStore(): KeyValueStore | undefined {
 const store = deviceStore();
 let alerts = loadAlertSettings(store);
 const location = resolveDisplaySettings(window.location.search, store);
-if (location) mountWeatherPanel(document.getElementById('weather'), location.query);
+const weather = location ? mountWeatherPanel(document.getElementById('weather'), location.query, () => alerts) : undefined;
 
 const status = byId<HTMLParagraphElement>('status');
 const start = byId<HTMLDivElement>('start');
@@ -64,13 +77,19 @@ const sirenSelect = byId<HTMLSelectElement>('setting-siren');
 const volumeInput = byId<HTMLInputElement>('setting-volume');
 const replayInput = byId<HTMLInputElement>('setting-replay');
 const minutesInput = byId<HTMLInputElement>('setting-minutes');
+const clockSelect = byId<HTMLSelectElement>('setting-clock');
+const temperatureSelect = byId<HTMLSelectElement>('setting-temperature');
 for (const id of SIRENS) sirenSelect.append(new Option(SIREN_LABELS[id], id));
+for (const id of CLOCKS) clockSelect.append(new Option(CLOCK_LABELS[id], id));
+for (const id of TEMPERATURE_UNITS) temperatureSelect.append(new Option(TEMPERATURE_LABELS[id], id));
 
 function fillSettingsForm(settings: AlertSettings): void {
   sirenSelect.value = settings.siren;
   volumeInput.value = String(settings.volume);
   replayInput.checked = settings.replayAudioDuringCountdown;
   minutesInput.value = String(settings.timeLimitMinutes);
+  clockSelect.value = settings.clock;
+  temperatureSelect.value = settings.temperatureUnit;
 }
 
 function readSettingsForm(): AlertSettings {
@@ -79,6 +98,8 @@ function readSettingsForm(): AlertSettings {
     volume: Number(volumeInput.value),
     replayAudioDuringCountdown: replayInput.checked,
     timeLimitMinutes: Number(minutesInput.value),
+    clock: clockSelect.value as ClockFormat,
+    temperatureUnit: temperatureSelect.value as TemperatureUnit,
   });
 }
 
@@ -87,8 +108,12 @@ byId<HTMLButtonElement>('open-settings').addEventListener('click', () => {
   dialog.showModal();
 });
 volumeInput.addEventListener('input', () => output.setVolume(Number(volumeInput.value)));
-for (const input of [sirenSelect, volumeInput, replayInput]) {
-  input.addEventListener('change', () => (alerts = readSettingsForm()));
+for (const input of [sirenSelect, volumeInput, replayInput, clockSelect, temperatureSelect]) {
+  input.addEventListener('change', () => {
+    alerts = readSettingsForm();
+    // Clock and temperature apply at once: the weather panel reads them on every draw.
+    weather?.redraw();
+  });
 }
 dialog.addEventListener('close', () => {
   const previousMinutes = alerts.timeLimitMinutes;

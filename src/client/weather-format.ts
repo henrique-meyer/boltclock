@@ -1,4 +1,8 @@
 import type { ForecastHour, WeatherResponse } from '../shared/weather.js';
+import type { ClockFormat, DisplayUnits, TemperatureUnit } from './alert-settings.js';
+
+/** 12-hour clock and °F unless the display's settings say otherwise. */
+export const DEFAULT_UNITS: DisplayUnits = { clock: '12h', temperatureUnit: 'F' };
 
 /** The text the weather panel shows, worked out without the DOM so it can be tested. */
 export interface WeatherPanelView {
@@ -27,8 +31,12 @@ export function compassPoint(degrees: number): string {
   return COMPASS[Math.round((((degrees % 360) + 360) % 360) / 22.5) % 16]!;
 }
 
-export function formatTemperature(fahrenheit: number | null): string {
-  return fahrenheit === null ? '--°F' : `${Math.round(fahrenheit)}°F`;
+/** NWS reports °F; °C is converted, then rounded to a whole degree. */
+export function formatTemperature(fahrenheit: number | null, unit: TemperatureUnit = 'F'): string {
+  if (fahrenheit === null) return `--°${unit}`;
+  const value = unit === 'C' ? ((fahrenheit - 32) * 5) / 9 : fahrenheit;
+  // Math.round(-0.4) is -0; show it as 0.
+  return `${Math.round(value) || 0}°${unit}`;
 }
 
 /** "SW 12 mph, gusts 20", "Calm", or "Wind not reported". */
@@ -41,8 +49,11 @@ export function formatWind(speedMph: number | null, gustMph: number | null, dire
   return `${from ? `${from} ` : ''}${speed} mph${gusts}`;
 }
 
-/** "3 PM" in the display's time zone (or the one given). */
-export function formatHour(ms: number, timeZone?: string): string {
+/** "3 PM" (12-hour) or "15:00" (24-hour), in the display's time zone (or the one given). */
+export function formatHour(ms: number, timeZone?: string, clock: ClockFormat = '12h'): string {
+  if (clock === '24h') {
+    return new Date(ms).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone });
+  }
   return new Date(ms).toLocaleTimeString('en-US', { hour: 'numeric', timeZone });
 }
 
@@ -59,10 +70,10 @@ export function formatPrecipitation(chance: number | null): string {
   return chance ? `${Math.round(chance)}%` : '';
 }
 
-function forecastRow(hour: ForecastHour, timeZone?: string) {
+function forecastRow(hour: ForecastHour, timeZone: string | undefined, units: DisplayUnits) {
   return {
-    time: formatHour(hour.startMs, timeZone),
-    temperature: formatTemperature(hour.temperatureF),
+    time: formatHour(hour.startMs, timeZone, units.clock),
+    temperature: formatTemperature(hour.temperatureF, units.temperatureUnit),
     text: hour.text,
     precipitation: formatPrecipitation(hour.precipitationChance),
   };
@@ -73,11 +84,16 @@ export function messageView(message: string): WeatherPanelView {
   return { message, place: '', temperature: '', condition: '', wind: '', forecast: [], credit: NWS_CREDIT, stale: false };
 }
 
-export function weatherPanelView(response: WeatherResponse, nowMs: number, timeZone?: string): WeatherPanelView {
+export function weatherPanelView(
+  response: WeatherResponse,
+  nowMs: number,
+  timeZone?: string,
+  units: DisplayUnits = DEFAULT_UNITS,
+): WeatherPanelView {
   if (response.status === 'outside-coverage') return messageView(response.message);
 
   const { current } = response;
-  const forecast = response.forecast.map((hour) => forecastRow(hour, timeZone));
+  const forecast = response.forecast.map((hour) => forecastRow(hour, timeZone, units));
   const age = current
     ? `observed ${formatAge(nowMs - current.observedAtMs)}`
     : `forecast updated ${formatAge(nowMs - response.updatedAtMs)}`;
@@ -94,7 +110,7 @@ export function weatherPanelView(response: WeatherResponse, nowMs: number, timeZ
   }
   return {
     ...view,
-    temperature: formatTemperature(current.temperatureF),
+    temperature: formatTemperature(current.temperatureF, units.temperatureUnit),
     condition: current.text || response.forecast[0]?.text || '',
     wind: formatWind(current.windSpeedMph, current.windGustMph, current.windDirectionDeg),
   };

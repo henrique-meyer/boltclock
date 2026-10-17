@@ -60,7 +60,9 @@ Press **Start display**. That one click turns on sound, which browsers only allo
 - the siren: two-tone, mechanical, yelp, or none;
 - the volume;
 - whether new strikes replay the siren during a countdown (off by default: later strikes only restart the countdown);
-- the countdown length: 30 minutes by default, at most 120. An address with `minutes=` pins it on a kiosk.
+- the countdown length: 30 minutes by default, at most 120. An address with `minutes=` pins it on a kiosk;
+- the clock for forecast times: 12-hour (the default) or 24-hour;
+- the temperature unit: °F (the default) or °C.
 
 The settings also have test buttons for both sounds.
 
@@ -130,7 +132,7 @@ The sirens and the all-clear chime are generated in code by a script in this rep
   - `weather/` relays api.weather.gov with the required User-Agent, cached and retried politely.
 - `src/functions/`: the Azure Function entry point for lightning ingest.
 - `src/shared/`: code for both server and browser (great-circle distance, grid cells, message and weather shapes).
-- `src/client/`: the browser display and the location picker (`location.html`), built with Vite. `stream.ts` is the push channel client. `display-settings.ts` picks the point the display watches: `?lat&lon` in the address, else the location saved by the picker (`location-settings.ts`). `display-controller.ts` runs the state machine (`src/shared/display-state.ts`) for the page. `audio.ts` plays the sirens and announcements. `alert-settings.ts` keeps the sound and countdown settings. `weather-panel.ts` shows the weather for the point.
+- `src/client/`: the browser display and the location picker (`location.html`), built with Vite. `stream.ts` is the push channel client. `display-settings.ts` picks the point the display watches: `?lat&lon` in the address, else the location saved by the picker (`location-settings.ts`). `display-controller.ts` runs the state machine (`src/shared/display-state.ts`) for the page. `audio.ts` plays the sirens and announcements. `alert-settings.ts` keeps the sound, countdown, clock and temperature settings. `weather-panel.ts` shows the weather for the point.
 - `test/`: Vitest tests.
 - `scripts/audio/`: the scripts that make the sounds ([audio plan](docs/audio-plan.md)).
 - `assets/`: the logo. `logo.svg` is the app icon and favicon, `logo-mark.svg` has a transparent background, and both have PNG copies. The `-yellow` files are an alternate colourway that isn't in use. `assets/audio/` holds the sirens, the chime and the announcements.

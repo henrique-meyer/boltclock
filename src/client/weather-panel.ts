@@ -1,6 +1,13 @@
 import './weather-panel.css';
 import { OBSERVATION_REFRESH_MS, type WeatherResponse } from '../shared/weather.js';
-import { messageView, weatherPanelView, type WeatherPanelView } from './weather-format.js';
+import type { DisplayUnits } from './alert-settings.js';
+import { DEFAULT_UNITS, messageView, weatherPanelView, type WeatherPanelView } from './weather-format.js';
+
+export interface WeatherPanel {
+  /** Draw again now, e.g. after the clock or temperature setting changed. */
+  redraw(): void;
+  stop(): void;
+}
 
 /** After a failed request, ask again this soon. */
 const RETRY_MS = 60_000;
@@ -67,10 +74,15 @@ function render(root: HTMLElement, view: WeatherPanelView): void {
 /**
  * Shows current weather and the next hours for a point in the display's weather slot (`.weather`), refreshing about
  * every 10 minutes like the relay's observations. The panel draws inside its own wrapper, so the slot's place in the
- * display's layout stays the layout's business. Does nothing without a slot. Returns a function that stops it.
+ * display's layout stays the layout's business. Does nothing without a slot. `units` is read on every draw, so the
+ * display's clock and temperature settings apply as soon as `redraw` is called.
  */
-export function mountWeatherPanel(slot: HTMLElement | null, point: { lat: number; lon: number }): () => void {
-  if (!slot) return () => {};
+export function mountWeatherPanel(
+  slot: HTMLElement | null,
+  point: { lat: number; lon: number },
+  units: () => DisplayUnits = () => DEFAULT_UNITS,
+): WeatherPanel {
+  if (!slot) return { redraw: () => {}, stop: () => {} };
   slot.classList.add('weather');
   const root = el('div', 'weather-panel');
   slot.replaceChildren(root);
@@ -85,7 +97,7 @@ export function mountWeatherPanel(slot: HTMLElement | null, point: { lat: number
       if (failed) render(root, messageView('Weather unavailable.'));
       return;
     }
-    const view = weatherPanelView(last, Date.now());
+    const view = weatherPanelView(last, Date.now(), undefined, units());
     // A failed refresh keeps the last weather on screen, marked stale.
     render(root, failed ? { ...view, stale: true } : view);
   };
@@ -108,9 +120,12 @@ export function mountWeatherPanel(slot: HTMLElement | null, point: { lat: number
 
   const ageTimer = setInterval(() => draw(failed), AGE_TICK_MS);
   void refresh();
-  return () => {
-    stopped = true;
-    clearTimeout(refreshTimer);
-    clearInterval(ageTimer);
+  return {
+    redraw: () => draw(failed),
+    stop: () => {
+      stopped = true;
+      clearTimeout(refreshTimer);
+      clearInterval(ageTimer);
+    },
   };
 }
