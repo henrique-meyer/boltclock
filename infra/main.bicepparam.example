@@ -16,6 +16,11 @@ param targetPort = 8080
 param healthPath = '/health'
 param cpuCores = '0.25'
 
+// A display watched around the clock: minReplicas = 1, sessionLimitMinutes = 0.
+// A demo that should cost close to nothing: minReplicas = 0 and a short session limit, e.g. 15 (ADR 0003).
+param minReplicas = 1
+param sessionLimitMinutes = 0
+
 param googleMapsApiKey = readEnvironmentVariable('GOOGLE_MAPS_API_KEY')
 param nwsUserAgent = readEnvironmentVariable('NWS_USER_AGENT')
 param publicBaseUrl = ''

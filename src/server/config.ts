@@ -6,6 +6,11 @@ export interface Config {
   nwsUserAgent: string;
   /** Public URL of the app, without a trailing slash. */
   publicBaseUrl: string;
+  /**
+   * Minutes after which the server ends a display session, so a demo deployment can scale back to zero.
+   * 0 means no limit (ADR 0003).
+   */
+  sessionLimitMinutes: number;
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
@@ -15,10 +20,17 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     throw new Error(`PORT must be a port number, got "${rawPort}"`);
   }
 
+  const rawSessionLimit = env.SESSION_LIMIT_MINUTES?.trim() || '0';
+  const sessionLimitMinutes = Number(rawSessionLimit);
+  if (!Number.isInteger(sessionLimitMinutes) || sessionLimitMinutes < 0) {
+    throw new Error(`SESSION_LIMIT_MINUTES must be a whole number of minutes, got "${rawSessionLimit}"`);
+  }
+
   return {
     port,
     googleMapsApiKey: env.GOOGLE_MAPS_API_KEY?.trim() ?? '',
     nwsUserAgent: env.NWS_USER_AGENT?.trim() ?? '',
     publicBaseUrl: (env.PUBLIC_BASE_URL?.trim() || `http://localhost:${port}`).replace(/\/+$/, ''),
+    sessionLimitMinutes,
   };
 }

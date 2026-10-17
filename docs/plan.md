@@ -22,6 +22,7 @@ flowchart TD
   s7[BOLT-7 provision, DNS, domain]
   s8[BOLT-8 logo]
   s10[BOLT-10 stack and scaffold]
+  s14[BOLT-14 demo scale to zero]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -29,6 +30,8 @@ flowchart TD
   s3 --> s5
   s3 --> s7
   s5 --> s7
+  s10 --> s14
+  s14 --> s7
 ```
 
 ## Stories
@@ -90,3 +93,9 @@ Blocked by BOLT-4 and BOLT-5.
 ### BOLT-11 — Fix the Reader role ID in the Bicep (bug)
 
 The deploy identity's Reader assignment on the resource group used a role definition ID that does not exist, so the first deploy failed on it with `RoleDefinitionDoesNotExist`. Use the built-in Reader ID, `acdd72a7-3385-48ef-bd42-f606fba81ae7`, and redeploy.
+
+### BOLT-14 — Demo hosting: scale to zero and a session time limit
+
+The hosted instance is a demo, so it scales to zero between visits instead of running around the clock ([decisions/0003-demo-scale-to-zero.md](decisions/0003-demo-scale-to-zero.md)). Bicep gains `minReplicas` (0 or 1) with an HTTP scale rule, and `sessionLimitMinutes`, passed to the app as `SESSION_LIMIT_MINUTES`. The server reads and validates it; the push channel story enforces it by ending the stream with a `session ended` event, after which the display stops reconnecting, treats the data as stale and asks for a reload. The deploy workflow wakes a scaled-to-zero revision while it waits for health. The system design, `infra/README.md`, the README and `.env.example` describe it.
+
+Blocked by BOLT-10. Blocks BOLT-7.

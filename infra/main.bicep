@@ -36,6 +36,17 @@ param healthPath string = '/health'
 ])
 param cpuCores string = '0.25'
 
+@description('Replicas kept running with no traffic. 1 for a display watched around the clock; 0 for a demo that scales to zero between visits (ADR 0003).')
+@allowed([
+  0
+  1
+])
+param minReplicas int = 1
+
+@description('Minutes after which the server ends a display session, so a demo goes back to zero. 0 means no limit.')
+@minValue(0)
+param sessionLimitMinutes int = 0
+
 @secure()
 @description('Browser key for the Google Maps JavaScript API and Places. Restrict it by HTTP referrer to your domain.')
 param googleMapsApiKey string
@@ -123,8 +134,9 @@ resource containerEnv 'Microsoft.App/managedEnvironments@2024-03-01' = {
 
 var defaultBaseUrl = 'https://${containerAppName}.${containerEnv.properties.defaultDomain}'
 
-// One replica, always on. Lightning ingest polls NOAA around the clock, so the app cannot scale to zero.
-// The server rebuilds its 60-minute flash buffer from the bucket on start, so it needs no volume or database.
+// At most one replica: more would each ingest the same files. minReplicas = 1 keeps it always on for a real display;
+// 0 lets a demo scale to zero between visits. The server rebuilds its 60-minute flash buffer from the bucket on start,
+// so it needs no volume or database, and a cold start loses nothing.
 resource containerApp 'Microsoft.App/containerApps@2024-03-01' = if (deployApp) {
   name: containerAppName
   location: location
@@ -180,6 +192,10 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = if (deployApp) 
               name: 'PORT'
               value: string(targetPort)
             }
+            {
+              name: 'SESSION_LIMIT_MINUTES'
+              value: string(sessionLimitMinutes)
+            }
           ]
           probes: [
             {
@@ -214,8 +230,19 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = if (deployApp) 
         }
       ]
       scale: {
-        minReplicas: 1
+        minReplicas: minReplicas
         maxReplicas: 1
+        // Wakes the app from zero on the first request. An open display stream counts as a request until it ends.
+        rules: [
+          {
+            name: 'http'
+            http: {
+              metadata: {
+                concurrentRequests: '10'
+              }
+            }
+          }
+        ]
       }
     }
   }
