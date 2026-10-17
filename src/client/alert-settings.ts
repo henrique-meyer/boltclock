@@ -18,7 +18,10 @@ export interface AlertSettings {
   siren: SirenId;
   /** 0 to 1. */
   volume: number;
-  /** Replay the siren and announcement for each new strike during a countdown. The countdown restarts either way. */
+  /**
+   * Replay the siren and announcement for each new strike during a countdown. Off by default (BOLT-23): the first
+   * strike sounds the alarm, and later ones only restart the countdown unless this is turned on.
+   */
   replayAudioDuringCountdown: boolean;
   /** All-clear countdown, from the latest strike's time. 1 to 120 minutes. */
   timeLimitMinutes: number;
@@ -27,7 +30,7 @@ export interface AlertSettings {
 export const DEFAULT_ALERT_SETTINGS: AlertSettings = {
   siren: 'two-tone',
   volume: 0.8,
-  replayAudioDuringCountdown: true,
+  replayAudioDuringCountdown: false,
   timeLimitMinutes: DEFAULT_TIME_LIMIT_MINUTES,
 };
 
