@@ -9,15 +9,69 @@
     <link rel="apple-touch-icon" href="/assets/logo.png">
     <script type="module" src="./main.ts"></script>
   </head>
-  <body>
-    <main class="display">
-      <img class="mark" src="/assets/logo-mark.svg" alt="">
-      <h1 class="name">BoltClock</h1>
+  <body class="mode-normal">
+    <header class="topbar">
+      <img class="topbar-mark" src="/assets/logo-mark.svg" alt="">
+      <span class="topbar-name">BoltClock</span>
       <p class="status" id="status" role="status">Checking the server…</p>
+      <nav class="topbar-actions">
+        <button type="button" id="simulate" class="test-button" hidden>Simulate a strike</button>
+        <button type="button" id="open-settings">Settings</button>
+        <a href="/location.html">Location</a>
+      </nav>
+    </header>
+
+    <main class="stage">
+      <section class="alarm" aria-live="polite">
+        <p class="headline" id="headline">All clear</p>
+        <p class="countdown" id="countdown" hidden>30:00</p>
+        <p class="detail" id="detail"></p>
+        <p class="test-tag" id="test-tag" hidden>Test strike: simulated on this screen, not real lightning</p>
+      </section>
+      <section id="weather" class="weather" aria-label="Weather"></section>
     </main>
+
+    <div class="stale" id="stale" role="alert" hidden>
+      <p class="stale-title">NO LIGHTNING DATA</p>
+      <p class="stale-detail" id="stale-detail">No all-clear while data is missing.</p>
+    </div>
+
+    <div class="start" id="start">
+      <img class="start-mark" src="/assets/logo-mark.svg" alt="">
+      <button type="button" class="start-button" id="start-button">Start display</button>
+      <p class="start-hint">Turns on sound and full screen. The alarm needs sound to warn you.</p>
+    </div>
+
+    <button type="button" class="sound-banner" id="sound-banner" hidden>Sound is off. Click to enable sound.</button>
+
+    <dialog class="settings" id="settings">
+      <form method="dialog" class="settings-form" id="settings-form">
+        <h2>Alerts and sound</h2>
+        <label>Siren
+          <select id="setting-siren"></select>
+        </label>
+        <label>Volume
+          <input id="setting-volume" type="range" min="0" max="1" step="0.05">
+        </label>
+        <label class="checkbox">
+          <input id="setting-replay" type="checkbox">
+          Replay the siren for each new strike during a countdown
+        </label>
+        <label>All-clear countdown, minutes (1–120)
+          <input id="setting-minutes" type="number" min="1" max="120" step="1" inputmode="numeric">
+        </label>
+        <div class="settings-tests">
+          <button type="button" id="test-strike-sound">Test strike sound</button>
+          <button type="button" id="test-all-clear-sound">Test all-clear sound</button>
+        </div>
+        <p class="settings-note">Saved on this device. Changing the countdown reconnects the display.</p>
+        <button type="submit" class="settings-close">Done</button>
+      </form>
+    </dialog>
+
     <footer class="fineprint">
       <p>Lightning data: NOAA GOES-19 Geostationary Lightning Mapper. Weather: National Weather Service (api.weather.gov). Strike locations are accurate within ±5 miles. Not a certified lightning warning system. When thunder roars, go indoors. Strikes can be missed or arrive up to a minute late.</p>
-      <p class="site-credit">Designed &amp; built by <a href="https://www.hmeyer.com" target="_blank" rel="noopener">Henrique Meyer</a> · <a href="https://github.com/henrique-meyer/boltclock" target="_blank" rel="noopener">Source on GitHub</a> · <a href="/location.html">Location</a></p>
+      <p class="site-credit">Designed &amp; built by <a href="https://www.hmeyer.com" target="_blank" rel="noopener">Henrique Meyer</a> · <a href="https://github.com/henrique-meyer/boltclock" target="_blank" rel="noopener">Source on GitHub</a></p>
     </footer>
   </body>
 </html>

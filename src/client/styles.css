@@ -1,9 +1,14 @@
-/* Brand colors, matching assets/logo.svg: navy tile, paper, mark outline, light bolt. */
+/* Brand colors, matching assets/logo.svg: navy tile, paper, mark outline, light bolt. Alert colors are warning
+   colors, not brand: amber and red read as danger from across a room. */
 :root {
   --navy: #0c2340;
   --paper: #f4f0e6;
   --outline: #cdbfa8;
   --bolt: #4cc9f0;
+  --bolt-dark: #1e8fd5;
+  --alert: #b3261e;
+  --alert-deep: #6e1410;
+  --amber: #ffb300;
   color-scheme: dark;
 }
 
@@ -25,37 +30,298 @@ body {
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
-/* Built to be read from 20 ft on a 21" monitor: sizes follow the screen height. */
-.display {
+body.mode-alert {
+  background: radial-gradient(circle at 50% 40%, var(--alert), var(--alert-deep));
+}
+
+button,
+select,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* ---- Top bar ---- */
+/* Above the "NO LIGHTNING DATA" overlay, so settings and the location stay reachable while data is missing. */
+.topbar {
+  position: relative;
+  z-index: 12;
+  display: flex;
+  align-items: center;
+  gap: 1.5vw;
+  padding: 1.5vh 3vw;
+}
+
+.topbar-mark {
+  height: 6vh;
+}
+
+.topbar-name {
+  font-weight: 700;
+  font-size: 3.2vh;
+}
+
+.status {
   flex: 1;
+  margin: 0;
+  font-size: 2.6vh;
+  color: var(--bolt);
+}
+
+.mode-alert .status {
+  color: var(--paper);
+}
+
+.status a {
+  color: inherit;
+}
+
+.topbar-actions {
+  display: flex;
+  gap: 1vw;
+  align-items: center;
+  font-size: max(13px, 1.8vh);
+}
+
+.topbar-actions a,
+.topbar-actions button {
+  color: var(--paper);
+  background: transparent;
+  border: 1px solid var(--outline);
+  border-radius: 0.4em;
+  padding: 0.3em 0.8em;
+  text-decoration: none;
+}
+
+.topbar-actions .test-button {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+
+.topbar-actions [hidden] {
+  display: none;
+}
+
+/* ---- Stage: built to be read from 20 ft on a 21" monitor, so sizes follow the screen height ---- */
+.stage {
+  flex: 1;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  align-items: center;
+  justify-items: center;
+  padding: 1vh 4vw;
+  text-align: center;
+}
+
+.alarm {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5vh;
+}
+
+.alarm [hidden] {
+  display: none;
+}
+
+.headline {
+  margin: 0;
+  font-size: min(11vh, 9vw);
+  line-height: 1;
+  font-weight: 700;
+}
+
+.mode-alert .headline {
+  color: var(--amber);
+}
+
+/* Primary info at well over 12% of the screen height. */
+.countdown {
+  margin: 0;
+  /* Capped by width too, so "MM:SS" never runs off a portrait screen. */
+  font-size: min(30vh, 26vw);
+  line-height: 0.95;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.detail {
+  margin: 0;
+  font-size: 4.5vh;
+}
+
+.test-tag {
+  margin: 0;
+  font-size: 2.6vh;
+  color: var(--navy);
+  background: var(--amber);
+  border-radius: 0.3em;
+  padding: 0.2em 0.6em;
+}
+
+.weather:empty {
+  display: none;
+}
+
+/* ---- Stale data: never subtle, since the display cannot clear an alert while it shows ---- */
+.stale {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2vh;
+  background: rgb(12 35 64 / 0.92);
+  z-index: 10;
+}
+
+.stale[hidden] {
+  display: none;
+}
+
+.stale-title {
+  margin: 0;
+  font-size: 12vh;
+  font-weight: 800;
+  color: var(--amber);
+  text-align: center;
+}
+
+.stale-detail {
+  margin: 0;
+  font-size: 3.5vh;
+  text-align: center;
+  max-width: 80vw;
+}
+
+/* ---- Start overlay: the first click unlocks sound ---- */
+.start {
+  position: fixed;
+  inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 3vh;
-  padding: 4vh 4vw;
-  text-align: center;
+  background: var(--navy);
+  z-index: 20;
 }
 
-.mark {
-  height: 22vh;
+.start[hidden] {
+  display: none;
 }
 
-.name {
+.start-mark {
+  height: 20vh;
+}
+
+.start-button {
+  font-size: 6vh;
+  font-weight: 700;
+  padding: 0.5em 1.4em;
+  border: 0;
+  border-radius: 0.4em;
+  background: var(--bolt);
+  color: var(--navy);
+}
+
+.start-button:focus-visible {
+  outline: 4px solid var(--paper);
+  outline-offset: 4px;
+}
+
+.start-hint {
   margin: 0;
-  font-size: 14vh;
-  line-height: 1;
+  font-size: 2.4vh;
+  color: var(--outline);
+}
+
+.sound-banner {
+  position: fixed;
+  left: 50%;
+  bottom: 9vh;
+  transform: translateX(-50%);
+  font-size: 2.8vh;
+  font-weight: 700;
+  padding: 0.6em 1.2em;
+  border: 0;
+  border-radius: 0.4em;
+  background: var(--amber);
+  color: var(--navy);
+  z-index: 15;
+}
+
+.sound-banner[hidden] {
+  display: none;
+}
+
+/* ---- Settings dialog ---- */
+.settings {
+  border: 1px solid var(--outline);
+  border-radius: 0.6em;
+  background: var(--navy);
+  color: var(--paper);
+  padding: 1.5em 2em;
+  max-width: min(32em, 92vw);
+}
+
+.settings::backdrop {
+  background: rgb(0 0 0 / 0.6);
+}
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+.settings-form h2 {
+  margin: 0;
+}
+
+.settings-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3em;
+}
+
+.settings-form label.checkbox {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.6em;
+}
+
+.settings-tests {
+  display: flex;
+  gap: 0.6em;
+  flex-wrap: wrap;
+}
+
+.settings-tests button,
+.settings-close {
+  padding: 0.4em 0.9em;
+  border-radius: 0.4em;
+  border: 1px solid var(--outline);
+  background: transparent;
+  color: var(--paper);
+}
+
+.settings-close {
+  align-self: flex-end;
+  background: var(--bolt);
+  color: var(--navy);
+  border: 0;
   font-weight: 700;
 }
 
-.status {
+.settings-note {
   margin: 0;
-  font-size: 4vh;
-  color: var(--bolt);
-}
-
-.status a {
-  color: inherit;
+  font-size: 0.85em;
+  color: var(--outline);
 }
 
 /* The credits-and-disclaimers line stays on one line on a display; the size floor lets it wrap on a phone. */
@@ -64,6 +330,10 @@ body {
   font-size: max(11px, min(1.8vh, 0.68vw));
   color: var(--outline);
   text-align: center;
+}
+
+.mode-alert .fineprint {
+  color: var(--paper);
 }
 
 .fineprint p {

@@ -11,6 +11,7 @@ describe('loadConfig', () => {
       publicBaseUrl: 'http://localhost:8080',
       sessionLimitMinutes: 0,
       strikesTableEndpoint: '',
+      testMode: false,
     });
   });
 
@@ -23,6 +24,7 @@ describe('loadConfig', () => {
       PUBLIC_BASE_URL: 'https://your-domain.example/',
       SESSION_LIMIT_MINUTES: ' 15 ',
       STRIKES_TABLE_ENDPOINT: ' https://account.table.core.windows.net/ ',
+      TEST_MODE: ' TRUE ',
     });
 
     expect(config).toEqual({
@@ -33,6 +35,7 @@ describe('loadConfig', () => {
       publicBaseUrl: 'https://your-domain.example',
       sessionLimitMinutes: 15,
       strikesTableEndpoint: 'https://account.table.core.windows.net',
+      testMode: true,
     });
   });
 
@@ -47,6 +50,10 @@ describe('loadConfig', () => {
 
   it.each(['-1', '2.5', 'ten'])('rejects SESSION_LIMIT_MINUTES=%s', (minutes) => {
     expect(() => loadConfig({ SESSION_LIMIT_MINUTES: minutes })).toThrow(/SESSION_LIMIT_MINUTES must be/);
+  });
+
+  it.each(['', 'false', '1', 'yes'])('keeps test mode off for TEST_MODE=%s', (value) => {
+    expect(loadConfig({ TEST_MODE: value }).testMode).toBe(false);
   });
 
   it('treats an empty PORT as unset', () => {

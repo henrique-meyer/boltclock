@@ -18,7 +18,14 @@ describe('GET /api/client-config', () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.headers['cache-control']).toBe('no-store');
-    expect(response.json()).toEqual({ googleMapsApiKey: 'test-key', googleMapsMapId: 'test-map-id' });
+    expect(response.json()).toEqual({ googleMapsApiKey: 'test-key', googleMapsMapId: 'test-map-id', testMode: false });
+  });
+
+  it('turns test mode on only when TEST_MODE is true', async () => {
+    app = await buildApp({ clientConfig: loadConfig({ TEST_MODE: 'true' }) });
+    const response = await app.inject({ method: 'GET', url: '/api/client-config' });
+
+    expect(response.json()).toMatchObject({ testMode: true });
   });
 
   it('sends nothing else from the configuration', async () => {
@@ -30,14 +37,14 @@ describe('GET /api/client-config', () => {
     app = await buildApp({ clientConfig: config });
     const response = await app.inject({ method: 'GET', url: '/api/client-config' });
 
-    expect(Object.keys(response.json()).sort()).toEqual(['googleMapsApiKey', 'googleMapsMapId']);
+    expect(Object.keys(response.json()).sort()).toEqual(['googleMapsApiKey', 'googleMapsMapId', 'testMode']);
     expect(response.body).not.toContain('you@example.com');
   });
 
-  it('answers with an empty key when none is configured', async () => {
+  it('answers with an empty key and test mode off when nothing is configured', async () => {
     app = await buildApp();
     const response = await app.inject({ method: 'GET', url: '/api/client-config' });
 
-    expect(response.json()).toEqual({ googleMapsApiKey: '', googleMapsMapId: 'DEMO_MAP_ID' });
+    expect(response.json()).toEqual({ googleMapsApiKey: '', googleMapsMapId: 'DEMO_MAP_ID', testMode: false });
   });
 });
