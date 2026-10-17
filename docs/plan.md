@@ -56,6 +56,7 @@ flowchart TD
   s45[BOLT-45 alert screen fits 1080p]
   s46[BOLT-46 SIMULATION flag]
   s47[BOLT-47 countdown length in the status]
+  s48[BOLT-48 use current location shows]
   s49[BOLT-49 loading spinner]
   s2 --> s3
   s4 --> s10
@@ -102,6 +103,7 @@ flowchart TD
   s28 --> s45
   s45 --> s46
   s21 --> s47
+  s31 --> s48
   s21 --> s49
 ```
 
@@ -392,3 +394,9 @@ Blocked by BOLT-21.
 Henrique, 2026-10-17. "NO LIGHTNING DATA" flashed for a moment every time the display started, before the first data arrived. While the display waits for its first heartbeat, it now shows a large, slow spinner on the same veil instead. NO LIGHTNING DATA shows only when the data is really missing: the feed failed, the data went old after having been fresh, the session ended, or nothing arrived within 15 seconds. Either way there is still no all-clear.
 
 Blocked by BOLT-21.
+
+### BOLT-48 — "Use current location" hidden although the location works (bug)
+
+Henrique, 2026-10-17. With a saved pin the picker does not ask for the location on load (BOLT-30), so the BOLT-31 link showed only when the Permissions API said "granted". Chrome's "Allow this time" and Safari report "prompt" even when location works, so the link stayed hidden. It now shows whenever the browser has geolocation and the permission is not "denied", hides at once if the permission becomes denied, and a click asks for the location when needed.
+
+Blocked by BOLT-31.
