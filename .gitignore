@@ -39,7 +39,7 @@ venv/
 .data/
 data/cache/
 *.nc
-!tests/fixtures/**/*.nc
+!test/fixtures/**/*.nc
 
 # ---- Logs, OS, editors ----
 *.log
