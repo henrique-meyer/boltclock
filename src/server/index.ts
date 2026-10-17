@@ -10,7 +10,12 @@ const store = config.strikesTableEndpoint
   ? new AzureTableStore(config.strikesTableEndpoint, new DefaultAzureCredential())
   : undefined;
 const app = await buildApp({
-  clientConfig: { googleMapsApiKey: config.googleMapsApiKey, googleMapsMapId: config.googleMapsMapId, testMode: config.testMode },
+  clientConfig: {
+    googleMapsApiKey: config.googleMapsApiKey,
+    googleMapsMapId: config.googleMapsMapId,
+    testMode: config.testMode,
+    buttonIconsOnly: config.buttonIconsOnly,
+  },
   clientDir: resolve('dist/client'),
   assetsDir: resolve('assets'),
   logger: true,

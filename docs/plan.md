@@ -39,6 +39,7 @@ flowchart TD
   s28[BOLT-28 weather backgrounds and alert styling]
   s30[BOLT-30 picker opens on the saved pin]
   s29[BOLT-29 test mode and announcement setting]
+  s32[BOLT-32 icon-only buttons setting]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -66,6 +67,7 @@ flowchart TD
   s22 --> s28
   s19 --> s30
   s21 --> s29
+  s27 --> s32
 ```
 
 ## Stories
@@ -249,3 +251,7 @@ With a saved point, `/location.html` centers on that pin and frames its radius, 
 - **Simulate all clear:** in test mode, during a countdown, a sun icon button left of the bolt ends the countdown at once with the all-clear sound. Simulated strikes are dropped; real ones stay for deduplication.
 - **Announcement on/off:** a checkbox under "Replay the siren" turns the spoken sentence on or off, on by default and saved with the other alert settings. With no siren and no announcement an alert is silent, and Settings says so. The "No siren" choice loses "announcement only" from its label.
 - **Hidden buttons stay hidden:** the BOLT-27 icon-button style overrode `hidden`, so the test buttons showed without a location or test mode. The hide rule now comes after it.
+
+### BOLT-32 — BUTTON_ICONS_ONLY: icon-only or labelled top-bar buttons
+
+Each top-right button shows its icon and a text label (Simulate all clear, Simulate a strike, Settings, Location, Full screen). A deployment setting, `BUTTON_ICONS_ONLY` (Bicep `buttonIconsOnly`, default `false`), shows the icons alone instead, with the names kept as tooltips and accessible labels. The server passes it to the browser in `GET /api/client-config` next to `testMode`; the display fetches that once. `.env.example`, `infra/README.md` and the README describe it.
