@@ -152,7 +152,9 @@ jobs:
           fn=(--subscription "$AZURE_SUBSCRIPTION_ID" --resource-group "$AZURE_RESOURCE_GROUP" --name "$AZURE_FUNCTIONAPP_NAME")
           az functionapp deployment source config-zip "${fn[@]}" --src function.zip --output none
           # An unsigned request must be refused: 403 proves the new code is live and checking signatures.
-          host=$(az functionapp show "${fn[@]}" --query defaultHostName --output tsv)
+          # Flex Consumption apps report the hostname under properties, not at the top level.
+          host=$(az functionapp show "${fn[@]}" --query properties.defaultHostName --output tsv)
+          if [ -z "$host" ]; then echo "::error::Could not read the Function App's hostname."; exit 1; fi
           for attempt in $(seq 1 12); do
             status=$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: text/plain' -d '{}' "https://$host/api/glm" || true)
             echo "attempt $attempt: POST /api/glm -> $status"
