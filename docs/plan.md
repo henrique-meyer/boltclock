@@ -55,6 +55,7 @@ flowchart TD
   s43[BOLT-43 ALLOW_SIMULATION setting]
   s45[BOLT-45 alert screen fits 1080p]
   s46[BOLT-46 SIMULATION flag]
+  s47[BOLT-47 countdown length in the status]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -99,6 +100,7 @@ flowchart TD
   s37 --> s43
   s28 --> s45
   s45 --> s46
+  s21 --> s47
 ```
 
 ## Stories
@@ -376,3 +378,9 @@ Blocked by BOLT-28.
 Henrique, 2026-10-17. The "Test strike: simulated, not real lightning" label gives way to a SIMULATION flag left of the Simulate buttons: as tall as those buttons, yellow border and yellow fill. It is outside the buttons' group, so it stays visible in full screen. It shows after either Simulate button, since both put fake information on screen, and goes away only when what the display shows is real again: when a real strike drives the screen (a real alert or repeat), or once a countdown length has passed since the last Simulate press, so no simulated strike or forced all-clear can still be part of it. The controller keeps that time (`simulatedUntilMs`) and its view reports `simulation`.
 
 Blocked by BOLT-45.
+
+### BOLT-47 — Status line shows the countdown length during a countdown
+
+Henrique, 2026-10-17. Nothing on screen said what the all-clear countdown started at. During a countdown the top bar's status line ends with one more bullet, "· Countdown from 30 minutes", using the countdown length in effect (the setting, or a kiosk's `minutes=`). In ALL CLEAR it is not shown.
+
+Blocked by BOLT-21.
