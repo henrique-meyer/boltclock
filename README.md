@@ -48,7 +48,7 @@ BoltClock runs as one container. The reference deployment is Azure Container App
 Images are published to GitHub Container Registry by [deploy.yml](.github/workflows/deploy.yml).
 
 ## Project layout
-- `src/server/`: the Fastify server (`/health` now; lightning ingest, push channel and weather relay to come).
+- `src/server/`: the Fastify server (`/health` now; lightning ingest, push channel and weather relay to come). `src/server/glm/` reads GOES-19 GLM files ([format notes](docs/glm-format.md)).
 - `src/client/`: the browser display, built with Vite.
 - `test/`: Vitest tests.
 - `assets/`: the logo. `logo.svg` is the app icon and favicon, `logo-mark.svg` has a transparent background, and both have PNG copies. The `-yellow` files are an alternate colourway that isn't in use.

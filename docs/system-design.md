@@ -19,6 +19,7 @@ Weather: client → relay → api.weather.gov `/points/{lat,lon}` (cached) → h
 - Deduplicate flashes by id. Ignore flashes older than the time limit.
 
 ## Data characteristics (verified 2026-10-16)
+File layout, packing and measured flash counts: [glm-format.md](glm-format.md).
 - Files: `OR_GLM-L2-LCFA_G19_s…_e…_c….nc`, 20-s windows, under `GLM-L2-LCFA/YYYY/DDD/HH/`. Measured arrival was ~20–40 s after window end, so flash-to-availability is ~20–60 s.
 - New-object notifications: the SNS topic `arn:aws:sns:us-east-1:123901341784:NewGOES19Object`.
 - GOES-East covers Florida well. GLM resolution is ~8 km, it detects total lightning (in-cloud + cloud-to-ground), and detection is <100%. Minimum sensible radius is ~10 mi. The UI and README must state "Strike locations are accurate within ±5 miles."
