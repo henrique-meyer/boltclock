@@ -112,6 +112,10 @@ The sound files only; playback, sequencing, the autoplay unlock and the settings
 
 Blocked by BOLT-10.
 
+### BOLT-13 — Move the GitHub Actions to their Node 24 majors
+
+GitHub warns that the actions in `pr.yml` and `deploy.yml` run on the deprecated Node 20. Move them to the current majors, which run on Node 24: `actions/checkout` v7, `actions/setup-node` v7, `docker/setup-buildx-action` v4, `docker/login-action` v4, `docker/metadata-action` v6, `docker/build-push-action` v7 and `azure/login` v3. Their breaking changes do not touch the inputs the workflows use. `ubuntu-latest` moves to Ubuntu 26.04 from 2026-10-19 and stays: the workflows need only bash, curl, Docker with Buildx and the Azure CLI, which both images have. The deploy gating and the secret names do not change.
+
 ### BOLT-14 — Demo hosting: scale to zero and a session time limit
 
 The hosted instance is a demo, so it scales to zero between visits instead of running around the clock ([decisions/0003-demo-scale-to-zero.md](decisions/0003-demo-scale-to-zero.md)). Bicep gains `minReplicas` (0 or 1) with an HTTP scale rule, and `sessionLimitMinutes`, passed to the app as `SESSION_LIMIT_MINUTES`. The server reads and validates it; the push channel story enforces it by ending the stream with a `session ended` event, after which the display stops reconnecting, treats the data as stale and asks for a reload. The deploy workflow wakes a scaled-to-zero revision while it waits for health. The system design, `infra/README.md`, the README and `.env.example` describe it.
