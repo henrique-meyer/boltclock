@@ -27,7 +27,7 @@ The image comes from GitHub Container Registry as a public package, so the app n
 - Reads `GOOGLE_MAPS_API_KEY`, `NWS_USER_AGENT`, `PUBLIC_BASE_URL`, `SESSION_LIMIT_MINUTES` and `STRIKES_TABLE_ENDPOINT` from the environment. With the endpoint set, it reads the flash tables with its managed identity; without it, `/api/stream` answers 503.
 - With `SESSION_LIMIT_MINUTES` above 0, ends each display session after that many minutes, so a demo can scale back to zero.
 - With `BUTTON_ICONS_ONLY=true` (Bicep `buttonIconsOnly`, default `false`), the display's top-right buttons show only their icons; otherwise each icon has its label.
-- With `TEST_MODE=true` (Bicep `testMode`, default `false`), the display offers "Simulate a strike" and, during a countdown, "Simulate all clear" for demos. It's local to the browser tab and never stored.
+- With `TEST_MODE=true` (Bicep `testMode`, default `false`), the display offers "Simulate a strike" and, during a countdown, "Simulate all clear" for demos. It's local to the browser tab and never stored. It is the default for each display's Simulation mode checkbox in Settings, which a device can turn off or on.
 - Keeps no state on disk. On start it rebuilds the last 60 minutes of flashes from the GLM bucket, so restarts and new revisions lose nothing.
 - Logs to stdout. It never logs addresses or search text.
 - The ingress has a 240-second request timeout. The push channel (`GET /api/stream`) reads the flash tables and sends a heartbeat every ~15 seconds. The browser reconnects when a stream drops, the server replays the display's window on connect, and flashes are deduplicated by id. On shutdown the server closes open streams, so a new revision starts promptly.

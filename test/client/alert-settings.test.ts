@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { ALERT_STORAGE_KEY, DEFAULT_ALERT_SETTINGS, loadAlertSettings, normalizeAlertSettings, saveAlertSettings } from '../../src/client/alert-settings.js';
+import {
+  ALERT_STORAGE_KEY,
+  DEFAULT_ALERT_SETTINGS,
+  loadAlertSettings,
+  normalizeAlertSettings,
+  saveAlertSettings,
+  simulationOn,
+} from '../../src/client/alert-settings.js';
 
 function memoryStore(initial: Record<string, string> = {}) {
   const data = new Map(Object.entries(initial));
@@ -17,6 +24,7 @@ describe('alert settings', () => {
       clock: '12h',
       temperatureUnit: 'F',
       distanceUnit: 'mi',
+      simulation: null,
     });
     expect(loadAlertSettings(undefined)).toEqual(DEFAULT_ALERT_SETTINGS);
   });
@@ -32,6 +40,7 @@ describe('alert settings', () => {
       clock: '24h',
       temperatureUnit: 'C',
       distanceUnit: 'km',
+      simulation: false,
     });
 
     expect(loadAlertSettings(store)).toEqual(saved);
@@ -49,6 +58,7 @@ describe('alert settings', () => {
         clock: 'metric',
         temperatureUnit: 'K',
         distanceUnit: 'furlongs',
+        simulation: 'maybe',
       }),
     ).toEqual({
       siren: 'two-tone',
@@ -59,6 +69,7 @@ describe('alert settings', () => {
       clock: '12h',
       temperatureUnit: 'F',
       distanceUnit: 'mi',
+      simulation: null,
     });
     expect(normalizeAlertSettings({ volume: -1, timeLimitMinutes: 2.5 })).toMatchObject({ volume: 0, timeLimitMinutes: 30 });
     expect(normalizeAlertSettings({ siren: 'none', timeLimitMinutes: 120 })).toMatchObject({ siren: 'none', timeLimitMinutes: 120 });
@@ -77,6 +88,15 @@ describe('alert settings', () => {
   it('keeps a saved clock and temperature choice', () => {
     const store = memoryStore({ [ALERT_STORAGE_KEY]: JSON.stringify({ clock: '24h', temperatureUnit: 'C' }) });
     expect(loadAlertSettings(store)).toMatchObject({ clock: '24h', temperatureUnit: 'C', siren: 'two-tone' });
+  });
+
+  it('follows TEST_MODE for Simulation mode until the device chooses', () => {
+    expect(simulationOn(DEFAULT_ALERT_SETTINGS, true)).toBe(true);
+    expect(simulationOn(DEFAULT_ALERT_SETTINGS, false)).toBe(false);
+    const store = memoryStore();
+    const off = saveAlertSettings(store, { ...DEFAULT_ALERT_SETTINGS, simulation: false });
+    expect(simulationOn(loadAlertSettings(store), true)).toBe(false);
+    expect(simulationOn({ ...off, simulation: true }, false)).toBe(true);
   });
 
   it('survives unreadable storage', () => {
