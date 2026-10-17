@@ -59,7 +59,12 @@ const start = byId<HTMLDivElement>('start');
 // ---- Sound ----
 const output = new WebAudioOutput();
 output.setVolume(alerts.volume);
-const announcer = new Announcer(output, () => alerts.siren, (message) => console.warn(`Sound: ${message}`));
+const announcer = new Announcer(
+  output,
+  () => alerts.siren,
+  (message) => console.warn(`Sound: ${message}`),
+  () => alerts.announcement,
+);
 const soundBanner = byId<HTMLButtonElement>('sound-banner');
 let started = false;
 
@@ -98,6 +103,8 @@ const dialog = byId<HTMLDialogElement>('settings');
 const sirenSelect = byId<HTMLSelectElement>('setting-siren');
 const volumeInput = byId<HTMLInputElement>('setting-volume');
 const replayInput = byId<HTMLInputElement>('setting-replay');
+const announcementInput = byId<HTMLInputElement>('setting-announcement');
+const silentWarning = byId<HTMLParagraphElement>('setting-silent');
 const minutesInput = byId<HTMLInputElement>('setting-minutes');
 const clockSelect = byId<HTMLSelectElement>('setting-clock');
 const temperatureSelect = byId<HTMLSelectElement>('setting-temperature');
@@ -109,6 +116,8 @@ function fillSettingsForm(settings: AlertSettings): void {
   sirenSelect.value = settings.siren;
   volumeInput.value = String(settings.volume);
   replayInput.checked = settings.replayAudioDuringCountdown;
+  announcementInput.checked = settings.announcement;
+  silentWarning.hidden = settings.siren !== 'none' || settings.announcement;
   minutesInput.value = String(settings.timeLimitMinutes);
   clockSelect.value = settings.clock;
   temperatureSelect.value = settings.temperatureUnit;
@@ -119,6 +128,7 @@ function readSettingsForm(): AlertSettings {
     siren: sirenSelect.value as SirenId,
     volume: Number(volumeInput.value),
     replayAudioDuringCountdown: replayInput.checked,
+    announcement: announcementInput.checked,
     timeLimitMinutes: Number(minutesInput.value),
     clock: clockSelect.value as ClockFormat,
     temperatureUnit: temperatureSelect.value as TemperatureUnit,
@@ -130,9 +140,10 @@ byId<HTMLButtonElement>('open-settings').addEventListener('click', () => {
   dialog.showModal();
 });
 volumeInput.addEventListener('input', () => output.setVolume(Number(volumeInput.value)));
-for (const input of [sirenSelect, volumeInput, replayInput, clockSelect, temperatureSelect]) {
+for (const input of [sirenSelect, volumeInput, replayInput, announcementInput, clockSelect, temperatureSelect]) {
   input.addEventListener('change', () => {
     alerts = readSettingsForm();
+    silentWarning.hidden = alerts.siren !== 'none' || alerts.announcement;
     // Clock and temperature apply at once: the weather panel reads them on every draw.
     weather?.redraw();
   });
@@ -160,6 +171,9 @@ const detail = byId<HTMLParagraphElement>('detail');
 const testTag = byId<HTMLParagraphElement>('test-tag');
 const stale = byId<HTMLDivElement>('stale');
 const staleDetail = byId<HTMLParagraphElement>('stale-detail');
+const simulateAllClear = byId<HTMLButtonElement>('simulate-all-clear');
+/** Set once the server says test mode is on (TEST_MODE). */
+let testMode = false;
 
 function render(view: ControllerView, connection: ConnectionState, radius: { value: number; unit: string }, minutes: number): void {
   const alert = view.mode === 'ALERT';
@@ -170,6 +184,8 @@ function render(view: ControllerView, connection: ConnectionState, radius: { val
   countdown.hidden = !alert;
   countdown.textContent = view.countdown ?? '';
   testTag.hidden = !view.testStrike;
+  // Test mode only: during a countdown, the sun button ends it at once.
+  simulateAllClear.hidden = !(testMode && alert);
   detail.textContent = alert
     ? `${view.nearestStrike ? `Nearest strike ${view.nearestStrike.distance} ${view.nearestStrike.unit} away. ` : ''}Stay indoors until the countdown ends.`
     : `No lightning within ${radius.value} ${radius.unit} in the last ${minutes} minutes.`;
@@ -240,6 +256,11 @@ if (!location) {
   void fetchClientConfig()
     .then((config) => {
       if (!config.testMode) return;
+      testMode = true;
+      simulateAllClear.addEventListener('click', () => {
+        controller.simulateAllClear();
+        redraw();
+      });
       const simulate = byId<HTMLButtonElement>('simulate');
       simulate.hidden = false;
       simulate.addEventListener('click', () => {

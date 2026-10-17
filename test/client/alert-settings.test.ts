@@ -7,11 +7,12 @@ function memoryStore(initial: Record<string, string> = {}) {
 }
 
 describe('alert settings', () => {
-  it('defaults to a two-tone siren, 80% volume, replay off, a 30-minute countdown, a 12-hour clock and °F', () => {
+  it('defaults to a two-tone siren, 80% volume, replay off, the announcement on, a 30-minute countdown, a 12-hour clock and °F', () => {
     expect(loadAlertSettings(memoryStore())).toEqual({
       siren: 'two-tone',
       volume: 0.8,
       replayAudioDuringCountdown: false,
+      announcement: true,
       timeLimitMinutes: 30,
       clock: '12h',
       temperatureUnit: 'F',
@@ -25,6 +26,7 @@ describe('alert settings', () => {
       siren: 'yelp',
       volume: 0.25,
       replayAudioDuringCountdown: false,
+      announcement: false,
       timeLimitMinutes: 45,
       clock: '24h',
       temperatureUnit: 'C',
@@ -36,17 +38,31 @@ describe('alert settings', () => {
 
   it('clamps or replaces bad values instead of failing', () => {
     expect(
-      normalizeAlertSettings({ siren: 'airhorn', volume: 7, replayAudioDuringCountdown: 'yes', timeLimitMinutes: 500, clock: 'metric', temperatureUnit: 'K' }),
+      normalizeAlertSettings({
+        siren: 'airhorn',
+        volume: 7,
+        replayAudioDuringCountdown: 'yes',
+        announcement: 'no',
+        timeLimitMinutes: 500,
+        clock: 'metric',
+        temperatureUnit: 'K',
+      }),
     ).toEqual({
       siren: 'two-tone',
       volume: 1,
       replayAudioDuringCountdown: false,
+      announcement: true,
       timeLimitMinutes: 30,
       clock: '12h',
       temperatureUnit: 'F',
     });
     expect(normalizeAlertSettings({ volume: -1, timeLimitMinutes: 2.5 })).toMatchObject({ volume: 0, timeLimitMinutes: 30 });
     expect(normalizeAlertSettings({ siren: 'none', timeLimitMinutes: 120 })).toMatchObject({ siren: 'none', timeLimitMinutes: 120 });
+  });
+
+  it('keeps a saved announcement choice', () => {
+    const store = memoryStore({ [ALERT_STORAGE_KEY]: JSON.stringify({ announcement: false }) });
+    expect(loadAlertSettings(store).announcement).toBe(false);
   });
 
   it('keeps a saved replay choice', () => {

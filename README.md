@@ -60,13 +60,14 @@ Press **Start display**. That one click turns on sound, which browsers only allo
 - the siren: two-tone, mechanical, yelp, or none;
 - the volume;
 - whether new strikes replay the siren during a countdown (off by default: later strikes only restart the countdown);
+- whether the announcement is spoken after the siren or chime (on by default; with no siren and no announcement, alerts are silent);
 - the countdown length: 30 minutes by default, at most 120. An address with `minutes=` pins it on a kiosk;
 - the clock for forecast times: 12-hour (the default) or 24-hour;
 - the temperature unit: °F (the default) or °C.
 
 The settings also have test buttons for both sounds.
 
-**Test mode:** with `TEST_MODE=true` (Bicep parameter `testMode`), the top bar offers **Simulate a strike**. It puts a fake strike at 60% of the radius through the same logic as a real one, labelled as a test on screen. It lives only in that browser tab: nothing is stored or sent. Keep it off on a real display.
+**Test mode:** with `TEST_MODE=true` (Bicep parameter `testMode`), the top bar offers **Simulate a strike** (the bolt). It puts a fake strike at a random distance inside the radius, in a random direction, through the same logic as a real one, labelled as a test on screen. Every test strike sounds the alarm, even during a countdown with replay off. During a countdown, **Simulate all clear** (the sun) ends it at once with the all-clear sound. It lives only in that browser tab: nothing is stored or sent. Keep it off on a real display.
 
 ### Kiosk
 For an always-on screen, open the display in a browser's kiosk mode, with a flag that allows sound without a click. For example, Chrome:
