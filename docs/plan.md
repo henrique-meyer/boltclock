@@ -53,6 +53,7 @@ flowchart TD
   s42[BOLT-42 replay off speaks only]
   s44[BOLT-44 picker returns to the main screen]
   s43[BOLT-43 ALLOW_SIMULATION setting]
+  s45[BOLT-45 alert screen fits 1080p]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -95,6 +96,7 @@ flowchart TD
   s29 --> s42
   s38 --> s44
   s37 --> s43
+  s28 --> s45
 ```
 
 ## Stories
@@ -360,3 +362,9 @@ Blocked by BOLT-38.
 Henrique, 2026-10-17. A new deployment setting, `ALLOW_SIMULATION` (Bicep `allowSimulation`, default `false`), decides whether displays offer Simulation mode at all. Off: Settings has no Simulation mode checkbox and the Simulate buttons never show, whatever a device saved. On: the checkbox is offered, and `TEST_MODE` (Bicep `testMode`) is its default, which each device can change. The server passes both in `GET /api/client-config`. The demo runs with `ALLOW_SIMULATION=true` and `TEST_MODE=false`. `.env.example`, `infra/README.md` and the README describe both.
 
 Blocked by BOLT-37.
+
+### BOLT-45 — Lightning nearby screen fits 1920x1080 (bug)
+
+Henrique, 2026-10-17. With the weather and forecast showing, the ALERT screen was about 65 px too tall for a 1920x1080 browser window, so it scrolled. Everything still scales with the screen height; the alarm text is a little smaller (countdown 25vh instead of 30vh, headline 9vh instead of 11vh, 1vh gaps). The stage's alarm row can no longer push the weather down (`minmax(0, 1fr) auto`), so the weather and its place line sit at the same height in ALL CLEAR and LIGHTNING NEARBY.
+
+Blocked by BOLT-28.

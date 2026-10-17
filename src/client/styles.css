@@ -153,10 +153,13 @@ button {
 }
 
 /* ---- Stage: built to be read from 20 ft on a 21" monitor, so sizes follow the screen height ---- */
+/* The alarm takes what is left above the weather, and never pushes it: the weather (and its place line) stays put in
+   ALL CLEAR and LIGHTNING NEARBY alike, and the page never scrolls (BOLT-45). */
 .stage {
   flex: 1;
+  min-height: 0;
   display: grid;
-  grid-template-rows: 1fr auto;
+  grid-template-rows: minmax(0, 1fr) auto;
   align-items: center;
   justify-items: center;
   padding: 1vh 4vw;
@@ -167,7 +170,7 @@ button {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.5vh;
+  gap: 1vh;
 }
 
 .alarm [hidden] {
@@ -176,7 +179,7 @@ button {
 
 .headline {
   margin: 0;
-  font-size: min(11vh, 9vw);
+  font-size: min(9vh, 9vw);
   line-height: 1;
   font-weight: 700;
 }
@@ -188,8 +191,8 @@ button {
 /* Primary info at well over 12% of the screen height. */
 .countdown {
   margin: 0;
-  /* Capped by width too, so "MM:SS" never runs off a portrait screen. */
-  font-size: min(30vh, 26vw);
+  /* Capped by width too, so "MM:SS" never runs off a portrait screen. 25vh leaves room for the weather on 16:9. */
+  font-size: min(25vh, 26vw);
   line-height: 0.95;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
