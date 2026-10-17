@@ -383,7 +383,7 @@ Blocked by BOLT-45.
 
 ### BOLT-47 — Status line shows the countdown length during a countdown
 
-Henrique, 2026-10-17. Nothing on screen said what the all-clear countdown started at. During a countdown the top bar's status line ends with one more bullet, "· countdown 30 minutes" (first "Countdown from 30 minutes"; shortened at Henrique's request), using the countdown length in effect (the setting, or a kiosk's `minutes=`). In ALL CLEAR it is not shown.
+Henrique, 2026-10-17. Nothing on screen said what the all-clear countdown started at. During a countdown the top bar's status line ends with one more bullet, "· countdown 30 min" (first "Countdown from 30 minutes"; shortened at Henrique's request), using the countdown length in effect (the setting, or a kiosk's `minutes=`). In ALL CLEAR it is not shown.
 
 Blocked by BOLT-21.
 
