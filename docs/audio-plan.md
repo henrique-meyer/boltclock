@@ -6,7 +6,7 @@
 - **Speech**: "Lightning detected {n} miles away" / "{n} kilometers away", n = whole number 0–100 mi or 0–161 km (the 100 mi radius cap), "Lightning detected in the area." for an announcement without the distance, and "No lightning detected in the area." Say "1 mile" / "1 kilometer", and "less than 1 mile" / "less than 1 kilometer" for 0. It must sound clear and consistent on a kiosk device with no internet voice services. If the primary voice method fails, fall back to any other available method rather than staying silent.
 - **Chime**: a short rising three-note bell (G–C–E), about 2 s, before the all-clear message.
 - **Sequencing**: A = siren → short gap → speech. B = chime → speech. Never overlap sounds; a newer event interrupts the current one.
-- **Autoplay**: browsers block sound until a user gesture. Provide a large "Start display" action (which also enters full screen) that enables audio. If audio is not enabled, show a persistent "click to enable sound" banner. Document a kiosk configuration that allows sound without a click.
+- **Autoplay**: browsers block sound until a user gesture. Provide a large "Start display" action that enables audio (full screen is a separate top-bar button). If audio is not enabled, show a persistent "click to enable sound" banner. Document a kiosk configuration that allows sound without a click.
 - Volume control and test buttons for A and B in settings.
 - Sound sets are built-in and selectable later. No uploads.
 

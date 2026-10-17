@@ -49,7 +49,7 @@ Only the pin's coordinates and the radius are saved, in the browser's local stor
 The display watches the saved location. A kiosk can be pinned to a point by its address instead, which overrides the saved one: `/?lat=28.54&lon=-81.38&radius=10&unit=mi&minutes=30` (`radius`, `unit` and `minutes` are optional).
 
 ## Using the display
-Press **Start display**. That one click turns on sound, which browsers only allow after a user gesture, and enters full screen. If sound is still off, a "click to enable sound" banner stays up until it's on.
+Press **Start display**. That one click turns on sound, which browsers only allow after a user gesture. The full-screen button at the top right (or F11) fills the screen and hides the top-bar buttons; Esc or F11 brings them back. If sound is still off, a "click to enable sound" banner stays up until it's on.
 
 - **All clear:** the calm navy screen.
 - **Lightning nearby:** a strike inside the radius turns the screen red and starts an MM:SS countdown, counted from the strike's own time. It plays the siren, then "Lightning detected N miles away" (in the unit the radius was entered in). Each new strike in the radius restarts the countdown.

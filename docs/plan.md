@@ -34,6 +34,7 @@ flowchart TD
   s22[BOLT-22 weather relay and panel]
   s24[BOLT-24 clock and temperature units]
   s25[BOLT-25 save returns to the display]
+  s27[BOLT-27 full-screen button]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -55,6 +56,7 @@ flowchart TD
   s10 --> s22
   s22 --> s24
   s19 --> s25
+  s21 --> s27
 ```
 
 ## Stories
@@ -212,3 +214,7 @@ Blocked by BOLT-22.
 After a successful "Save location" on the picker, the browser goes straight back to the display, which starts watching the new point (Henrique, 2026-10-17). If the browser will not save (site data blocked), the picker stays open and shows the error as before.
 
 Blocked by BOLT-19.
+
+### BOLT-27 — Full screen from a top-bar button
+
+**Start display** turns on sound only and no longer enters full screen. A full-screen icon button to the right of **Location** does that, hidden where the browser cannot. In full screen, whether from the button or F11, the top-right buttons (test strike, Settings, Location, full screen) are hidden; Esc or F11 brings them back.
