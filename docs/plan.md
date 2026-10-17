@@ -51,6 +51,7 @@ flowchart TD
   s41[BOLT-41 one forecast hour per line]
   s39[BOLT-39 picker at /location]
   s42[BOLT-42 replay off speaks only]
+  s43[BOLT-43 ALLOW_SIMULATION setting]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -91,6 +92,7 @@ flowchart TD
   s22 --> s41
   s19 --> s39
   s29 --> s42
+  s37 --> s43
 ```
 
 ## Stories
@@ -344,3 +346,9 @@ Blocked by BOLT-19.
 Henrique, 2026-10-17. With "Replay the siren for each new strike during a countdown" off, a simulated strike during a countdown still played the siren (BOLT-29 made every test strike sound the full alarm). The rule is now the same for real and simulated strikes: the first strike plays the siren, then the announcement. Each new strike during the countdown restarts it and raises a `repeat` event whose `siren` is the replay setting. With replay on it plays the siren, then the announcement; with replay off it plays the announcement only, and nothing at all when "Speak the announcement" is off. An announcement with nothing to play never cuts off a sound already playing.
 
 Blocked by BOLT-29.
+
+### BOLT-43 — Simulation mode: ALLOW_SIMULATION, and TEST_MODE as the default
+
+Henrique, 2026-10-17. A new deployment setting, `ALLOW_SIMULATION` (Bicep `allowSimulation`, default `false`), decides whether displays offer Simulation mode at all. Off: Settings has no Simulation mode checkbox and the Simulate buttons never show, whatever a device saved. On: the checkbox is offered, and `TEST_MODE` (Bicep `testMode`) is its default, which each device can change. The server passes both in `GET /api/client-config`. The demo runs with `ALLOW_SIMULATION=true` and `TEST_MODE=false`. `.env.example`, `infra/README.md` and the README describe both.
+
+Blocked by BOLT-37.

@@ -12,6 +12,7 @@ describe('loadConfig', () => {
       sessionLimitMinutes: 0,
       strikesTableEndpoint: '',
       testMode: false,
+      allowSimulation: false,
       buttonIconsOnly: false,
     });
   });
@@ -26,6 +27,7 @@ describe('loadConfig', () => {
       SESSION_LIMIT_MINUTES: ' 15 ',
       STRIKES_TABLE_ENDPOINT: ' https://account.table.core.windows.net/ ',
       TEST_MODE: ' TRUE ',
+      ALLOW_SIMULATION: ' true ',
       BUTTON_ICONS_ONLY: ' true ',
     });
 
@@ -38,6 +40,7 @@ describe('loadConfig', () => {
       sessionLimitMinutes: 15,
       strikesTableEndpoint: 'https://account.table.core.windows.net',
       testMode: true,
+      allowSimulation: true,
       buttonIconsOnly: true,
     });
   });

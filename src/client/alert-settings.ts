@@ -112,7 +112,10 @@ export function saveAlertSettings(store: KeyValueStore | undefined, settings: Al
   return normalized;
 }
 
-/** Whether the Simulate buttons show: this device's choice, else the deployment's TEST_MODE. */
-export function simulationOn(settings: AlertSettings, deploymentTestMode: boolean): boolean {
-  return settings.simulation ?? deploymentTestMode;
+/**
+ * Whether the Simulate buttons show. Only where the deployment allows simulation (ALLOW_SIMULATION); then this
+ * device's choice, else the deployment's default (TEST_MODE).
+ */
+export function simulationOn(settings: AlertSettings, deployment: { testMode: boolean; allowSimulation: boolean }): boolean {
+  return deployment.allowSimulation && (settings.simulation ?? deployment.testMode);
 }

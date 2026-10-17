@@ -254,8 +254,9 @@ const staleDetail = byId<HTMLParagraphElement>('stale-detail');
 const simulateAllClear = byId<HTMLButtonElement>('simulate-all-clear');
 const simulateStrike = byId<HTMLButtonElement>('simulate');
 const simulationInput = byId<HTMLInputElement>('setting-simulation');
-/** The deployment's TEST_MODE, once the server has said. The default for Simulation mode. */
-let deploymentTestMode = false;
+const simulationOption = byId<HTMLLabelElement>('simulation-option');
+/** The deployment's simulation settings, once the server has said: ALLOW_SIMULATION, and TEST_MODE as the default. */
+let deployment = { testMode: false, allowSimulation: false };
 /** Simulation mode: the Simulate buttons show. */
 let testMode = false;
 /** Switches the watched radius in place (a distance-unit change); set once the display is watching a point. */
@@ -264,21 +265,24 @@ let changeRadius: ((radius: UrlSettings['radius']) => void) | undefined;
 let redrawDisplay: (() => void) | undefined;
 
 function applySimulation(): void {
-  testMode = simulationOn(alerts, deploymentTestMode);
+  testMode = simulationOn(alerts, deployment);
+  // Without ALLOW_SIMULATION there is no checkbox at all.
+  simulationOption.hidden = !deployment.allowSimulation;
   simulationInput.checked = testMode;
   simulateStrike.hidden = !testMode || !redrawDisplay;
   if (redrawDisplay) redrawDisplay();
   else simulateAllClear.hidden = true;
 }
 
-// Simulation mode: TEST_MODE is the default, and each device can turn it off or on in Settings (BOLT-37).
+// Simulation mode: offered only with ALLOW_SIMULATION. TEST_MODE is the default, and each device can turn it off or on
+// in Settings (BOLT-37, BOLT-43).
 simulationInput.addEventListener('change', () => {
   alerts = saveAlertSettings(store, { ...alerts, simulation: simulationInput.checked });
   applySimulation();
 });
 void clientConfig
   .then((config) => {
-    deploymentTestMode = config.testMode;
+    deployment = { testMode: config.testMode, allowSimulation: config.allowSimulation };
     applySimulation();
   })
   .catch(() => {});

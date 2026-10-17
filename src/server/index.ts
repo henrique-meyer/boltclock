@@ -14,6 +14,7 @@ const app = await buildApp({
     googleMapsApiKey: config.googleMapsApiKey,
     googleMapsMapId: config.googleMapsMapId,
     testMode: config.testMode,
+    allowSimulation: config.allowSimulation,
     buttonIconsOnly: config.buttonIconsOnly,
   },
   clientDir: resolve('dist/client'),
@@ -27,7 +28,9 @@ const app = await buildApp({
 if (!config.googleMapsApiKey) app.log.warn('GOOGLE_MAPS_API_KEY is not set. The location picker will not load.');
 if (!config.nwsUserAgent) app.log.warn('NWS_USER_AGENT is not set. api.weather.gov requires one, so /api/weather answers 503.');
 if (config.sessionLimitMinutes > 0) app.log.info(`Display sessions end after ${config.sessionLimitMinutes} minutes.`);
-if (config.testMode) app.log.info('TEST_MODE is on: the display offers a simulated strike.');
+if (config.allowSimulation) {
+  app.log.info(`ALLOW_SIMULATION is on: displays offer Simulation mode, ${config.testMode ? 'on' : 'off'} by default (TEST_MODE).`);
+}
 if (!store) app.log.warn('STRIKES_TABLE_ENDPOINT is not set. /api/stream answers 503.');
 
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {

@@ -47,8 +47,11 @@ param minReplicas int = 1
 @minValue(0)
 param sessionLimitMinutes int = 0
 
-@description('Show the display\'s "Simulate a strike" button, for demos and testing. Keep false for a real display.')
+@description('Default for each display\'s Simulation mode checkbox (the Simulate buttons). Only used when allowSimulation is true.')
 param testMode bool = false
+
+@description('Offer Simulation mode in the display\'s settings at all, for demos and testing. Keep false for a real display.')
+param allowSimulation bool = false
 
 @description('Show the display\'s top-right buttons as icons only. False shows each icon with its text label.')
 param buttonIconsOnly bool = false
@@ -230,6 +233,10 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = if (deployApp) 
             {
               name: 'TEST_MODE'
               value: testMode ? 'true' : 'false'
+            }
+            {
+              name: 'ALLOW_SIMULATION'
+              value: allowSimulation ? 'true' : 'false'
             }
             {
               name: 'BUTTON_ICONS_ONLY'
