@@ -21,12 +21,13 @@ import { mountBackdrop } from './backdrop.js';
 import type { RadiusUnit } from '../shared/display-state.js';
 import { DisplayController, type ControllerView } from './display-controller.js';
 import { currentDistanceUnit, resolveDisplaySettings, setDistanceUnit, startAtBrowserLocation } from './display-settings.js';
-import { currentPosition } from './geolocation.js';
+import { currentPosition, onLocationGranted } from './geolocation.js';
 import { defaultRadius, type KeyValueStore } from './location-settings.js';
+import { placeLabel, START_MESSAGES } from './start-screen.js';
 import { openStream, type ConnectionState } from './stream.js';
 import type { UrlSettings } from './url-settings.js';
 import { backgroundOverride, backgroundScene, type BackgroundScene } from './weather-background.js';
-import { mountWeatherPanel, type WeatherPanel } from './weather-panel.js';
+import { fetchWeather, mountWeatherPanel, type WeatherPanel } from './weather-panel.js';
 
 const byId = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -90,28 +91,49 @@ async function enableSound(): Promise<void> {
   output.preload(['siren-two-tone.wav', 'siren-mechanical.wav', 'siren-yelp.wav', 'chime.wav', 'speech/all-clear.mp3', 'speech/strike-nearby.mp3']);
 }
 
-// First visit (no saved location, no ?lat&lon): the Start screen offers the browser's location. With it, "Start
-// display" watches it at the default radius and saves it; without it, "Set location" opens the picker. A saved
-// location is used as stored, and the browser's location is not asked for.
+// ---- Start screen ----
+// First visit (no saved location, no ?lat&lon): it offers the browser's location. With it, "Start display" watches
+// it at the default radius and saves it; without it, "Set location" opens the picker. A saved location is used as
+// stored, and the browser's location is not asked for. The line under the button names the place.
 const startButton = byId<HTMLButtonElement>('start-button');
-const startHint = byId<HTMLParagraphElement>('start-hint');
-const SOUND_HINT = 'Turns on sound. The alarm needs sound to warn you.';
+const startMessage = byId<HTMLParagraphElement>('start-message');
+/** Waits 30 s: the permission prompt may still be open. */
+const FIRST_VISIT_GEOLOCATION_MS = 30_000;
 let browserLocation: { lat: number; lon: number } | undefined;
+let findingLocation = false;
+/** Set while a demo session has ended: the Start button then reconnects. */
+let resumeSession: (() => void) | undefined;
+
+async function findBrowserLocation(): Promise<void> {
+  if (location || browserLocation || findingLocation) return;
+  findingLocation = true;
+  startMessage.textContent = START_MESSAGES.askingForLocation;
+  const here = await currentPosition(undefined, FIRST_VISIT_GEOLOCATION_MS);
+  findingLocation = false;
+  if (location) return;
+  browserLocation = here;
+  startButton.textContent = here ? 'Start display' : 'Set location';
+  if (!here) {
+    startMessage.textContent = START_MESSAGES.noLocation;
+    return;
+  }
+  startMessage.textContent = placeLabel(here);
+  const weather = await fetchWeather(here).catch(() => undefined);
+  if (!location) startMessage.textContent = placeLabel(here, weather);
+}
+
 if (!location) {
   startButton.textContent = 'Set location';
-  startHint.textContent = 'Allow your location to watch where you are, or choose a place on the map.';
-  void currentPosition().then((here) => {
-    if (location) return;
-    browserLocation = here;
-    startButton.textContent = here ? 'Start display' : 'Set location';
-    startHint.textContent = here
-      ? `Watches ${defaultRadius(alerts.distanceUnit).value} ${alerts.distanceUnit} around your location. ${SOUND_HINT}`
-      : 'Choose a place on the map to watch for lightning.';
-  });
+  void findBrowserLocation();
+  // Allowed later, or after the first request gave up: ask again, so the button turns into "Start display".
+  onLocationGranted(() => void findBrowserLocation());
 }
 
 startButton.addEventListener('click', () => {
-  if (!location) {
+  if (resumeSession) {
+    resumeSession();
+    resumeSession = undefined;
+  } else if (!location) {
     if (!browserLocation) {
       window.location.assign('/location.html');
       return;
@@ -263,6 +285,8 @@ if (location) {
 function watch(watched: UrlSettings): void {
   weather = mountWeatherPanel(document.getElementById('weather'), watched.query, () => alerts, (report) => {
     if (!pinnedBackground) showBackground(backgroundScene(report));
+    // The Start screen names the place, unless it is saying the session ended.
+    if (!resumeSession) startMessage.textContent = placeLabel(watched.query, report);
   });
 
   // ?minutes= in the address pins a kiosk's countdown; otherwise the saved alert setting decides.
@@ -280,26 +304,38 @@ function watch(watched: UrlSettings): void {
   let connection: ConnectionState = 'connecting';
   const redraw = () => render(controller.view(Date.now()), connection, watched.radius, timeLimitMinutes);
 
-  openStream(
-    { ...watched.query, minutes: timeLimitMinutes },
-    {
-      onFlashes: (flashes) => {
-        controller.flashes(flashes, Date.now());
-        redraw();
+  const connect = () =>
+    openStream(
+      { ...watched.query, minutes: timeLimitMinutes },
+      {
+        onFlashes: (flashes) => {
+          controller.flashes(flashes, Date.now());
+          redraw();
+        },
+        onHeartbeat: (heartbeat) => {
+          if (heartbeat.latestFileEndMs !== null) {
+            controller.heartbeat({ latestFileEndMs: heartbeat.latestFileEndMs, serverTimeMs: heartbeat.serverTimeMs }, Date.now());
+          }
+          redraw();
+        },
+        onConnection: (state) => {
+          connection = state;
+          if (state === 'ended') {
+            controller.sessionEnded(Date.now());
+            // Back to the Start screen; its button reconnects, and the replay brings back any countdown.
+            startButton.textContent = 'Start display';
+            startMessage.textContent = START_MESSAGES.sessionEnded;
+            start.hidden = false;
+            resumeSession = () => {
+              controller.sessionResumed(Date.now());
+              connect();
+            };
+          }
+          redraw();
+        },
       },
-      onHeartbeat: (heartbeat) => {
-        if (heartbeat.latestFileEndMs !== null) {
-          controller.heartbeat({ latestFileEndMs: heartbeat.latestFileEndMs, serverTimeMs: heartbeat.serverTimeMs }, Date.now());
-        }
-        redraw();
-      },
-      onConnection: (state) => {
-        connection = state;
-        if (state === 'ended') controller.sessionEnded(Date.now());
-        redraw();
-      },
-    },
-  );
+    );
+  connect();
   setInterval(() => {
     controller.tick(Date.now());
     redraw();

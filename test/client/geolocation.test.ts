@@ -19,6 +19,20 @@ describe('currentPosition', () => {
     await expect(currentPosition(refusing)).resolves.toBeUndefined();
   });
 
+  it('passes the timeout to the browser', async () => {
+    let timeout: number | undefined;
+    const geo: Geo = {
+      getCurrentPosition: (success, _error, options) => {
+        timeout = options?.timeout;
+        success({ coords: { latitude: 1, longitude: 2 } } as GeolocationPosition);
+      },
+    };
+    await currentPosition(geo, 30_000);
+    expect(timeout).toBe(30_000);
+    await currentPosition(geo);
+    expect(timeout).toBe(10_000);
+  });
+
   it('answers undefined without geolocation', async () => {
     await expect(currentPosition(undefined)).resolves.toBeUndefined();
   });

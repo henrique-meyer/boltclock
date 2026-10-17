@@ -264,6 +264,20 @@ describe('STALE overlay', () => {
     expect(events.map((e) => e.type)).toEqual(['alert']);
     expect(displayView(state, T0 + 32 * MIN)).toMatchObject({ mode: 'ALERT', stale: true, sessionEnded: true });
   });
+
+  it('resumes after the session ended, stale until fresh data, then clears as usual', () => {
+    const ended = run(fresh(settings()), [
+      [flashes(flash('a', T0, 8)), T0],
+      [{ type: 'session-ended' }, T0 + MIN],
+    ]).state;
+    const resumed = run(ended, [[{ type: 'session-resumed' }, T0 + 40 * MIN]]);
+    expect(resumed.events).toEqual([]);
+    expect(displayView(resumed.state, T0 + 40 * MIN)).toMatchObject({ mode: 'ALERT', stale: true, sessionEnded: false });
+
+    const fresh40 = run(resumed.state, [[heartbeat(T0 + 40 * MIN), T0 + 40 * MIN]]);
+    expect(fresh40.events).toEqual([{ type: 'all-clear' }]);
+    expect(displayView(fresh40.state, T0 + 40 * MIN)).toMatchObject({ mode: 'NORMAL', stale: false });
+  });
 });
 
 describe('dedupe and old flashes', () => {

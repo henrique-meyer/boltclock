@@ -45,6 +45,7 @@ flowchart TD
   s34[BOLT-34 alert text matches the announcement]
   s35[BOLT-35 first-visit Start screen]
   s36[BOLT-36 distance unit setting]
+  s38[BOLT-38 Start screen name, place, credit and session end]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -79,6 +80,7 @@ flowchart TD
   s21 --> s35
   s20 --> s35
   s24 --> s36
+  s35 --> s38
 ```
 
 ## Stories
@@ -296,3 +298,9 @@ Blocked by BOLT-20 and BOLT-21.
 Settings gains a "Distance" choice, miles (the default) or kilometres (Henrique, 2026-10-17). It is the saved radius's unit: changing it converts the saved radius (rounded to 0.1, within the 100 mi cap; 10 mi is 16.1 km) and restarts the display, whose text and announcements follow the radius's unit. Choosing a unit on the location picker and saving changes the setting too. With no location saved, it is the unit a new location starts with, on the picker and on the first-visit Start screen (10 mi, or 16.1 km). A kiosk address with `unit=` still wins on that screen.
 
 Blocked by BOLT-24 and BOLT-35.
+
+### BOLT-38 — Start screen: name, place, credit and the session-ended message
+
+Henrique, 2026-10-17. The Start screen shows "BoltClock" under the logo and, at the bottom, the main page's "Designed & built by Henrique Meyer · Source on GitHub" line without the disclaimers. The sound sentence under the button is gone; that line keeps its space and names the place being watched, from the weather relay's NWS lookup ("Orlando, FL"; the coordinates where NWS has no name). On a first visit it asks the user to allow their location, or to choose a place when there is none. Fixes a BOLT-35 bug: when the first location request failed or the prompt was answered late, the button stayed "Set location". The display now asks again when the permission turns to granted, and waits 30 s for the first answer. When a demo session ends, the display goes back to this screen with "Your session has ended. Press Start display to continue."; the button reconnects without a reload (the state machine's `session-resumed` input), and the data stays stale until a fresh heartbeat.
+
+Blocked by BOLT-35.
