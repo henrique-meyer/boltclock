@@ -171,6 +171,8 @@ async function start(): Promise<void> {
       point = stored.point;
       dirty = false;
       status.textContent = `Saved on this device: ${stored.radius.value} ${stored.radius.unit} around the pin.`;
+      // Straight back to the display, which starts watching the new point. A failed save stays here.
+      window.location.assign('/');
     } catch {
       status.textContent = 'This browser would not save the location. Check that site data is allowed.';
     }

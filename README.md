@@ -42,7 +42,7 @@ Add `--env-file .env.local` after `--env-file .env` to use the localhost key the
 Checks: `npm run lint`, `npm run typecheck` and `npm test`.
 
 ## Choosing the location
-Open `/location.html` (the "Location" link under the display). Search for a place, click the map or drag the pin, set the radius in miles or kilometres (10 mi by default, at most 100 mi or 160.9 km), and save. A search only moves the pin. The map opens on the browser's location if it is allowed, otherwise on the saved point.
+Open `/location.html` (the "Location" link under the display). Search for a place, click the map or drag the pin, set the radius in miles or kilometres (10 mi by default, at most 100 mi or 160.9 km), and save. Saving goes straight back to the display, which then watches the new point; if the browser will not save, the picker stays open and says why. A search only moves the pin. The map opens on the browser's location if it is allowed, otherwise on the saved point.
 
 Only the pin's coordinates and the radius are saved, in the browser's local storage on the display device. Addresses and search text are never stored or logged.
 

@@ -33,6 +33,7 @@ flowchart TD
   s21[BOLT-21 alarm display]
   s22[BOLT-22 weather relay and panel]
   s24[BOLT-24 clock and temperature units]
+  s25[BOLT-25 save returns to the display]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -53,6 +54,7 @@ flowchart TD
   s20 --> s21
   s10 --> s22
   s22 --> s24
+  s19 --> s25
 ```
 
 ## Stories
@@ -204,3 +206,9 @@ The display's "Replay the siren for each new strike during a countdown" setting 
 The display's settings add a clock choice, 12-hour ("3 PM", the default) or 24-hour ("15:00"), and a temperature choice, °F (the default) or °C (Henrique, 2026-10-17). Both are saved on the device with the other alert settings and apply to the weather panel at once, without a reload. NWS still reports °F; the panel converts and rounds to a whole degree. A forecast row's time, temperature and chance of precipitation never wrap onto a second line; only the condition text may wrap.
 
 Blocked by BOLT-22.
+
+### BOLT-25 — Save location returns to the display
+
+After a successful "Save location" on the picker, the browser goes straight back to the display, which starts watching the new point (Henrique, 2026-10-17). If the browser will not save (site data blocked), the picker stays open and shows the error as before.
+
+Blocked by BOLT-19.
