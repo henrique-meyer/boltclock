@@ -54,6 +54,10 @@ body {
   color: var(--bolt);
 }
 
+.status a {
+  color: inherit;
+}
+
 /* The credits-and-disclaimers line stays on one line on a display; the size floor lets it wrap on a phone. */
 .fineprint {
   padding: 1.5vh 4vw 2vh;

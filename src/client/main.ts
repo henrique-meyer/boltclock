@@ -1,17 +1,30 @@
 import './styles.css';
 import type { StreamFlash } from '../shared/messages.js';
 import { openStream, type ConnectionState } from './stream.js';
-import { readUrlSettings } from './url-settings.js';
+import { resolveDisplaySettings } from './display-settings.js';
+import type { KeyValueStore } from './location-settings.js';
 
 const status = document.querySelector<HTMLParagraphElement>('#status');
 
 /** Lightning data older than this is stale: no all-clear, and the display says so. */
 const STALE_AFTER_MS = 3 * 60_000;
 
-const settings = readUrlSettings(window.location.search);
+/** Reading window.localStorage throws when the browser blocks site data; the display then needs ?lat&lon. */
+function deviceStore(): KeyValueStore | undefined {
+  try {
+    return window.localStorage;
+  } catch {
+    return undefined;
+  }
+}
+
+const settings = resolveDisplaySettings(window.location.search, deviceStore());
 
 if (status && !settings) {
-  status.textContent = 'Add ?lat=…&lon=… to the address to watch a location.';
+  const link = document.createElement('a');
+  link.href = '/location.html';
+  link.textContent = 'Choose a location';
+  status.replaceChildren(link, ' to watch for lightning.');
 }
 
 if (status && settings) {

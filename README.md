@@ -46,6 +46,8 @@ Open `/location.html` (the "Location" link under the display). Search for a plac
 
 Only the pin's coordinates and the radius are saved, in the browser's local storage on the display device. Addresses and search text are never stored or logged.
 
+The display watches the saved location. A kiosk can be pinned to a point by its address instead, which overrides the saved one: `/?lat=28.54&lon=-81.38&radius=10&unit=mi&minutes=30` (`radius`, `unit` and `minutes` are optional).
+
 ## Google Maps key
 Each deployment brings its own Google Maps Platform key; none is in this repository. The server reads it from `GOOGLE_MAPS_API_KEY` at runtime and hands it to the location picker, so the same image works anywhere. A browser key is visible to every visitor, which is why its restrictions matter.
 
@@ -101,7 +103,7 @@ The sirens and the all-clear chime are generated in code by a script in this rep
   - `push/` streams nearby flashes to displays.
 - `src/functions/`: the Azure Function entry point for lightning ingest.
 - `src/shared/`: code for both server and browser (great-circle distance, grid cells).
-- `src/client/`: the browser display and the location picker (`location.html`), built with Vite. `stream.ts` is the push channel client. Until the display reads the saved location, it takes its point from the address: `?lat=…&lon=…&radius=10&unit=mi&minutes=30`.
+- `src/client/`: the browser display and the location picker (`location.html`), built with Vite. `stream.ts` is the push channel client. `display-settings.ts` picks the point the display watches: `?lat&lon` in the address, else the location saved by the picker (`location-settings.ts`).
 - `test/`: Vitest tests.
 - `scripts/audio/`: the scripts that make the sounds ([audio plan](docs/audio-plan.md)).
 - `assets/`: the logo. `logo.svg` is the app icon and favicon, `logo-mark.svg` has a transparent background, and both have PNG copies. The `-yellow` files are an alternate colourway that isn't in use. `assets/audio/` holds the sirens, the chime and the announcements.
