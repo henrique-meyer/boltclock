@@ -10,8 +10,6 @@
   --alert: #8f1c14;
   --alert-deep: #5c100c;
   --amber: #ffb300;
-  --hazard-dark: #1a0806;
-  --hazard-band: 2.4vh;
   color-scheme: dark;
 }
 
@@ -40,30 +38,9 @@ body {
   text-shadow: 0 0.04em 0.3em rgb(4 11 26 / 0.6);
 }
 
-/* ALERT: a red field framed by amber-and-black hazard bands, top and bottom, over any weather. */
+/* ALERT: the whole screen turns red, over any weather. No bands or frames: the countdown keeps the full height. */
 body.mode-alert {
   background: radial-gradient(circle at 50% 40%, var(--alert), var(--alert-deep));
-  padding-block: var(--hazard-band);
-}
-
-body.mode-alert::before,
-body.mode-alert::after {
-  content: "";
-  position: fixed;
-  left: 0;
-  right: 0;
-  height: var(--hazard-band);
-  background: repeating-linear-gradient(-45deg, var(--amber) 0 1.7vh, var(--hazard-dark) 1.7vh 3.4vh);
-  /* Over the "NO LIGHTNING DATA" overlay too: data going stale does not end an alert. */
-  z-index: 11;
-}
-
-body.mode-alert::before {
-  top: 0;
-}
-
-body.mode-alert::after {
-  bottom: 0;
 }
 
 button,
