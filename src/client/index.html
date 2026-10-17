@@ -16,9 +16,18 @@
       <span class="topbar-name">BoltClock</span>
       <p class="status" id="status" role="status">Checking the server…</p>
       <nav class="topbar-actions">
-        <button type="button" id="simulate" class="test-button" hidden>Simulate a strike</button>
-        <button type="button" id="open-settings">Settings</button>
-        <a href="/location.html">Location</a>
+        <button type="button" id="simulate" class="icon-button test-button" aria-label="Simulate a strike" title="Simulate a strike" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>
+        </button>
+        <button type="button" id="open-settings" class="icon-button" aria-label="Settings" title="Settings">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.61 9.53 L22.26 9.75 L22.26 14.25 L19.61 14.47 L19.13 15.63 L20.84 17.66 L17.66 20.84 L15.63 19.13 L14.47 19.61 L14.25 22.26 L9.75 22.26 L9.53 19.61 L8.37 19.13 L6.34 20.84 L3.16 17.66 L4.87 15.63 L4.39 14.47 L1.74 14.25 L1.74 9.75 L4.39 9.53 L4.87 8.37 L3.16 6.34 L6.34 3.16 L8.37 4.87 L9.53 4.39 L9.75 1.74 L14.25 1.74 L14.47 4.39 L15.63 4.87 L17.66 3.16 L20.84 6.34 L19.13 8.37Z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+        <a href="/location.html" class="icon-button" aria-label="Location" title="Location">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>
+        </a>
+        <button type="button" id="fullscreen" class="icon-button" aria-label="Full screen" title="Full screen (Esc or F11 to leave)" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg>
+        </button>
       </nav>
     </header>
 
@@ -40,7 +49,7 @@
     <div class="start" id="start">
       <img class="start-mark" src="/assets/logo-mark.svg" alt="">
       <button type="button" class="start-button" id="start-button">Start display</button>
-      <p class="start-hint">Turns on sound and full screen. The alarm needs sound to warn you.</p>
+      <p class="start-hint">Turns on sound. The alarm needs sound to warn you.</p>
     </div>
 
     <button type="button" class="sound-banner" id="sound-banner" hidden>Sound is off. Click to enable sound.</button>

@@ -35,6 +35,7 @@ flowchart TD
   s24[BOLT-24 clock and temperature units]
   s25[BOLT-25 save returns to the display]
   s26[BOLT-26 footer disclaimer line]
+  s27[BOLT-27 top-bar icons and full screen]
   s28[BOLT-28 weather backgrounds and alert styling]
   s2 --> s3
   s4 --> s10
@@ -51,13 +52,14 @@ flowchart TD
   s10 --> s18
   s10 --> s19
   s17 --> s20
-  s19 --> s20
+  s19 --> s20
   s18 --> s21
   s20 --> s21
   s10 --> s22
   s22 --> s24
   s19 --> s25
   s21 --> s26
+  s21 --> s27
   s21 --> s28
   s22 --> s28
 ```
@@ -221,6 +223,10 @@ Blocked by BOLT-19.
 ### BOLT-26 — Footer: disclaimers on their own line
 
 In the footer of the display and the location picker, the disclaimers ("Strike locations are accurate within ±5 miles. Not a certified lightning warning system. When thunder roars, go indoors. Strikes can be missed or arrive up to a minute late.") get their own line below the data credits. The picker's footer drops "Map and place search: Google Maps.": Google's attribution is the logo and data credit on the map, which stays, and the search suggestions already say "Search results from Google Maps".
+
+### BOLT-27 — Top bar: icon buttons and full screen on request
+
+**Start display** turns on sound only and no longer enters full screen. The top-bar buttons become icons with tooltips and accessible names: a lightning bolt for the test strike, a gear for Settings, a map pin for Location, and a new full-screen button to the right of Location, hidden where the browser cannot go full screen. In full screen, whether from the button or F11, the top-right buttons (test strike, Settings, Location, full screen) are hidden; Esc or F11 brings them back.
 
 ### BOLT-28 — Weather backgrounds and alert styling
 

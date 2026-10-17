@@ -138,6 +138,33 @@ button {
   display: none;
 }
 
+.topbar-actions .icon-button {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3em 0.45em;
+}
+
+.icon-button svg {
+  width: 1.6em;
+  height: 1.6em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* In full screen, from the button or from F11, the buttons hide. Esc or F11 leaves full screen. */
+:root:fullscreen .topbar-actions {
+  display: none;
+}
+
+@media (display-mode: fullscreen) {
+  .topbar-actions {
+    display: none;
+  }
+}
+
 /* ---- Stage: built to be read from 20 ft on a 21" monitor, so sizes follow the screen height ---- */
 .stage {
   flex: 1;

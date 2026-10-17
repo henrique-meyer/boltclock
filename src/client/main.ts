@@ -82,10 +82,16 @@ byId<HTMLButtonElement>('start-button').addEventListener('click', () => {
   started = true;
   start.hidden = true;
   void enableSound();
-  // Full screen is best effort: a kiosk browser may already be full screen, or refuse.
-  void document.documentElement.requestFullscreen?.().catch(() => {});
 });
 soundBanner.addEventListener('click', () => void enableSound());
+
+// Full screen only on request. In full screen the top-bar buttons hide (styles.css); Esc or F11 brings them back.
+const fullscreenButton = byId<HTMLButtonElement>('fullscreen');
+fullscreenButton.hidden = !document.fullscreenEnabled;
+fullscreenButton.addEventListener('click', () => {
+  // Best effort: a kiosk browser may refuse.
+  void document.documentElement.requestFullscreen().catch(() => {});
+});
 
 // ---- Settings dialog ----
 const dialog = byId<HTMLDialogElement>('settings');
