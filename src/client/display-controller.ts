@@ -5,6 +5,7 @@ import {
   rebuildDisplayState,
   serverNow,
   step,
+  timeLimitMs,
   type DisplayEvent,
   type DisplaySettings,
   type DisplayState,
@@ -20,7 +21,7 @@ export const TEST_FLASH_PREFIX = 'test-';
 
 export interface ControllerView extends DisplayView {
   /** The strike the alert shows (the latest one) is a simulated one. */
-  testStrike: boolean;
+  simulation: boolean;
   /** Seconds since the newest GLM file, or null before the first heartbeat. */
   dataAgeSeconds: number | null;
 }
@@ -33,6 +34,11 @@ export class DisplayController {
   private state: DisplayState;
   private replayed = false;
   private testCount = 0;
+  /**
+   * Server time until which something on screen may come from a Simulate button: a countdown length after the last
+   * press, since a simulated strike or a forced all-clear is part of what shows for that long. Null when all is real.
+   */
+  private simulatedUntilMs: number | null = null;
 
   constructor(
     private settings: DisplaySettings,
@@ -59,7 +65,10 @@ export class DisplayController {
       this.state = rebuildDisplayState(this.settings, flashes, nowMs, heartbeat && toHeartbeat(heartbeat));
       return;
     }
-    this.apply(step(this.state, { type: 'flashes', flashes }, nowMs));
+    const result = step(this.state, { type: 'flashes', flashes }, nowMs);
+    // A real strike now drives the screen: what it shows is real again.
+    if (result.events.some((event) => event.type !== 'all-clear')) this.simulatedUntilMs = null;
+    this.apply(result);
   }
 
   heartbeat(heartbeat: Heartbeat, nowMs: number): void {
@@ -88,6 +97,7 @@ export class DisplayController {
     const km = radiusKm(this.settings) * (0.05 + 0.9 * this.random());
     const { lat, lon } = destinationPoint(this.settings.point.lat, this.settings.point.lon, 360 * this.random(), km);
     const flash: Flash = { id: `${TEST_FLASH_PREFIX}${++this.testCount}`, timeMs: serverNow(this.state, nowMs), lat, lon };
+    this.markSimulated(nowMs);
     this.apply(step(this.state, { type: 'flashes', flashes: [flash] }, nowMs));
   }
 
@@ -95,8 +105,9 @@ export class DisplayController {
    * Test mode: ends a countdown at once with the all-clear sound, so a test can start over. Simulated strikes are
    * dropped; real ones stay, so a replayed real flash is still recognised.
    */
-  simulateAllClear(): void {
+  simulateAllClear(nowMs: number): void {
     if (this.state.mode !== 'ALERT') return;
+    this.markSimulated(nowMs);
     const strikes = new Map([...this.state.strikes].filter(([id]) => !id.startsWith(TEST_FLASH_PREFIX)));
     this.apply({
       state: { ...this.state, mode: 'NORMAL', countdownEndMs: null, strikes, latestStrikeId: null },
@@ -109,9 +120,13 @@ export class DisplayController {
     const heartbeat = this.state.heartbeat;
     return {
       ...view,
-      testStrike: view.latestStrike !== null && (this.state.latestStrikeId?.startsWith(TEST_FLASH_PREFIX) ?? false),
+      simulation: this.simulatedUntilMs !== null && serverNow(this.state, nowMs) < this.simulatedUntilMs,
       dataAgeSeconds: heartbeat ? Math.max(0, Math.round((serverNow(this.state, nowMs) - heartbeat.latestFileEndMs) / 1000)) : null,
     };
+  }
+
+  private markSimulated(nowMs: number): void {
+    this.simulatedUntilMs = serverNow(this.state, nowMs) + timeLimitMs(this.settings);
   }
 
   private apply(result: { state: DisplayState; events: DisplayEvent[] }): void {

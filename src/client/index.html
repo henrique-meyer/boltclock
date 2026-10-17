@@ -15,8 +15,8 @@
       <img class="topbar-mark" src="/assets/logo-mark.svg" alt="">
       <span class="topbar-name">BoltClock</span>
       <p class="status" id="status" role="status">Checking the server…</p>
-      <!-- In the top bar, so a test strike adds no height to the alarm (BOLT-45). -->
-      <p class="test-tag" id="test-tag" title="Simulated on this screen, not real lightning" hidden>Test strike: simulated, not real lightning</p>
+      <!-- Shown while anything on screen comes from a Simulate button (BOLT-46). Outside the buttons, so it stays in full screen. -->
+      <span class="sim-flag" id="sim-flag" title="Simulated on this screen, not real lightning data" hidden>SIMULATION</span>
       <nav class="topbar-actions">
         <button type="button" id="simulate-all-clear" class="icon-button test-button" aria-label="Simulate all clear" title="Simulate all clear" hidden>
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg><span class="button-label">Simulate all clear</span>

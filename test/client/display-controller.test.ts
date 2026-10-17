@@ -77,7 +77,7 @@ describe('DisplayController', () => {
 
     const view = controller.view(T0);
     expect(view.mode).toBe('ALERT');
-    expect(view.testStrike).toBe(true);
+    expect(view.simulation).toBe(true);
     expect(view.countdown).toBe('30:00');
     expect(heard).toEqual([{ kind: 'strike', distance: 5, unit: 'mi' }]);
   });
@@ -130,15 +130,34 @@ describe('DisplayController', () => {
     controller.simulateStrike(T0);
     heard.length = 0;
 
-    controller.simulateAllClear();
+    controller.simulateAllClear(T0);
     expect(heard).toEqual([{ kind: 'all-clear' }]);
     expect(controller.view(T0).mode).toBe('NORMAL');
-    expect(controller.view(T0).testStrike).toBe(false);
+    // A forced all-clear is simulated too.
+    expect(controller.view(T0).simulation).toBe(true);
 
     // The real flash is not news again, and a second press in NORMAL does nothing.
     controller.flashes([flashNorth('real', 4, T0)], T0);
-    controller.simulateAllClear();
+    controller.simulateAllClear(T0);
     expect(heard).toEqual([{ kind: 'all-clear' }]);
+  });
+
+  it('shows SIMULATION from either Simulate button until the screen is real again', () => {
+    const { controller, beat } = setup({ ...SETTINGS, replayAudioDuringCountdown: false }, () => 0.5);
+    controller.flashes([], T0);
+    beat(T0);
+    expect(controller.view(T0).simulation).toBe(false);
+
+    // A countdown length after the last press, nothing simulated can still be on screen.
+    controller.simulateStrike(T0);
+    expect(controller.view(T0 + 29 * 60_000).simulation).toBe(true);
+    expect(controller.view(T0 + 30 * 60_000).simulation).toBe(false);
+
+    // A real strike takes over at once.
+    controller.simulateStrike(T0 + 31 * 60_000);
+    expect(controller.view(T0 + 31 * 60_000).simulation).toBe(true);
+    controller.flashes([flashNorth('real', 4, T0 + 32 * 60_000)], T0 + 32 * 60_000);
+    expect(controller.view(T0 + 32 * 60_000).simulation).toBe(false);
   });
 
   it('gives each simulated strike its own test id, so a second one extends the countdown', () => {
@@ -164,7 +183,7 @@ describe('DisplayController', () => {
       { kind: 'strike', distance: 1, unit: 'mi' },
       { kind: 'strike', distance: 9, unit: 'mi', speechOnly: true },
     ]);
-    expect(controller.view(T0 + 60_000)).toMatchObject({ latestStrike: { distance: 9, unit: 'mi' }, testStrike: true });
+    expect(controller.view(T0 + 60_000)).toMatchObject({ latestStrike: { distance: 9, unit: 'mi' }, simulation: true });
   });
 
   it('switches the distance unit in place, keeping the countdown, and announces in the new unit', () => {
