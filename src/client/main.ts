@@ -320,7 +320,9 @@ function render(view: ControllerView, connection: ConnectionState, radius: { val
 
   const live = connection === 'open' ? 'Live' : connection === 'reconnecting' ? 'Reconnecting' : connection === 'connecting' ? 'Connecting' : 'Offline';
   const age = view.dataAgeSeconds === null ? 'no data yet' : `data ${view.dataAgeSeconds} s old`;
-  status.textContent = `${live} · ${age} · watching ${radius.value} ${radius.unit}`;
+  // During a countdown, say what it started at (BOLT-47); the countdown shows only what is left.
+  const countdownFrom = alert ? ` · Countdown from ${minutes} ${minutes === 1 ? 'minute' : 'minutes'}` : '';
+  status.textContent = `${live} · ${age} · watching ${radius.value} ${radius.unit}${countdownFrom}`;
 }
 
 if (location) {
