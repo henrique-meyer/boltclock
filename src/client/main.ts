@@ -24,7 +24,7 @@ import { DisplayController, type ControllerView } from './display-controller.js'
 import { currentDistanceUnit, resolveDisplaySettings, setDistanceUnit, startAtBrowserLocation } from './display-settings.js';
 import { currentPosition, onLocationGranted } from './geolocation.js';
 import { defaultRadius, type KeyValueStore } from './location-settings.js';
-import { placeLabel, START_MESSAGES } from './start-screen.js';
+import { placeLabel, START_MESSAGES, takeReturnToDisplay } from './start-screen.js';
 import { openStream, type ConnectionState } from './stream.js';
 import type { UrlSettings } from './url-settings.js';
 import { backgroundOverride, backgroundScene, type BackgroundScene } from './weather-background.js';
@@ -147,6 +147,14 @@ startButton.addEventListener('click', () => {
   void enableSound();
 });
 soundBanner.addEventListener('click', () => void enableSound());
+
+// Back from the location picker (Save location or Back to the display): straight to the main screen, unless there is
+// no location to watch. Sound may still be blocked without the Start click; the sound banner then asks for one.
+if (takeReturnToDisplay() && location) {
+  started = true;
+  start.hidden = true;
+  void enableSound();
+}
 
 // Full screen only on request. In full screen the top-bar buttons hide (styles.css); Esc or F11 brings them back.
 const fullscreenButton = byId<HTMLButtonElement>('fullscreen');
