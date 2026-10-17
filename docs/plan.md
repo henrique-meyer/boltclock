@@ -49,6 +49,7 @@ flowchart TD
   s37[BOLT-37 Simulation mode checkbox]
   s40[BOLT-40 distance unit applies in place]
   s41[BOLT-41 one forecast hour per line]
+  s39[BOLT-39 picker at /location]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -87,6 +88,7 @@ flowchart TD
   s29 --> s37
   s36 --> s40
   s22 --> s41
+  s19 --> s39
 ```
 
 ## Stories
@@ -328,3 +330,9 @@ Blocked by BOLT-36.
 Henrique, 2026-10-17. On a wide screen the two forecast hours sat side by side on one line. Each hour now has its own line on any width: the forecast list is a four-column grid (time, temperature, condition, chance), each row's cells sit in it directly, and the chance cell is always there (empty without a chance), so the columns line up.
 
 Blocked by BOLT-22.
+
+### BOLT-39 — Location picker at /location
+
+Henrique, 2026-10-17. The picker's address is `/location` instead of `/location.html`. The server serves `location.html` there, and `/location.html` redirects permanently (301) to `/location`, keeping its query string, so old links and bookmarks still work. Every link to the picker (the top bar's Location button, "Set location", "Choose a location") uses `/location`, and `npm run dev` rewrites `/location` the same way. The README and the system design use the new address.
+
+Blocked by BOLT-19.

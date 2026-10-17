@@ -16,7 +16,7 @@ import { readUrlSettings, type UrlSettings } from './url-settings.js';
 
 /**
  * The point and radius the display watches. ?lat&lon in the address wins, so a kiosk can be pinned to a point by
- * its URL. Otherwise the display uses the location saved on this device by /location.html, with the default time
+ * its URL. Otherwise the display uses the location saved on this device by /location, with the default time
  * window. Undefined when there is neither.
  */
 export function resolveDisplaySettings(search: string, store: KeyValueStore | undefined): UrlSettings | undefined {

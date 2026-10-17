@@ -59,6 +59,22 @@ describe('static files', () => {
     expect(bundle.headers['content-type']).toMatch(/javascript/);
   });
 
+  it('serves the location picker at /location and redirects the old .html address there', async () => {
+    app = await buildApp({ clientDir: tempDir({ 'index.html': '<h1>BoltClock</h1>', 'location.html': '<h1>Location</h1>' }) });
+
+    const page = await app.inject({ method: 'GET', url: '/location' });
+    expect(page.statusCode).toBe(200);
+    expect(page.headers['content-type']).toMatch(/^text\/html/);
+    expect(page.body).toContain('Location');
+
+    const old = await app.inject({ method: 'GET', url: '/location.html' });
+    expect(old.statusCode).toBe(301);
+    expect(old.headers.location).toBe('/location');
+
+    const withQuery = await app.inject({ method: 'GET', url: '/location.html?from=bookmark' });
+    expect(withQuery.headers.location).toBe('/location?from=bookmark');
+  });
+
   it('keeps /health when the client is served at /', async () => {
     app = await buildApp({ clientDir: tempDir({ 'index.html': '<h1>BoltClock</h1>' }) });
     const response = await app.inject({ method: 'GET', url: '/health' });

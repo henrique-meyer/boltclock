@@ -7,6 +7,20 @@ const server = 'http://localhost:8080';
 
 export default defineConfig({
   root: 'src/client',
+  plugins: [
+    {
+      // `npm run dev` serves the picker at /location too, as the server does (BOLT-39).
+      name: 'location-route',
+      configureServer(devServer) {
+        devServer.middlewares.use((request, _response, next) => {
+          if (request.url === '/location' || request.url?.startsWith('/location?')) {
+            request.url = request.url.replace('/location', '/location.html');
+          }
+          next();
+        });
+      },
+    },
+  ],
   publicDir: false,
   build: {
     outDir: '../../dist/client',

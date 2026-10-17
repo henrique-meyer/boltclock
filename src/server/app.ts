@@ -45,6 +45,12 @@ export async function buildApp(options: AppOptions = {}): Promise<FastifyInstanc
   }
   if (options.clientDir && existsSync(options.clientDir)) {
     await app.register(fastifyStatic, { root: options.clientDir, prefix: '/' });
+    // The picker's address is /location (BOLT-39). The old /location.html redirects there, keeping its query.
+    app.get('/location', (_request, reply) => reply.sendFile('location.html'));
+    app.get('/location.html', (request, reply) => {
+      const query = request.url.indexOf('?');
+      return reply.redirect(`/location${query === -1 ? '' : request.url.slice(query)}`, 301);
+    });
   }
 
   return app;

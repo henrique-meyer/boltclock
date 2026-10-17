@@ -136,7 +136,7 @@ startButton.addEventListener('click', () => {
     resumeSession = undefined;
   } else if (!location) {
     if (!browserLocation) {
-      window.location.assign('/location.html');
+      window.location.assign('/location');
       return;
     }
     location = startAtBrowserLocation(store, browserLocation, defaultRadius(alerts.distanceUnit));
@@ -316,7 +316,7 @@ if (location) {
 } else {
   headline.textContent = 'No location yet';
   const link = document.createElement('a');
-  link.href = '/location.html';
+  link.href = '/location';
   link.textContent = 'Choose a location';
   detail.replaceChildren(link, ' to watch for lightning.');
   status.textContent = 'Not watching anywhere yet.';
