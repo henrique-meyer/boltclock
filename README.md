@@ -48,8 +48,34 @@ Only the pin's coordinates and the radius are saved, in the browser's local stor
 
 The display watches the saved location. A kiosk can be pinned to a point by its address instead, which overrides the saved one: `/?lat=28.54&lon=-81.38&radius=10&unit=mi&minutes=30` (`radius`, `unit` and `minutes` are optional).
 
-## Google Maps key
-Each deployment brings its own Google Maps Platform key; none is in this repository. The server reads it from `GOOGLE_MAPS_API_KEY` at runtime and hands it to the location picker, so the same image works anywhere. A browser key is visible to every visitor, which is why its restrictions matter.
+## Using the display
+Press **Start display**. That one click turns on sound, which browsers only allow after a user gesture, and enters full screen. If sound is still off, a "click to enable sound" banner stays up until it's on.
+
+- **All clear:** the calm navy screen.
+- **Lightning nearby:** a strike inside the radius turns the screen red and starts an MM:SS countdown, counted from the strike's own time. It plays the siren, then "Lightning detected N miles away" (in the unit the radius was entered in). Each new strike in the radius restarts the countdown.
+- **All-clear sound:** when the countdown ends, a chime plays, then "No lightning detected in the area."
+- **NO LIGHTNING DATA:** shown over everything when the newest satellite file is more than 3 minutes old. The display never announces an all-clear while it shows.
+
+**Settings** (saved on this device):
+- the siren: two-tone, mechanical, yelp, or none;
+- the volume;
+- whether new strikes replay the siren during a countdown;
+- the countdown length: 30 minutes by default, at most 120. An address with `minutes=` pins it on a kiosk.
+
+The settings also have test buttons for both sounds.
+
+**Test mode:** with `TEST_MODE=true` (Bicep parameter `testMode`), the top bar offers **Simulate a strike**. It puts a fake strike at 60% of the radius through the same logic as a real one, labelled as a test on screen. It lives only in that browser tab: nothing is stored or sent. Keep it off on a real display.
+
+### Kiosk
+For an always-on screen, open the display in a browser's kiosk mode, with a flag that allows sound without a click. For example, Chrome:
+
+```bash
+chrome --kiosk --autoplay-policy=no-user-gesture-required "https://your-domain.example/?lat=28.54&lon=-81.38&radius=10&unit=mi"
+```
+
+The display still shows the Start button once. With that flag, the alarm can sound even before anyone presses it.
+
+## Google Maps keyEach deployment brings its own Google Maps Platform key; none is in this repository. The server reads it from `GOOGLE_MAPS_API_KEY` at runtime and hands it to the location picker, so the same image works anywhere. A browser key is visible to every visitor, which is why its restrictions matter.
 
 1. In the Google Cloud console, create a project with billing, and enable the **Maps JavaScript API** and **Places API (New)**.
 2. Create an API key and restrict it:
@@ -67,7 +93,7 @@ Each deployment brings its own Google Maps Platform key; none is in this reposit
 ## Tech stack
 - **Language and runtime:** TypeScript on Node 24 LTS for the server, the ingest function and the browser client ([ADR 0002](docs/decisions/0002-node-typescript.md)).
 - **Server:** Fastify, serving the display, `/health`, the push channel (server-sent events at `/api/stream`) and the weather relay (`/api/weather`).
-- **Client:** Vite and plain TypeScript, with no UI framework.
+- **Client:** Vite and plain TypeScript, with no UI framework. Sound is played with the Web Audio API, falling back to the browser's speech synthesis.
 - **Lightning data:** NOAA GOES-19 Geostationary Lightning Mapper (GLM-L2-LCFA) NetCDF4 files, read with `h5wasm` (the HDF5 library compiled to WebAssembly) ([format notes](docs/glm-format.md)).
 - **Ingest:** NOAA's new-object notifications (Amazon SNS) reach an AWS Lambda relay, then an Azure Function that verifies NOAA's signature and stores flashes in Azure Table Storage, partitioned by 1° grid cell ([ADR 0004](docs/decisions/0004-webhook-ingest-table-storage.md)).
 - **Weather and maps:** the National Weather Service API, and the Google Maps JavaScript API with Places for the location picker.
@@ -92,7 +118,7 @@ browser display ◀── Azure Container App (Fastify) ◀── reads nearby f
 [deploy.yml](.github/workflows/deploy.yml) publishes each image to GitHub Container Registry and deploys the container and the function.
 
 ## Sounds
-The sirens and the all-clear chime are generated in code by a script in this repo. The spoken announcements use the voice "Brian" from [ElevenLabs](https://elevenlabs.io).
+The sirens and the all-clear chime are generated in code by a script in this repo. The spoken announcements use the voice "Brian" from [ElevenLabs](https://elevenlabs.io), recorded in advance. The display plays them with the Web Audio API and never calls ElevenLabs. If a clip cannot load, the browser's own voice reads the same sentence.
 
 ## Project layout
 - `src/server/`: the Fastify server (`/health`, the push channel, the weather relay). Also:
@@ -104,7 +130,7 @@ The sirens and the all-clear chime are generated in code by a script in this rep
   - `weather/` relays api.weather.gov with the required User-Agent, cached and retried politely.
 - `src/functions/`: the Azure Function entry point for lightning ingest.
 - `src/shared/`: code for both server and browser (great-circle distance, grid cells, message and weather shapes).
-- `src/client/`: the browser display and the location picker (`location.html`), built with Vite. `stream.ts` is the push channel client. `display-settings.ts` picks the point the display watches: `?lat&lon` in the address, else the location saved by the picker (`location-settings.ts`). `weather-panel.ts` shows the weather for that point.
+- `src/client/`: the browser display and the location picker (`location.html`), built with Vite. `stream.ts` is the push channel client. `display-settings.ts` picks the point the display watches: `?lat&lon` in the address, else the location saved by the picker (`location-settings.ts`). `display-controller.ts` runs the state machine (`src/shared/display-state.ts`) for the page. `audio.ts` plays the sirens and announcements. `alert-settings.ts` keeps the sound and countdown settings. `weather-panel.ts` shows the weather for the point.
 - `test/`: Vitest tests.
 - `scripts/audio/`: the scripts that make the sounds ([audio plan](docs/audio-plan.md)).
 - `assets/`: the logo. `logo.svg` is the app icon and favicon, `logo-mark.svg` has a transparent background, and both have PNG copies. The `-yellow` files are an alternate colourway that isn't in use. `assets/audio/` holds the sirens, the chime and the announcements.

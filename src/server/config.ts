@@ -18,6 +18,8 @@ export interface Config {
   sessionLimitMinutes: number;
   /** Table Storage endpoint of the flash tables (ADR 0004). Empty: no flash store, and /api/stream answers 503. */
   strikesTableEndpoint: string;
+  /** Shows the display's "Simulate a strike" button (BOLT-21). Off unless TEST_MODE is exactly "true". */
+  testMode: boolean;
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
@@ -41,5 +43,6 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     publicBaseUrl: (env.PUBLIC_BASE_URL?.trim() || `http://localhost:${port}`).replace(/\/+$/, ''),
     sessionLimitMinutes,
     strikesTableEndpoint: (env.STRIKES_TABLE_ENDPOINT?.trim() ?? '').replace(/\/+$/, ''),
+    testMode: env.TEST_MODE?.trim().toLowerCase() === 'true',
   };
 }
