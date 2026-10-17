@@ -48,6 +48,7 @@ flowchart TD
   s38[BOLT-38 Start screen name, place, credit and session end]
   s37[BOLT-37 Simulation mode checkbox]
   s40[BOLT-40 distance unit applies in place]
+  s41[BOLT-41 one forecast hour per line]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -85,6 +86,7 @@ flowchart TD
   s35 --> s38
   s29 --> s37
   s36 --> s40
+  s22 --> s41
 ```
 
 ## Stories
@@ -320,3 +322,9 @@ Blocked by BOLT-29.
 Henrique, 2026-10-17. Changing Settings > Distance reloaded the page, which landed on the Start screen. The change now applies in place: the saved radius is converted as before (BOLT-36), and the display controller takes the new radius (`setRadius`), so the countdown and strikes stay while the text, the latest-strike distance and later announcements switch unit at once. A kiosk's `?unit=` still wins. "Test strike sound" without a saved location now speaks the setting's unit instead of always miles. Only a countdown-length change still reconnects.
 
 Blocked by BOLT-36.
+
+### BOLT-41 — Weather panel: one forecast hour per line
+
+Henrique, 2026-10-17. On a wide screen the two forecast hours sat side by side on one line. Each hour now has its own line on any width: the forecast list is a four-column grid (time, temperature, condition, chance), each row's cells sit in it directly, and the chance cell is always there (empty without a chance), so the columns line up.
+
+Blocked by BOLT-22.
