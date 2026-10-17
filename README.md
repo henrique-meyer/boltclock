@@ -40,7 +40,7 @@ Checks: `npm run lint`, `npm run typecheck` and `npm test`.
 
 ## Tech stack
 - **Language and runtime:** TypeScript on Node 24 LTS for the server, the ingest function and the browser client ([ADR 0002](docs/decisions/0002-node-typescript.md)).
-- **Server:** Fastify, serving the display, `/health` and, as they land, the push channel and weather relay.
+- **Server:** Fastify, serving the display, `/health`, the push channel (server-sent events at `/api/stream`) and, as it lands, the weather relay.
 - **Client:** Vite and plain TypeScript, with no UI framework.
 - **Lightning data:** NOAA GOES-19 Geostationary Lightning Mapper (GLM-L2-LCFA) NetCDF4 files, read with `h5wasm` (the HDF5 library compiled to WebAssembly) ([format notes](docs/glm-format.md)).
 - **Ingest:** NOAA's new-object notifications (Amazon SNS) reach an AWS Lambda relay, then an Azure Function that verifies NOAA's signature and stores flashes in Azure Table Storage, partitioned by 1° grid cell ([ADR 0004](docs/decisions/0004-webhook-ingest-table-storage.md)).
@@ -66,14 +66,15 @@ browser display ◀── Azure Container App (Fastify) ◀── reads nearby f
 [deploy.yml](.github/workflows/deploy.yml) publishes each image to GitHub Container Registry and deploys the container and the function.
 
 ## Project layout
-- `src/server/`: the Fastify server (`/health` now; push channel and weather relay to come). Also:
+- `src/server/`: the Fastify server (`/health`, the push channel; the weather relay to come). Also:
   - `glm/` reads GOES-19 GLM files;
   - `sns/` verifies SNS signatures;
   - `strikes/` stores and queries flashes;
-  - `ingest/` handles notifications.
+  - `ingest/` handles notifications;
+  - `push/` streams nearby flashes to displays.
 - `src/functions/`: the Azure Function entry point for lightning ingest.
 - `src/shared/`: code for both server and browser (great-circle distance, grid cells).
-- `src/client/`: the browser display, built with Vite.
+- `src/client/`: the browser display, built with Vite. `stream.ts` is the push channel client. Until the settings screen exists, the point comes from the address: `?lat=…&lon=…&radius=10&unit=mi&minutes=30`.
 - `test/`: Vitest tests.
 - `assets/`: the logo. `logo.svg` is the app icon and favicon, `logo-mark.svg` has a transparent background, and both have PNG copies. The `-yellow` files are an alternate colourway that isn't in use.
 - `docs/`: the [system design](docs/system-design.md), the [plan](docs/plan.md), and decisions in [docs/decisions](docs/decisions/).

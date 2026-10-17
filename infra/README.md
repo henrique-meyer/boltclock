@@ -24,11 +24,11 @@ The image comes from GitHub Container Registry as a public package, so the app n
 
 - Listens on `PORT` (8080).
 - `GET /health` answers `200 {"status":"ok"}` as soon as the process is up. It never depends on NOAA data freshness: stale lightning data is a warning on the display, not a reason to restart the container.
-- Reads `GOOGLE_MAPS_API_KEY`, `NWS_USER_AGENT`, `PUBLIC_BASE_URL` and `SESSION_LIMIT_MINUTES` from the environment.
+- Reads `GOOGLE_MAPS_API_KEY`, `NWS_USER_AGENT`, `PUBLIC_BASE_URL`, `SESSION_LIMIT_MINUTES` and `STRIKES_TABLE_ENDPOINT` from the environment. With the endpoint set, it reads the flash tables with its managed identity; without it, `/api/stream` answers 503.
 - With `SESSION_LIMIT_MINUTES` above 0, ends each display session after that many minutes, so a demo can scale back to zero.
 - Keeps no state on disk. On start it rebuilds the last 60 minutes of flashes from the GLM bucket, so restarts and new revisions lose nothing.
 - Logs to stdout. It never logs addresses or search text.
-- The ingress has a 240-second request timeout. The push channel sends a heartbeat every ~15 seconds, the browser reconnects when a stream drops, and the server replays its buffer on connect (flashes are deduplicated by id).
+- The ingress has a 240-second request timeout. The push channel (`GET /api/stream`) reads the flash tables and sends a heartbeat every ~15 seconds. The browser reconnects when a stream drops, the server replays the display's window on connect, and flashes are deduplicated by id. On shutdown the server closes open streams, so a new revision starts promptly.
 
 ## Cost
 
