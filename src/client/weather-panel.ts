@@ -57,11 +57,10 @@ function render(root: HTMLElement, view: WeatherPanelView): void {
           el('span', 'weather-hour-temp', hour.temperature),
           el('span', 'weather-hour-text', hour.text),
         );
-        if (hour.precipitation) {
-          const chance = el('span', 'weather-hour-precip', hour.precipitation);
-          chance.title = 'Chance of precipitation';
-          item.append(chance);
-        }
+        // Always a cell, empty without a chance, so the columns stay lined up.
+        const chance = el('span', 'weather-hour-precip', hour.precipitation);
+        if (hour.precipitation) chance.title = 'Chance of precipitation';
+        item.append(chance);
         list.append(item);
       }
       children.push(list);

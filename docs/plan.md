@@ -47,6 +47,7 @@ flowchart TD
   s36[BOLT-36 distance unit setting]
   s38[BOLT-38 Start screen name, place, credit and session end]
   s37[BOLT-37 Simulation mode checkbox]
+  s41[BOLT-41 one forecast hour per line]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -83,6 +84,7 @@ flowchart TD
   s24 --> s36
   s35 --> s38
   s29 --> s37
+  s22 --> s41
 ```
 
 ## Stories
@@ -312,3 +314,9 @@ Blocked by BOLT-35.
 Henrique, 2026-10-17. A "Simulation mode" checkbox sits at the bottom left of Settings, beside Done. It shows or hides the Simulate a strike and Simulate all clear buttons at once, with no reload. The deployment's `TEST_MODE` is only its default: the alert setting `simulation` is null until the device chooses, then true or false, saved with the other settings on that device. Other settings never pin it. A simulated countdown already running when it is turned off runs out as usual.
 
 Blocked by BOLT-29.
+
+### BOLT-41 — Weather panel: one forecast hour per line
+
+Henrique, 2026-10-17. On a wide screen the two forecast hours sat side by side on one line. Each hour now has its own line on any width: the forecast list is a four-column grid (time, temperature, condition, chance), each row's cells sit in it directly, and the chance cell is always there (empty without a chance), so the columns line up.
+
+Blocked by BOLT-22.
