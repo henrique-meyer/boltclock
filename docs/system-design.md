@@ -34,7 +34,7 @@ One container image serves the client, the push channel and the weather relay on
 - `GET /health` reports process health only. Stale lightning data is shown on the display, never used to restart the container.
 - Proxies may cut long-lived requests (Azure Container Apps: 240 s). The client reconnects, the server replays the buffer, and flashes are deduplicated by id.
 - Run it close to AWS us-east-1 for the lowest GLM latency.
-- Demo deployments ([ADR 0003](decisions/0003-demo-scale-to-zero.md)) scale to zero between visits and set a session limit. When the limit is reached, the server ends the push stream with a "session ended" event. The client stops reconnecting, treats the data as stale (so it never announces all-clear), and asks for a reload. After a cold start the display shows "NO LIGHTNING DATA" until the buffer is rebuilt.
+- Demo deployments ([ADR 0003](decisions/0003-demo-scale-to-zero.md)) scale to zero between visits and set a session limit. When the limit is reached, the server ends the push stream with a "session ended" event. The client stops reconnecting, treats the data as stale (so it never announces all-clear), and goes back to the Start screen with a session-ended message; its Start display button reconnects without a reload, and the replay restores any countdown. After a cold start the display shows "NO LIGHTNING DATA" until the buffer is rebuilt.
 
 ## Safety
 Not a certified lightning warning system. Disclose latency, positional error ("Strike locations are accurate within ±5 miles."), and missed detections.

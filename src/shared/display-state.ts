@@ -81,6 +81,8 @@ export type DisplayInput =
   | { type: 'flashes'; flashes: readonly Flash[] }
   | { type: 'heartbeat'; heartbeat: Heartbeat }
   | { type: 'session-ended' }
+  /** The display reconnected after a session ended (the Start button). Data stays stale until a fresh heartbeat. */
+  | { type: 'session-resumed' }
   /** The clock moved on. Send it about once a second while the display is up. */
   | { type: 'tick' };
 
@@ -186,6 +188,9 @@ export function step(
       break;
     case 'session-ended':
       next = { ...next, sessionEnded: true };
+      break;
+    case 'session-resumed':
+      next = { ...next, sessionEnded: false };
       break;
     case 'tick':
       break;

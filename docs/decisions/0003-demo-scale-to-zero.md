@@ -4,7 +4,7 @@ ADR 0001 keeps one replica running around the clock, because a real display is w
 
 A demo deployment therefore sets `minReplicas = 0`. Container Apps stops the replica when no request has been open for its cooldown period (five minutes by default), and an HTTP scale rule starts it again on the next request. A display's push stream is an open request, so the replica stays up while someone watches.
 
-To make sure an open display tab cannot keep the demo running forever, the server ends each display session after `SESSION_LIMIT_MINUTES` minutes (set through the `sessionLimitMinutes` parameter). It closes the stream with a "session ended" event. The display then stops reconnecting, says the demo session has ended, and asks for a reload. A session that has ended shows the data as stale and never announces all-clear, the same rule as any other loss of data. `0` means no limit.
+To make sure an open display tab cannot keep the demo running forever, the server ends each display session after `SESSION_LIMIT_MINUTES` minutes (set through the `sessionLimitMinutes` parameter). It closes the stream with a "session ended" event. The display then stops reconnecting and goes back to its Start screen, which says the session has ended; pressing Start display reconnects. A session that has ended shows the data as stale and never announces all-clear, the same rule as any other loss of data. `0` means no limit.
 
 Nothing else changes. The server is still stateless: a cold start rebuilds the last 60 minutes of flashes from the GLM bucket. The display shows "NO LIGHTNING DATA" until that finishes, which takes several seconds after the replica starts. There is still at most one replica.
 

@@ -262,8 +262,22 @@ button {
   display: none;
 }
 
+.start-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3vh;
+}
+
 .start-mark {
   height: 20vh;
+}
+
+.start-name {
+  margin: -1vh 0 0;
+  font-size: 6vh;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .start-button {
@@ -281,10 +295,25 @@ button {
   outline-offset: 4px;
 }
 
-.start-hint {
+.start-message {
   margin: 0;
+  /* One line's space even when empty, so the button never moves. */
+  min-height: 1.4em;
   font-size: 2.4vh;
   color: var(--outline);
+  text-align: center;
+}
+
+/* The credit line from the main page's footer, without the disclaimers. */
+.start-credit {
+  position: absolute;
+  bottom: 2vh;
+  left: 0;
+  right: 0;
+  margin: 0;
+  font-size: max(11px, 1.8vh);
+  color: var(--outline);
+  text-align: center;
 }
 
 .sound-banner {

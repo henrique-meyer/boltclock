@@ -61,6 +61,11 @@ export class DisplayController {
     this.apply(step(this.state, { type: 'session-ended' }, nowMs));
   }
 
+  /** The Start button reconnected after a session ended. */
+  sessionResumed(nowMs: number): void {
+    this.apply(step(this.state, { type: 'session-resumed' }, nowMs));
+  }
+
   tick(nowMs: number): void {
     this.apply(step(this.state, { type: 'tick' }, nowMs));
   }

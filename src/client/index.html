@@ -50,9 +50,14 @@
     </div>
 
     <div class="start" id="start">
-      <img class="start-mark" src="/assets/logo-mark.svg" alt="">
-      <button type="button" class="start-button" id="start-button">Start display</button>
-      <p class="start-hint" id="start-hint">Turns on sound. The alarm needs sound to warn you.</p>
+      <div class="start-main">
+        <img class="start-mark" src="/assets/logo-mark.svg" alt="">
+        <p class="start-name">BoltClock</p>
+        <button type="button" class="start-button" id="start-button">Start display</button>
+        <!-- The place, or a message such as "session ended". Its space stays when it is empty. -->
+        <p class="start-message" id="start-message" role="status"></p>
+      </div>
+      <p class="start-credit site-credit">Designed &amp; built by <a href="https://www.hmeyer.com" target="_blank" rel="noopener">Henrique Meyer</a> · <a href="https://github.com/henrique-meyer/boltclock" target="_blank" rel="noopener">Source on GitHub</a></p>
     </div>
 
     <button type="button" class="sound-banner" id="sound-banner" hidden>Sound is off. Click to enable sound.</button>
