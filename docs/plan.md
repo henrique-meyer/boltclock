@@ -30,6 +30,7 @@ flowchart TD
   s18[BOLT-18 display state machine]
   s19[BOLT-19 location picker]
   s20[BOLT-20 display uses the saved location]
+  s21[BOLT-21 alarm display]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -45,7 +46,9 @@ flowchart TD
   s10 --> s18
   s10 --> s19
   s17 --> s20
-  s19 --> s20
+  s19 --> s20
+  s18 --> s21
+  s20 --> s21
 ```
 
 ## Stories
@@ -164,3 +167,20 @@ Blocked by BOLT-10.
 The display stops requiring `?lat&lon` in the address and watches the point and radius saved by the BOLT-19 picker. `?lat&lon` (with optional `radius`, `unit` and `minutes`) still wins, so a kiosk can be pinned to a point by its URL; otherwise the saved location is used; with neither, the display links to `/location.html`. The saved radius, kept as entered, becomes the stream's `radiusKm` (miles converted, capped at the server limit), and the status line shows it in its own unit. The time window stays at the 30-minute default until the settings screen exists. `src/client/display-settings.ts` resolves this as a pure function, tested for the saved location, the address, both, and neither.
 
 Blocked by BOLT-17 and BOLT-19.
+
+### BOLT-21 — Alarm display: countdown, sound, Start button and test mode
+
+The display becomes the alarm (build steps 7 and 9, plus the test mode from step 10).
+
+- **States:** `src/client/display-controller.ts` runs the BOLT-18 state machine for the page. The first replay rebuilds silently, so a reload never re-sounds the siren. Later flashes, heartbeats and a one-second tick step it, and its events become announcements.
+- **Screens:**
+  - NORMAL: an all-clear screen.
+  - ALERT: a red screen with a countdown filling about 30% of the screen height, counted from the strike's time, and the nearest strike in the radius's unit.
+  - "NO LIGHTNING DATA": an overlay while data is stale or the session has ended.
+- **Sound** (`src/client/audio.ts`): A is siren, gap, distance sentence; B is chime, gap, all-clear sentence. A newer announcement interrupts the current one, the volume is a gain node, and the browser's speech reads any clip that fails to load. The sentences move to `src/shared/announcements.ts`, shared with the renderer.
+- **Start display** unlocks sound and enters full screen. A banner stays up while sound is locked.
+- **Device settings** (`alert-settings.ts`): siren, volume, replay during a countdown, countdown length (1–120), and test buttons. `?minutes=` pins the countdown on a kiosk.
+- **Test mode:** `TEST_MODE` (Bicep `testMode`, default off) shows "Simulate a strike", a local, labelled fake flash at 60% of the radius.
+- **Docs:** the README covers the display and a kiosk autoplay setup.
+
+Blocked by BOLT-18 and BOLT-20.

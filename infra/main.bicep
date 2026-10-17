@@ -47,6 +47,9 @@ param minReplicas int = 1
 @minValue(0)
 param sessionLimitMinutes int = 0
 
+@description('Show the display\'s "Simulate a strike" button, for demos and testing. Keep false for a real display.')
+param testMode bool = false
+
 @secure()
 @description('Browser key for the Google Maps JavaScript API and Places. Restrict it by HTTP referrer to your domain.')
 param googleMapsApiKey string
@@ -220,6 +223,10 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = if (deployApp) 
             {
               name: 'SESSION_LIMIT_MINUTES'
               value: string(sessionLimitMinutes)
+            }
+            {
+              name: 'TEST_MODE'
+              value: testMode ? 'true' : 'false'
             }
           ], deployIngest ? [
             {
