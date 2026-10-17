@@ -336,7 +336,7 @@ button {
   color: var(--outline);
 }
 
-/* The credits-and-disclaimers line stays on one line on a display; the size floor lets it wrap on a phone. */
+/* The credits line and the disclaimers line each stay on one line on a display; the size floor lets them wrap on a phone. */
 .fineprint {
   padding: 1.5vh 4vw 2vh;
   font-size: max(11px, min(1.8vh, 0.68vw));
