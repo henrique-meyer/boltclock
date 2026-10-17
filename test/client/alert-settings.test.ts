@@ -7,7 +7,7 @@ function memoryStore(initial: Record<string, string> = {}) {
 }
 
 describe('alert settings', () => {
-  it('defaults to a two-tone siren, 80% volume, replay off, the announcement on, a 30-minute countdown, a 12-hour clock and °F', () => {
+  it('defaults to a two-tone siren, 80% volume, replay off, the announcement on, a 30-minute countdown, a 12-hour clock, °F and miles', () => {
     expect(loadAlertSettings(memoryStore())).toEqual({
       siren: 'two-tone',
       volume: 0.8,
@@ -16,6 +16,7 @@ describe('alert settings', () => {
       timeLimitMinutes: 30,
       clock: '12h',
       temperatureUnit: 'F',
+      distanceUnit: 'mi',
     });
     expect(loadAlertSettings(undefined)).toEqual(DEFAULT_ALERT_SETTINGS);
   });
@@ -30,6 +31,7 @@ describe('alert settings', () => {
       timeLimitMinutes: 45,
       clock: '24h',
       temperatureUnit: 'C',
+      distanceUnit: 'km',
     });
 
     expect(loadAlertSettings(store)).toEqual(saved);
@@ -46,6 +48,7 @@ describe('alert settings', () => {
         timeLimitMinutes: 500,
         clock: 'metric',
         temperatureUnit: 'K',
+        distanceUnit: 'furlongs',
       }),
     ).toEqual({
       siren: 'two-tone',
@@ -55,6 +58,7 @@ describe('alert settings', () => {
       timeLimitMinutes: 30,
       clock: '12h',
       temperatureUnit: 'F',
+      distanceUnit: 'mi',
     });
     expect(normalizeAlertSettings({ volume: -1, timeLimitMinutes: 2.5 })).toMatchObject({ volume: 0, timeLimitMinutes: 30 });
     expect(normalizeAlertSettings({ siren: 'none', timeLimitMinutes: 120 })).toMatchObject({ siren: 'none', timeLimitMinutes: 120 });

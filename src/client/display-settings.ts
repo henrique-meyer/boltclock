@@ -1,5 +1,17 @@
 import { DEFAULT_TIME_LIMIT_MINUTES, KM_PER_MILE, MAX_RADIUS_KM } from '../shared/display-state.js';
-import { DEFAULT_RADIUS, loadLocation, normalizePoint, saveLocation, type KeyValueStore, type Point, type SavedLocation } from './location-settings.js';
+import type { RadiusUnit } from '../shared/display-state.js';
+import { saveAlertSettings, type AlertSettings } from './alert-settings.js';
+import {
+  convertRadius,
+  DEFAULT_RADIUS,
+  loadLocation,
+  normalizePoint,
+  saveLocation,
+  type KeyValueStore,
+  type Point,
+  type Radius,
+  type SavedLocation,
+} from './location-settings.js';
 import { readUrlSettings, type UrlSettings } from './url-settings.js';
 
 /**
@@ -28,12 +40,34 @@ export function settingsForLocation({ point, radius }: SavedLocation): UrlSettin
  * First visit: watch the browser's location with the default radius, and save it so later visits use it as stored.
  * The display still starts when storage refuses; it then asks again on the next visit.
  */
-export function startAtBrowserLocation(store: KeyValueStore | undefined, here: Point): UrlSettings {
-  const location: SavedLocation = { point: normalizePoint(here), radius: { ...DEFAULT_RADIUS } };
+export function startAtBrowserLocation(store: KeyValueStore | undefined, here: Point, radius: Radius = DEFAULT_RADIUS): UrlSettings {
+  const location: SavedLocation = { point: normalizePoint(here), radius: { ...radius } };
   try {
     if (store) saveLocation(store, location);
   } catch {
     // Site data blocked: watch for this visit only.
   }
   return settingsForLocation(location);
+}
+
+/** The distance unit Settings shows: the saved radius's unit when there is one, else the saved preference. */
+export function currentDistanceUnit(store: KeyValueStore | undefined, alerts: AlertSettings): RadiusUnit {
+  return (store && loadLocation(store)?.radius.unit) ?? alerts.distanceUnit;
+}
+
+/**
+ * Settings' distance unit (BOLT-36): saved with the alert settings, and a saved radius is converted to it, so the
+ * display, its announcements and the picker all use it. Returns the saved alert settings.
+ */
+export function setDistanceUnit(store: KeyValueStore | undefined, alerts: AlertSettings, unit: RadiusUnit): AlertSettings {
+  const next = saveAlertSettings(store, { ...alerts, distanceUnit: unit });
+  const saved = store && loadLocation(store);
+  if (store && saved && saved.radius.unit !== unit) {
+    try {
+      saveLocation(store, { point: saved.point, radius: convertRadius(saved.radius, unit) });
+    } catch {
+      // Site data blocked: nothing saved to convert.
+    }
+  }
+  return next;
 }

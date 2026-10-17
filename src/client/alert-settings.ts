@@ -1,4 +1,4 @@
-import { DEFAULT_TIME_LIMIT_MINUTES, MAX_TIME_LIMIT_MINUTES } from '../shared/display-state.js';
+import { DEFAULT_TIME_LIMIT_MINUTES, MAX_TIME_LIMIT_MINUTES, type RadiusUnit } from '../shared/display-state.js';
 import type { KeyValueStore } from './location-settings.js';
 
 /** How the display alerts and shows units, kept on the display device next to its location (there are no accounts). */
@@ -22,6 +22,9 @@ export const TEMPERATURE_UNITS = ['F', 'C'] as const;
 export type TemperatureUnit = (typeof TEMPERATURE_UNITS)[number];
 export const TEMPERATURE_LABELS: Record<TemperatureUnit, string> = { F: 'Fahrenheit (°F)', C: 'Celsius (°C)' };
 
+export const DISTANCE_UNITS = ['mi', 'km'] as const satisfies readonly RadiusUnit[];
+export const DISTANCE_LABELS: Record<RadiusUnit, string> = { mi: 'Miles', km: 'Kilometers' };
+
 /** How the display shows times and temperatures (BOLT-24). */
 export interface DisplayUnits {
   clock: ClockFormat;
@@ -41,6 +44,11 @@ export interface AlertSettings extends DisplayUnits {
   announcement: boolean;
   /** All-clear countdown, from the latest strike's time. 1 to 120 minutes. */
   timeLimitMinutes: number;
+  /**
+   * Miles or kilometres (BOLT-36): the saved radius's unit, kept in step with it, and the unit a new location starts
+   * with. Distances on screen and in announcements follow the radius's unit.
+   */
+  distanceUnit: RadiusUnit;
 }
 
 export const DEFAULT_ALERT_SETTINGS: AlertSettings = {
@@ -51,6 +59,7 @@ export const DEFAULT_ALERT_SETTINGS: AlertSettings = {
   timeLimitMinutes: DEFAULT_TIME_LIMIT_MINUTES,
   clock: '12h',
   temperatureUnit: 'F',
+  distanceUnit: 'mi',
 };
 
 /** Fills anything missing or out of range with the default, so a hand-edited or old value never breaks the display. */
@@ -70,6 +79,7 @@ export function normalizeAlertSettings(input: Partial<Record<keyof AlertSettings
     temperatureUnit: TEMPERATURE_UNITS.includes(input.temperatureUnit as TemperatureUnit)
       ? (input.temperatureUnit as TemperatureUnit)
       : DEFAULT_ALERT_SETTINGS.temperatureUnit,
+    distanceUnit: DISTANCE_UNITS.includes(input.distanceUnit as RadiusUnit) ? (input.distanceUnit as RadiusUnit) : DEFAULT_ALERT_SETTINGS.distanceUnit,
   };
 }
 

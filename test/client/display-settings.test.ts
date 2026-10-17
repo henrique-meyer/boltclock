@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { resolveDisplaySettings, startAtBrowserLocation } from '../../src/client/display-settings.js';
-import { loadLocation, LOCATION_STORAGE_KEY, type KeyValueStore } from '../../src/client/location-settings.js';
+import { DEFAULT_ALERT_SETTINGS, loadAlertSettings } from '../../src/client/alert-settings.js';
+import { currentDistanceUnit, resolveDisplaySettings, setDistanceUnit, startAtBrowserLocation } from '../../src/client/display-settings.js';
+import { convertRadius, defaultRadius, loadLocation, LOCATION_STORAGE_KEY, saveLocation, type KeyValueStore } from '../../src/client/location-settings.js';
 import { KM_PER_MILE, MAX_RADIUS_KM } from '../../src/shared/display-state.js';
 
 function storeWith(saved?: unknown): KeyValueStore {
@@ -84,5 +85,49 @@ describe('startAtBrowserLocation', () => {
     const refusing: KeyValueStore = { getItem: () => null, setItem: () => { throw new Error('blocked'); } };
     expect(startAtBrowserLocation(refusing, { lat: 1, lon: 2 })?.radius).toEqual({ value: 10, unit: 'mi' });
     expect(startAtBrowserLocation(undefined, { lat: 1, lon: 2 }).query).toMatchObject({ lat: 1, lon: 2 });
+  });
+});
+
+describe('distance unit', () => {
+  function memoryStore(): KeyValueStore {
+    const data = new Map<string, string>();
+    return { getItem: (k) => data.get(k) ?? null, setItem: (k, v) => void data.set(k, v) };
+  }
+
+  it('converts a radius to the other unit, rounded to 0.1 and within the cap', () => {
+    expect(convertRadius({ value: 10, unit: 'mi' }, 'km')).toEqual({ value: 16.1, unit: 'km' });
+    expect(convertRadius({ value: 16.1, unit: 'km' }, 'mi')).toEqual({ value: 10, unit: 'mi' });
+    expect(convertRadius({ value: 100, unit: 'mi' }, 'km')).toEqual({ value: 160.9, unit: 'km' });
+    expect(convertRadius({ value: 160.9, unit: 'km' }, 'mi')).toEqual({ value: 100, unit: 'mi' });
+    expect(convertRadius({ value: 0.1, unit: 'km' }, 'mi')).toEqual({ value: 0.1, unit: 'mi' });
+    expect(convertRadius({ value: 15, unit: 'km' }, 'km')).toEqual({ value: 15, unit: 'km' });
+    expect(defaultRadius('mi')).toEqual({ value: 10, unit: 'mi' });
+    expect(defaultRadius('km')).toEqual({ value: 16.1, unit: 'km' });
+  });
+
+  it('saves the unit and converts the saved radius, so the display uses it', () => {
+    const store = memoryStore();
+    saveLocation(store, { point: { lat: 28.5, lon: -81.4 }, radius: { value: 10, unit: 'mi' } });
+
+    const alerts = setDistanceUnit(store, DEFAULT_ALERT_SETTINGS, 'km');
+    expect(alerts.distanceUnit).toBe('km');
+    expect(loadAlertSettings(store).distanceUnit).toBe('km');
+    expect(loadLocation(store)?.radius).toEqual({ value: 16.1, unit: 'km' });
+    expect(resolveDisplaySettings('', store)?.radius).toEqual({ value: 16.1, unit: 'km' });
+  });
+
+  it('keeps the unit as the default for a location saved later', () => {
+    const store = memoryStore();
+    const alerts = setDistanceUnit(store, DEFAULT_ALERT_SETTINGS, 'km');
+    expect(loadLocation(store)).toBeUndefined();
+    expect(currentDistanceUnit(store, alerts)).toBe('km');
+    expect(startAtBrowserLocation(store, { lat: 1, lon: 2 }, defaultRadius(alerts.distanceUnit)).radius).toEqual({ value: 16.1, unit: 'km' });
+  });
+
+  it('shows the saved radius unit in Settings when it differs from the stored preference', () => {
+    const store = memoryStore();
+    saveLocation(store, { point: { lat: 0, lon: 0 }, radius: { value: 25, unit: 'km' } });
+    expect(currentDistanceUnit(store, DEFAULT_ALERT_SETTINGS)).toBe('km');
+    expect(currentDistanceUnit(undefined, DEFAULT_ALERT_SETTINGS)).toBe('mi');
   });
 });

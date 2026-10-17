@@ -3,6 +3,8 @@ import { fetchClientConfig } from './client-config.js';
 import {
   CLOCK_LABELS,
   CLOCKS,
+  DISTANCE_LABELS,
+  DISTANCE_UNITS,
   loadAlertSettings,
   saveAlertSettings,
   SIREN_LABELS,
@@ -16,10 +18,11 @@ import {
 } from './alert-settings.js';
 import { Announcer, WebAudioOutput, type Announcement } from './audio.js';
 import { mountBackdrop } from './backdrop.js';
+import type { RadiusUnit } from '../shared/display-state.js';
 import { DisplayController, type ControllerView } from './display-controller.js';
-import { resolveDisplaySettings, startAtBrowserLocation } from './display-settings.js';
+import { currentDistanceUnit, resolveDisplaySettings, setDistanceUnit, startAtBrowserLocation } from './display-settings.js';
 import { currentPosition } from './geolocation.js';
-import { DEFAULT_RADIUS, type KeyValueStore } from './location-settings.js';
+import { defaultRadius, type KeyValueStore } from './location-settings.js';
 import { openStream, type ConnectionState } from './stream.js';
 import type { UrlSettings } from './url-settings.js';
 import { backgroundOverride, backgroundScene, type BackgroundScene } from './weather-background.js';
@@ -102,7 +105,7 @@ if (!location) {
     browserLocation = here;
     startButton.textContent = here ? 'Start display' : 'Set location';
     startHint.textContent = here
-      ? `Watches ${DEFAULT_RADIUS.value} ${DEFAULT_RADIUS.unit} around your location. ${SOUND_HINT}`
+      ? `Watches ${defaultRadius(alerts.distanceUnit).value} ${alerts.distanceUnit} around your location. ${SOUND_HINT}`
       : 'Choose a place on the map to watch for lightning.';
   });
 }
@@ -113,7 +116,7 @@ startButton.addEventListener('click', () => {
       window.location.assign('/location.html');
       return;
     }
-    location = startAtBrowserLocation(store, browserLocation);
+    location = startAtBrowserLocation(store, browserLocation, defaultRadius(alerts.distanceUnit));
     watch(location);
   }
   started = true;
@@ -140,9 +143,11 @@ const silentWarning = byId<HTMLParagraphElement>('setting-silent');
 const minutesInput = byId<HTMLInputElement>('setting-minutes');
 const clockSelect = byId<HTMLSelectElement>('setting-clock');
 const temperatureSelect = byId<HTMLSelectElement>('setting-temperature');
+const distanceSelect = byId<HTMLSelectElement>('setting-distance');
 for (const id of SIRENS) sirenSelect.append(new Option(SIREN_LABELS[id], id));
 for (const id of CLOCKS) clockSelect.append(new Option(CLOCK_LABELS[id], id));
 for (const id of TEMPERATURE_UNITS) temperatureSelect.append(new Option(TEMPERATURE_LABELS[id], id));
+for (const id of DISTANCE_UNITS) distanceSelect.append(new Option(DISTANCE_LABELS[id], id));
 
 function fillSettingsForm(settings: AlertSettings): void {
   sirenSelect.value = settings.siren;
@@ -153,6 +158,7 @@ function fillSettingsForm(settings: AlertSettings): void {
   minutesInput.value = String(settings.timeLimitMinutes);
   clockSelect.value = settings.clock;
   temperatureSelect.value = settings.temperatureUnit;
+  distanceSelect.value = currentDistanceUnit(store, settings);
 }
 
 function readSettingsForm(): AlertSettings {
@@ -164,11 +170,15 @@ function readSettingsForm(): AlertSettings {
     timeLimitMinutes: Number(minutesInput.value),
     clock: clockSelect.value as ClockFormat,
     temperatureUnit: temperatureSelect.value as TemperatureUnit,
+    // Changed through setDistanceUnit when the dialog closes, which also converts the saved radius.
+    distanceUnit: alerts.distanceUnit,
   });
 }
 
+let distanceUnitWhenOpened = currentDistanceUnit(store, alerts);
 byId<HTMLButtonElement>('open-settings').addEventListener('click', () => {
   fillSettingsForm(alerts);
+  distanceUnitWhenOpened = distanceSelect.value as RadiusUnit;
   dialog.showModal();
 });
 volumeInput.addEventListener('input', () => output.setVolume(Number(volumeInput.value)));
@@ -184,8 +194,12 @@ dialog.addEventListener('close', () => {
   const previousMinutes = alerts.timeLimitMinutes;
   alerts = readSettingsForm();
   output.setVolume(alerts.volume);
-  // The countdown length is also the stream's replay window, so a change starts the display over.
-  if (alerts.timeLimitMinutes !== previousMinutes && location) window.location.reload();
+  const distanceUnit = distanceSelect.value as RadiusUnit;
+  const distanceChanged = distanceUnit !== distanceUnitWhenOpened;
+  if (distanceChanged) alerts = setDistanceUnit(store, alerts, distanceUnit);
+  // The countdown length is also the stream's replay window, and the distance unit is the radius's: either change
+  // starts the display over.
+  if ((alerts.timeLimitMinutes !== previousMinutes || distanceChanged) && location) window.location.reload();
 });
 byId<HTMLButtonElement>('test-strike-sound').addEventListener('click', async () => {
   await enableSound();

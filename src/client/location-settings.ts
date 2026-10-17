@@ -1,4 +1,4 @@
-import { MAX_RADIUS_KM, MAX_RADIUS_MI, type RadiusUnit } from '../shared/display-state.js';
+import { KM_PER_MILE, MAX_RADIUS_KM, MAX_RADIUS_MI, type RadiusUnit } from '../shared/display-state.js';
 import { normalizeLon } from '../shared/geo.js';
 
 /**
@@ -30,6 +30,18 @@ export type KeyValueStore = Pick<Storage, 'getItem' | 'setItem'>;
 
 export function maxRadius(unit: RadiusUnit): number {
   return unit === 'km' ? MAX_RADIUS_KM : MAX_RADIUS_MI;
+}
+
+/** The radius in the other unit, rounded to 0.1 and kept within the cap: 10 mi is 16.1 km, and 16.1 km is 10 mi. */
+export function convertRadius(radius: Radius, unit: RadiusUnit): Radius {
+  if (radius.unit === unit) return { ...radius };
+  const value = unit === 'km' ? radius.value * KM_PER_MILE : radius.value / KM_PER_MILE;
+  return { value: Math.min(Math.max(Math.round(value * 10) / 10, 0.1), maxRadius(unit)), unit };
+}
+
+/** The radius a new location starts with: 10 mi, or 16.1 km. */
+export function defaultRadius(unit: RadiusUnit): Radius {
+  return convertRadius(DEFAULT_RADIUS, unit);
 }
 
 export function isValidPoint(point: Point): boolean {

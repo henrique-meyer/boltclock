@@ -65,7 +65,8 @@ Press **Start display**. That one click turns on sound, which browsers only allo
 - whether the announcement is spoken after the siren or chime (on by default; with no siren and no announcement, alerts are silent);
 - the countdown length: 30 minutes by default, at most 120. An address with `minutes=` pins it on a kiosk;
 - the clock for forecast times: 12-hour (the default) or 24-hour;
-- the temperature unit: °F (the default) or °C.
+- the temperature unit: °F (the default) or °C;
+- the distance unit: miles (the default) or kilometres. It is the saved radius's unit: changing it converts the radius (10 mi becomes 16.1 km), and choosing a unit on the location picker changes it too. A location saved later starts in it.
 
 The settings also have test buttons for both sounds.
 
