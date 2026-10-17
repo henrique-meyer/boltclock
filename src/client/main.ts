@@ -25,6 +25,7 @@ import { DisplayController, type ControllerView } from './display-controller.js'
 import { currentDistanceUnit, resolveDisplaySettings, setDistanceUnit, startAtBrowserLocation } from './display-settings.js';
 import { currentPosition, onLocationGranted } from './geolocation.js';
 import { defaultRadius, type KeyValueStore } from './location-settings.js';
+import { formatSessionLeft, sessionEndOnDisplayClock } from './session.js';
 import { placeLabel, START_MESSAGES, takeReturnToDisplay } from './start-screen.js';
 import { openStream, type ConnectionState } from './stream.js';
 import type { UrlSettings } from './url-settings.js';
@@ -312,6 +313,10 @@ void clientConfig
   .catch(() => {});
 applySimulation();
 
+const sessionExpires = byId<HTMLSpanElement>('session-expires');
+/** When the demo session ends, on the display's clock; null without a session limit (BOLT-51). */
+let sessionEndsAtMs: number | null = null;
+
 function render(view: ControllerView, connection: ConnectionState, radius: { value: number; unit: string }, minutes: number): void {
   const alert = view.mode === 'ALERT';
   document.body.classList.toggle('mode-alert', alert);
@@ -338,6 +343,11 @@ function render(view: ControllerView, connection: ConnectionState, radius: { val
     Date.now() - watchingSinceMs < FIRST_DATA_WAIT_MS;
   loading.hidden = !waitingForFirstData;
   stale.hidden = !view.stale || waitingForFirstData;
+
+  // With a session limit, the footer counts down to it, on the data-sources line.
+  const sessionLeft = sessionEndsAtMs !== null && !view.sessionEnded;
+  sessionExpires.hidden = !sessionLeft;
+  if (sessionLeft) sessionExpires.textContent = ` Session expires: ${formatSessionLeft(sessionEndsAtMs! - Date.now())}`;
   staleDetail.textContent = view.sessionEnded
     ? 'Demo session ended. Reload the page to continue.'
     : connection === 'failed'
@@ -401,6 +411,7 @@ function watch(watched: UrlSettings): void {
           redraw();
         },
         onHeartbeat: (heartbeat) => {
+          sessionEndsAtMs = sessionEndOnDisplayClock(heartbeat, Date.now());
           if (heartbeat.latestFileEndMs !== null) {
             controller.heartbeat({ latestFileEndMs: heartbeat.latestFileEndMs, serverTimeMs: heartbeat.serverTimeMs }, Date.now());
           }

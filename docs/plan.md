@@ -60,6 +60,7 @@ flowchart TD
   s49[BOLT-49 loading spinner]
   s52[BOLT-52 Settings reset and title]
   s50[BOLT-50 phone layout]
+  s51[BOLT-51 session countdown in the footer]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -109,6 +110,7 @@ flowchart TD
   s21 --> s49
   s37 --> s52
   s45 --> s50
+  s38 --> s51
 ```
 
 ## Stories
@@ -416,3 +418,9 @@ Blocked by BOLT-37.
 Henrique, 2026-10-17. On a phone or a very narrow window the display's text overlapped: its sizes follow the screen height, for a wall display read from across the room. Below 720px wide the display now stacks instead. Sizes follow the width, and the top bar wraps: the logo and name sit with the buttons (icons only) on the first row, and the SIMULATION flag and the status go on the next. The alarm, the weather and the footer stack in order, the forecast's condition column takes the width that is left, and the page scrolls if it must. Screens 720px and wider are untouched. The Start screen, Settings and the location page already worked.
 
 Blocked by BOLT-45.
+
+### BOLT-51 — Footer shows the time left in a demo session
+
+Henrique, 2026-10-17. With a session limit (`SESSION_LIMIT_MINUTES` above 0), the footer's data-sources line ends with "Session expires: H:mm", counting down to the end of the session. Each connection's session runs from its own start, so every heartbeat now carries `sessionEndsAtMs` (null without a limit). The display moves it onto its own clock with the heartbeat's server time, so a display whose clock is off still counts right. It hides without a limit and once the session has ended.
+
+Blocked by BOLT-38.

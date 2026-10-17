@@ -25,6 +25,8 @@ export interface HeartbeatMessage {
   /** End time of the newest GLM file ingested, UTC ms, or null before the first one. */
   latestFileEndMs: number | null;
   serverTimeMs: number;
+  /** When the server ends this connection's session (SESSION_LIMIT_MINUTES), UTC ms; null without a limit (BOLT-51). */
+  sessionEndsAtMs: number | null;
 }
 
 /** The demo's session limit was reached (ADR 0003). The display stops reconnecting and asks for a reload. */
