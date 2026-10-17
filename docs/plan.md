@@ -22,10 +22,12 @@ flowchart TD
   s7[BOLT-7 provision, DNS, domain]
   s8[BOLT-8 logo]
   s10[BOLT-10 stack and scaffold]
+  s12[BOLT-12 audio assets]
   s14[BOLT-14 demo scale to zero]
   s15[BOLT-15 webhook ingest and flash storage]
   s16[BOLT-16 GLM parser]
   s17[BOLT-17 push channel]
+  s18[BOLT-18 display state machine]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -33,10 +35,12 @@ flowchart TD
   s3 --> s5
   s3 --> s7
   s5 --> s7
+  s10 --> s12
   s10 --> s14
   s14 --> s7
   s16 --> s15
   s15 --> s17
+  s10 --> s18
 ```
 
 ## Stories
@@ -99,6 +103,17 @@ Blocked by BOLT-4 and BOLT-5.
 
 The deploy identity's Reader assignment on the resource group used a role definition ID that does not exist, so the first deploy failed on it with `RoleDefinitionDoesNotExist`. Use the built-in Reader ID, `acdd72a7-3385-48ef-bd42-f606fba81ae7`, and redeploy.
 
+### BOLT-12 — Audio assets: selectable siren, announcements, chime
+
+The sound files only; playback, sequencing, the autoplay unlock and the settings screen come in a later story.
+
+- **Siren**, chosen in settings: No siren, Two-tone (hi-lo, mildest), Mechanical (slow civil-defense wail) or Yelp (fast sweeps, most urgent). A script synthesizes them, so they are original, and renders them to `assets/audio/`. "No siren" goes straight to the announcement.
+- **Announcements**: whole sentences rendered in advance with ElevenLabs instead of spliced numbers, so the intonation stays natural. "Lightning detected N miles away" for 0–100 and "N kilometers away" for 0–161, with "1 mile", "less than 1 mile" for 0, plus "Lightning detected in the area." without a distance and "No lightning detected in the area." A development-time script fixes the voice, model and settings. The 265 MP3 files are committed as rendered, and the app loads only the clip it needs. `ELEVENLABS_API_KEY` is read from `.env` by the script only, never by the running app.
+- **Chime**: a rising three-note bell before the all-clear, synthesized like the sirens.
+- **Docs**: [audio-plan.md](audio-plan.md) updated for the siren choice and the pre-rendered clips, and the README credits the sounds.
+
+Blocked by BOLT-10.
+
 ### BOLT-14 — Demo hosting: scale to zero and a session time limit
 
 The hosted instance is a demo, so it scales to zero between visits instead of running around the clock ([decisions/0003-demo-scale-to-zero.md](decisions/0003-demo-scale-to-zero.md)). Bicep gains `minReplicas` (0 or 1) with an HTTP scale rule, and `sessionLimitMinutes`, passed to the app as `SESSION_LIMIT_MINUTES`. The server reads and validates it; the push channel story enforces it by ending the stream with a `session ended` event, after which the display stops reconnecting, treats the data as stale and asks for a reload. The deploy workflow wakes a scaled-to-zero revision while it waits for health. The system design, `infra/README.md`, the README and `.env.example` describe it.
@@ -122,3 +137,9 @@ Blocks BOLT-15.
 `GET /api/stream?lat&lon&radiusKm&minutes` opens a server-sent events stream (build step 3). On connect it replays the flashes within the radius from the display's time-limit window, read from the BOLT-15 flash tables with the container app's managed identity, followed by a heartbeat with the newest GLM file end time. Every ~15 s it reads again, looking back three minutes for late files, and sends only flashes this connection hasn't seen, plus a heartbeat. If a read fails it skips the heartbeat, so the display goes stale. After `SESSION_LIMIT_MINUTES` it sends `session-ended` and closes (ADR 0003). On shutdown, open streams are closed. Message shapes live in `src/shared/messages.ts`. The browser client `src/client/stream.ts` reconnects automatically, drops replayed duplicates, and stops after a session ends. Until the settings screen exists, the display reads its point from the address and shows connection state, data age and the nearby strike count in the status line.
 
 Blocked by BOLT-15.
+
+### BOLT-18 — Display state machine
+
+`src/shared/display-state.ts` is the display's state machine as a pure module with no DOM, timers or network. It takes flashes, heartbeats, the session-ended signal, the clock and the display settings, and returns the next state, the events to announce (alert, repeat, all-clear) and a view model (state, MM:SS countdown, nearest recent strike in the unit the radius was entered in, stale flag). The countdown runs from the strike time on the server's clock; another strike extends it, with a repeat only when the replay setting is on; all-clear waits while the data is stale (newest GLM file over 3 minutes old, no heartbeat yet, or the session ended). Flashes are deduplicated by id and ignored once older than the time limit. A page load rebuilds the state from the server's replay without announcing; a reconnect's replay is deduplicated. Tests cover each rule.
+
+Blocked by BOLT-10.
