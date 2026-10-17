@@ -16,6 +16,8 @@ export interface Config {
    * 0 means no limit (ADR 0003).
    */
   sessionLimitMinutes: number;
+  /** Table Storage endpoint of the flash tables (ADR 0004). Empty: no flash store, and /api/stream answers 503. */
+  strikesTableEndpoint: string;
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
@@ -38,5 +40,6 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     nwsUserAgent: env.NWS_USER_AGENT?.trim() ?? '',
     publicBaseUrl: (env.PUBLIC_BASE_URL?.trim() || `http://localhost:${port}`).replace(/\/+$/, ''),
     sessionLimitMinutes,
+    strikesTableEndpoint: (env.STRIKES_TABLE_ENDPOINT?.trim() ?? '').replace(/\/+$/, ''),
   };
 }

@@ -26,6 +26,7 @@ flowchart TD
   s14[BOLT-14 demo scale to zero]
   s15[BOLT-15 webhook ingest and flash storage]
   s16[BOLT-16 GLM parser]
+  s17[BOLT-17 push channel]
   s18[BOLT-18 display state machine]
   s19[BOLT-19 location picker]
   s2 --> s3
@@ -39,6 +40,7 @@ flowchart TD
   s10 --> s14
   s14 --> s7
   s16 --> s15
+  s15 --> s17
   s10 --> s18
   s10 --> s19
 ```
@@ -114,6 +116,10 @@ The sound files only; playback, sequencing, the autoplay unlock and the settings
 
 Blocked by BOLT-10.
 
+### BOLT-13 — Move the GitHub Actions to their Node 24 majors
+
+GitHub warns that the actions in `pr.yml` and `deploy.yml` run on the deprecated Node 20. Move them to the current majors, which run on Node 24: `actions/checkout` v7, `actions/setup-node` v7, `docker/setup-buildx-action` v4, `docker/login-action` v4, `docker/metadata-action` v6, `docker/build-push-action` v7 and `azure/login` v3. Their breaking changes do not touch the inputs the workflows use. `ubuntu-latest` moves to Ubuntu 26.04 from 2026-10-19 and stays: the workflows need only bash, curl, Docker with Buildx and the Azure CLI, which both images have. The deploy gating and the secret names do not change.
+
 ### BOLT-14 — Demo hosting: scale to zero and a session time limit
 
 The hosted instance is a demo, so it scales to zero between visits instead of running around the clock ([decisions/0003-demo-scale-to-zero.md](decisions/0003-demo-scale-to-zero.md)). Bicep gains `minReplicas` (0 or 1) with an HTTP scale rule, and `sessionLimitMinutes`, passed to the app as `SESSION_LIMIT_MINUTES`. The server reads and validates it; the push channel story enforces it by ending the stream with a `session ended` event, after which the display stops reconnecting, treats the data as stale and asks for a reload. The deploy workflow wakes a scaled-to-zero revision while it waits for health. The system design, `infra/README.md`, the README and `.env.example` describe it.
@@ -131,6 +137,12 @@ Blocked by BOLT-16.
 `src/server/glm/parse.ts` reads one GOES-19 GLM-L2-LCFA file with `h5wasm` and returns its coverage window and flashes (id, time, latitude, longitude, quality), applying `_Unsigned`, `scale_factor`, `add_offset` and the `units` base time the way a NetCDF reader would. Degraded flashes are left out by default. `src/server/glm/filename.ts` reads times from object names and builds hourly prefixes, across day and year boundaries. Tests compare a committed real file with an independent `xarray` read of it and cover empty files, year rollover and unsigned ids. [glm-format.md](glm-format.md) documents the variables and the flash counts measured for BOLT-15.
 
 Blocks BOLT-15.
+
+### BOLT-17 — Push channel: nearby strikes and heartbeats over SSE
+
+`GET /api/stream?lat&lon&radiusKm&minutes` opens a server-sent events stream (build step 3). On connect it replays the flashes within the radius from the display's time-limit window, read from the BOLT-15 flash tables with the container app's managed identity, followed by a heartbeat with the newest GLM file end time. Every ~15 s it reads again, looking back three minutes for late files, and sends only flashes this connection hasn't seen, plus a heartbeat. If a read fails it skips the heartbeat, so the display goes stale. After `SESSION_LIMIT_MINUTES` it sends `session-ended` and closes (ADR 0003). On shutdown, open streams are closed. Message shapes live in `src/shared/messages.ts`. The browser client `src/client/stream.ts` reconnects automatically, drops replayed duplicates, and stops after a session ends. Until the settings screen exists, the display reads its point from the address and shows connection state, data age and the nearby strike count in the status line.
+
+Blocked by BOLT-15.
 
 ### BOLT-18 — Display state machine
 

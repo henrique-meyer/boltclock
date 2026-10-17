@@ -90,7 +90,10 @@ export interface StrikeQuery {
 }
 
 export interface Strike {
+  /** GLM flash id, unique within its file. */
   id: number;
+  /** Start of the GLM file the flash came from; with id it identifies the flash globally. */
+  fileStartMs: number;
   timeMs: number;
   lat: number;
   lon: number;
@@ -115,7 +118,7 @@ export async function queryStrikes(store: TableStore, query: StrikeQuery): Promi
     const distance = distanceKm(query.lat, query.lon, row.lat, row.lon);
     if (distance > query.radiusKm) continue;
     seen.add(row.rowKey);
-    strikes.push({ id: row.id, timeMs: row.timeMs, lat: row.lat, lon: row.lon, distanceKm: distance });
+    strikes.push({ id: row.id, fileStartMs: row.fileStartMs, timeMs: row.timeMs, lat: row.lat, lon: row.lon, distanceKm: distance });
   }
   return strikes.sort((a, b) => a.timeMs - b.timeMs);
 }
