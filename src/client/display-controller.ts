@@ -35,11 +35,20 @@ export class DisplayController {
   private testCount = 0;
 
   constructor(
-    private readonly settings: DisplaySettings,
+    private settings: DisplaySettings,
     private readonly announce: (announcement: Announcement) => void,
     private readonly random: () => number = Math.random,
   ) {
     this.state = createDisplayState(settings);
+  }
+
+  /**
+   * A new radius in place (BOLT-40), such as the same circle in the other unit after Settings' distance changed. The
+   * countdown and the strikes stay; distances on screen and in later announcements use the new unit.
+   */
+  setRadius(radius: DisplaySettings['radius']): void {
+    this.settings = { ...this.settings, radius };
+    this.state = { ...this.state, settings: { ...this.state.settings, radius } };
   }
 
   flashes(flashes: readonly Flash[], nowMs: number): void {

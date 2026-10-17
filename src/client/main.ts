@@ -221,14 +221,23 @@ dialog.addEventListener('close', () => {
   output.setVolume(alerts.volume);
   const distanceUnit = distanceSelect.value as RadiusUnit;
   const distanceChanged = distanceUnit !== distanceUnitWhenOpened;
-  if (distanceChanged) alerts = setDistanceUnit(store, alerts, distanceUnit);
-  // The countdown length is also the stream's replay window, and the distance unit is the radius's: either change
-  // starts the display over.
-  if ((alerts.timeLimitMinutes !== previousMinutes || distanceChanged) && location) window.location.reload();
+  if (distanceChanged) {
+    alerts = setDistanceUnit(store, alerts, distanceUnit);
+    // Applied in place, no reload: the same circle in the new unit. A kiosk's ?unit= still wins.
+    const next = resolveDisplaySettings(window.location.search, store);
+    if (location && next) {
+      location = next;
+      changeRadius?.(next.radius);
+    }
+  }
+  // The countdown length is also the stream's replay window, so a change starts the display over.
+  if (alerts.timeLimitMinutes !== previousMinutes && location) window.location.reload();
 });
 byId<HTMLButtonElement>('test-strike-sound').addEventListener('click', async () => {
   await enableSound();
-  void announcer.announce({ kind: 'strike', distance: Math.round(location?.radius.value ?? 10), unit: location?.radius.unit ?? 'mi' });
+  // In the watched radius's unit, which follows Settings' distance; without a location, in that setting's unit.
+  const radius = location?.radius ?? defaultRadius(alerts.distanceUnit);
+  void announcer.announce({ kind: 'strike', distance: Math.round(radius.value), unit: radius.unit });
 });
 byId<HTMLButtonElement>('test-all-clear-sound').addEventListener('click', async () => {
   await enableSound();
@@ -249,6 +258,8 @@ const simulationInput = byId<HTMLInputElement>('setting-simulation');
 let deploymentTestMode = false;
 /** Simulation mode: the Simulate buttons show. */
 let testMode = false;
+/** Switches the watched radius in place (a distance-unit change); set once the display is watching a point. */
+let changeRadius: ((radius: UrlSettings['radius']) => void) | undefined;
 /** Redraws the display after a mode change; set once the display is watching a point. */
 let redrawDisplay: (() => void) | undefined;
 
@@ -332,7 +343,13 @@ function watch(watched: UrlSettings): void {
     announce,
   );
   let connection: ConnectionState = 'connecting';
-  const redraw = () => render(controller.view(Date.now()), connection, watched.radius, timeLimitMinutes);
+  let radius = watched.radius;
+  const redraw = () => render(controller.view(Date.now()), connection, radius, timeLimitMinutes);
+  changeRadius = (next) => {
+    radius = next;
+    controller.setRadius(next);
+    redraw();
+  };
 
   const connect = () =>
     openStream(
