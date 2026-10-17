@@ -40,6 +40,7 @@ flowchart TD
   s30[BOLT-30 picker opens on the saved pin]
   s29[BOLT-29 test mode and announcement setting]
   s32[BOLT-32 icon-only buttons setting]
+  s31[BOLT-31 use current location link]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -68,6 +69,7 @@ flowchart TD
   s19 --> s30
   s21 --> s29
   s27 --> s32
+  s19 --> s31
 ```
 
 ## Stories
@@ -255,3 +257,9 @@ With a saved point, `/location.html` centers on that pin and frames its radius, 
 ### BOLT-32 — BUTTON_ICONS_ONLY: icon-only or labelled top-bar buttons
 
 Each top-right button shows its icon and a text label (Simulate all clear, Simulate a strike, Settings, Location, Full screen). A deployment setting, `BUTTON_ICONS_ONLY` (Bicep `buttonIconsOnly`, default `false`), shows the icons alone instead, with the names kept as tooltips and accessible labels. The server passes it to the browser in `GET /api/client-config` next to `testMode`; the display fetches that once. `.env.example`, `infra/README.md` and the README describe it.
+
+### BOLT-31 — Location picker: "Use current location" link
+
+Under the picker's "Point: lat, lon" readout, a "Use current location" link moves the pin to the browser's current location and centres the map on it, framing the radius circle (Henrique, 2026-10-17). The link shows only while the browser's location is allowed: after the page got a position, or when the geolocation permission is granted, and it hides at once if the permission is revoked. If no position comes back, the picker says so and the pin stays put. Like any pin move, the new point is kept only after "Save location".
+
+Blocked by BOLT-19.

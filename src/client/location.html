@@ -40,7 +40,11 @@
           <p class="field-error" id="radius-error" role="alert" hidden></p>
         </fieldset>
 
-        <p class="point" id="point-readout">No point set yet.</p>
+        <div class="point-block">
+          <p class="point" id="point-readout">No point set yet.</p>
+          <!-- Shown only while the browser's location is allowed. -->
+          <button type="button" class="link-button" id="use-here" hidden>Use current location</button>
+        </div>
         <button id="save" type="button" disabled>Save location</button>
         <p class="picker-status" id="picker-status" role="status"></p>
       </section>
