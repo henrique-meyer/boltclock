@@ -1,9 +1,10 @@
 import './styles.css';
 import './location.css';
+import { loadAlertSettings, saveAlertSettings } from './alert-settings.js';
 import { fetchClientConfig, loadGoogleMaps } from './client-config.js';
 import { currentPosition } from './geolocation.js';
 import {
-  DEFAULT_RADIUS,
+  defaultRadius,
   loadLocation,
   normalizePoint,
   parseRadius,
@@ -33,7 +34,8 @@ const mapElement = el<HTMLDivElement>('map');
 
 const saved = loadLocation(localStorage);
 let point: Point | undefined = saved?.point;
-let radius: Radius | undefined = saved?.radius ?? DEFAULT_RADIUS;
+// A new location starts in the distance unit chosen in the display's settings (BOLT-36).
+let radius: Radius | undefined = saved?.radius ?? defaultRadius(loadAlertSettings(localStorage).distanceUnit);
 let dirty = false;
 
 radiusValue.value = String(radius.value);
@@ -185,6 +187,8 @@ async function start(): Promise<void> {
       const stored = saveLocation(localStorage, { point, radius });
       point = stored.point;
       dirty = false;
+      // The picker's unit is the display's distance setting too.
+      saveAlertSettings(localStorage, { ...loadAlertSettings(localStorage), distanceUnit: stored.radius.unit });
       status.textContent = `Saved on this device: ${stored.radius.value} ${stored.radius.unit} around the pin.`;
       // Straight back to the display, which starts watching the new point. A failed save stays here.
       window.location.assign('/');

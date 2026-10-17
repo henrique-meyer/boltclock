@@ -44,6 +44,7 @@ flowchart TD
   s33[BOLT-33 alert without hazard bands]
   s34[BOLT-34 alert text matches the announcement]
   s35[BOLT-35 first-visit Start screen]
+  s36[BOLT-36 distance unit setting]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -77,6 +78,7 @@ flowchart TD
   s29 --> s34
   s21 --> s35
   s20 --> s35
+  s24 --> s36
 ```
 
 ## Stories
@@ -288,3 +290,9 @@ Blocked by BOLT-29.
 With no saved location and no `?lat&lon`, the display shows the Start screen instead of "No location yet" (Henrique, 2026-10-17). It asks for the browser's location on load. Until a position arrives the button reads "Set location", which opens the picker; when one arrives it reads "Start display", which saves that point with the default 10 mi radius and starts the display (sound on, main screen) without a reload. If storage refuses, the display still watches for this visit. A saved location is used as stored: the browser's location is not asked for and never replaces it. `currentPosition` moves to `src/client/geolocation.ts`, shared with the picker.
 
 Blocked by BOLT-20 and BOLT-21.
+
+### BOLT-36 — Settings: distance unit, shared with the location picker
+
+Settings gains a "Distance" choice, miles (the default) or kilometres (Henrique, 2026-10-17). It is the saved radius's unit: changing it converts the saved radius (rounded to 0.1, within the 100 mi cap; 10 mi is 16.1 km) and restarts the display, whose text and announcements follow the radius's unit. Choosing a unit on the location picker and saving changes the setting too. With no location saved, it is the unit a new location starts with, on the picker and on the first-visit Start screen (10 mi, or 16.1 km). A kiosk address with `unit=` still wins on that screen.
+
+Blocked by BOLT-24 and BOLT-35.
