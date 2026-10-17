@@ -139,17 +139,18 @@ async function start(): Promise<void> {
     }
   };
 
-  // "Use current location" shows only while the browser's location is allowed: after a position came back, or when
-  // the permission is granted. A permission change (revoked in the site settings, say) shows or hides it at once.
+  // "Use current location" shows whenever the browser can give its location: it has geolocation and the permission is
+  // not denied (BOLT-48). "prompt" counts, since Chrome's "Allow this time" and Safari report it even when location
+  // works; a click then asks. A permission change (blocked in the site settings, say) shows or hides it at once.
   const allowLocation = (allowed: boolean) => {
     useHere.hidden = !allowed;
   };
-  allowLocation(here !== undefined);
+  allowLocation('geolocation' in navigator);
   navigator.permissions
     ?.query({ name: 'geolocation' })
     .then((permission) => {
-      allowLocation(here !== undefined ? permission.state !== 'denied' : permission.state === 'granted');
-      permission.addEventListener('change', () => allowLocation(permission.state === 'granted'));
+      allowLocation(permission.state !== 'denied');
+      permission.addEventListener('change', () => allowLocation(permission.state !== 'denied'));
     })
     .catch(() => {});
 

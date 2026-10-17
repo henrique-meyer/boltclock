@@ -56,6 +56,7 @@ flowchart TD
   s45[BOLT-45 alert screen fits 1080p]
   s46[BOLT-46 SIMULATION flag]
   s47[BOLT-47 countdown length in the status]
+  s48[BOLT-48 use current location shows]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -101,6 +102,7 @@ flowchart TD
   s28 --> s45
   s45 --> s46
   s21 --> s47
+  s31 --> s48
 ```
 
 ## Stories
@@ -384,3 +386,9 @@ Blocked by BOLT-45.
 Henrique, 2026-10-17. Nothing on screen said what the all-clear countdown started at. During a countdown the top bar's status line ends with one more bullet, "· Countdown from 30 minutes", using the countdown length in effect (the setting, or a kiosk's `minutes=`). In ALL CLEAR it is not shown.
 
 Blocked by BOLT-21.
+
+### BOLT-48 — "Use current location" hidden although the location works (bug)
+
+Henrique, 2026-10-17. With a saved pin the picker does not ask for the location on load (BOLT-30), so the BOLT-31 link showed only when the Permissions API said "granted". Chrome's "Allow this time" and Safari report "prompt" even when location works, so the link stayed hidden. It now shows whenever the browser has geolocation and the permission is not "denied", hides at once if the permission becomes denied, and a click asks for the location when needed.
+
+Blocked by BOLT-31.
