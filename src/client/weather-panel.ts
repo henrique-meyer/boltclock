@@ -75,12 +75,14 @@ function render(root: HTMLElement, view: WeatherPanelView): void {
  * Shows current weather and the next hours for a point in the display's weather slot (`.weather`), refreshing about
  * every 10 minutes like the relay's observations. The panel draws inside its own wrapper, so the slot's place in the
  * display's layout stays the layout's business. Does nothing without a slot. `units` is read on every draw, so the
- * display's clock and temperature settings apply as soon as `redraw` is called.
+ * display's clock and temperature settings apply as soon as `redraw` is called. `onWeather` hears each answer the
+ * relay gives (not failures), so the display's background follows the same requests.
  */
 export function mountWeatherPanel(
   slot: HTMLElement | null,
   point: { lat: number; lon: number },
   units: () => DisplayUnits = () => DEFAULT_UNITS,
+  onWeather: (weather: WeatherResponse) => void = () => {},
 ): WeatherPanel {
   if (!slot) return { redraw: () => {}, stop: () => {} };
   slot.classList.add('weather');
@@ -114,6 +116,7 @@ export function mountWeatherPanel(
       nextMs = RETRY_MS;
     }
     if (stopped) return;
+    if (!failed && last) onWeather(last);
     draw(failed);
     refreshTimer = setTimeout(() => void refresh(), nextMs);
   };

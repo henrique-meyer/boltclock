@@ -36,6 +36,7 @@ flowchart TD
   s25[BOLT-25 save returns to the display]
   s26[BOLT-26 footer disclaimer line]
   s27[BOLT-27 top-bar icons and full screen]
+  s28[BOLT-28 weather backgrounds and alert styling]
   s29[BOLT-29 test mode and announcement setting]
   s2 --> s3
   s4 --> s10
@@ -60,6 +61,8 @@ flowchart TD
   s19 --> s25
   s21 --> s26
   s21 --> s27
+  s21 --> s28
+  s22 --> s28
   s21 --> s29
 ```
 
@@ -226,6 +229,12 @@ In the footer of the display and the location picker, the disclaimers ("Strike l
 ### BOLT-27 — Top bar: icon buttons and full screen on request
 
 **Start display** turns on sound only and no longer enters full screen. The top-bar buttons become icons with tooltips and accessible names: a lightning bolt for the test strike, a gear for Settings, a map pin for Location, and a new full-screen button to the right of Location, hidden where the browser cannot go full screen. In full screen, whether from the button or F11, the top-right buttons (test strike, Settings, Location, full screen) are hidden; Esc or F11 brings them back.
+
+### BOLT-28 — Weather backgrounds and alert styling
+
+Build step 8. The display's full-screen background matches the current weather: clear day, clear night, cloudy, rain, thunderstorm, fog, snow and wind, plus a neutral navy while the weather is unknown. `src/client/weather-background.ts` picks the scene as a pure function: the current observation's condition, else the first forecast hour's, else neutral (also outside NWS coverage and before the first answer). A failed refresh keeps the last scene, and `?background=<scene>` previews one. The weather panel reports each answer through a callback, so there is no second poller; the display sets `data-weather` on the body and draws the scene. The art is original inline SVG and CSS in the brand colours, with no images. Every sky keeps paper text at 7:1 contrast or better, motion is slow and stops under `prefers-reduced-motion`, and scenes crossfade. ALERT hides the weather art and shows a red field with amber-and-black hazard bands, so it never looks like the thunderstorm scene (dark indigo, no red or amber). Tests cover the mapping, the preview parameter, the sky and alert contrast, and the art markup.
+
+Blocked by BOLT-21 and BOLT-22.
 
 ### BOLT-29 — Test mode and the announcement setting
 

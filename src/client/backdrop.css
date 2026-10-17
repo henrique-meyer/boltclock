@@ -1,0 +1,124 @@
+/*
+ * The weather backdrop (backdrop.ts, art in backdrop-art.ts): a fixed layer behind everything on the display. Motion
+ * is slow on purpose, since the screen is on all day, and stops entirely for viewers who ask for reduced motion.
+ * Only transforms and opacity animate, so the browser composites the layers instead of repainting them.
+ */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--navy, #0c2340);
+}
+
+/* ALERT owns the whole screen: no weather art under it, so it never reads as a storm scene. */
+.mode-alert .backdrop {
+  display: none;
+}
+
+.bg-scene {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 2.4s ease;
+}
+
+.bg-scene--shown {
+  opacity: 1;
+}
+
+/* Visible overflow: a drifting layer still draws the art just past its edge, so no seam shows as it moves. */
+.bg-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.bg-drift-slow {
+  animation: bg-drift 150s ease-in-out infinite alternate;
+}
+
+.bg-drift-fast {
+  animation: bg-drift 95s ease-in-out infinite alternate-reverse;
+}
+
+.bg-drift-wind {
+  animation: bg-drift-wide 40s ease-in-out infinite alternate;
+}
+
+@keyframes bg-drift {
+  from {
+    transform: translate3d(-2.5vw, 0, 0);
+  }
+
+  to {
+    transform: translate3d(2.5vw, 0, 0);
+  }
+}
+
+@keyframes bg-drift-wide {
+  from {
+    transform: translate3d(-5vw, 0, 0);
+  }
+
+  to {
+    transform: translate3d(5vw, 0, 0);
+  }
+}
+
+/*
+ * Rain and snow: a tile repeated over a layer one tile larger than the screen, moved by exactly one tile per loop so
+ * the loop is seamless. --fall-x is the tile's width for slanted rain and 0 for snow.
+ */
+.bg-precip {
+  --tile-w: 3.2vh;
+  --tile-h: 12.8vh;
+  --fall-x: var(--tile-w);
+  position: absolute;
+  left: 0;
+  top: calc(-1 * var(--tile-h));
+  width: calc(100% + var(--tile-w));
+  height: calc(100% + var(--tile-h));
+  background-size: var(--tile-w) var(--tile-h);
+  animation: bg-fall 2.6s linear infinite;
+}
+
+.bg-rain--heavy {
+  animation-duration: 2.1s;
+}
+
+.bg-snow--far {
+  --tile-w: 29vh;
+  --tile-h: 29vh;
+  --fall-x: 0px;
+  animation-duration: 60s;
+}
+
+.bg-snow--near {
+  --tile-w: 43vh;
+  --tile-h: 43vh;
+  --fall-x: 0px;
+  animation-duration: 48s;
+}
+
+@keyframes bg-fall {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(calc(-1 * var(--fall-x)), var(--tile-h), 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-scene,
+  .bg-layer,
+  .bg-precip {
+    animation: none;
+    transition: none;
+  }
+}
