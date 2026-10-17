@@ -56,6 +56,7 @@ flowchart TD
   s45[BOLT-45 alert screen fits 1080p]
   s46[BOLT-46 SIMULATION flag]
   s47[BOLT-47 countdown length in the status]
+  s49[BOLT-49 loading spinner]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -101,6 +102,7 @@ flowchart TD
   s28 --> s45
   s45 --> s46
   s21 --> s47
+  s21 --> s49
 ```
 
 ## Stories
@@ -381,6 +383,12 @@ Blocked by BOLT-45.
 
 ### BOLT-47 — Status line shows the countdown length during a countdown
 
-Henrique, 2026-10-17. Nothing on screen said what the all-clear countdown started at. During a countdown the top bar's status line ends with one more bullet, "· Countdown from 30 minutes", using the countdown length in effect (the setting, or a kiosk's `minutes=`). In ALL CLEAR it is not shown.
+Henrique, 2026-10-17. Nothing on screen said what the all-clear countdown started at. During a countdown the top bar's status line ends with one more bullet, "· countdown 30 minutes" (first "Countdown from 30 minutes"; shortened at Henrique's request), using the countdown length in effect (the setting, or a kiosk's `minutes=`). In ALL CLEAR it is not shown.
+
+Blocked by BOLT-21.
+
+### BOLT-49 — Loading spinner while the first data loads
+
+Henrique, 2026-10-17. "NO LIGHTNING DATA" flashed for a moment every time the display started, before the first data arrived. While the display waits for its first heartbeat, it now shows a large, slow spinner on the same veil instead. NO LIGHTNING DATA shows only when the data is really missing: the feed failed, the data went old after having been fresh, the session ended, or nothing arrived within 15 seconds. Either way there is still no all-clear.
 
 Blocked by BOLT-21.

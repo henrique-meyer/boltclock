@@ -259,6 +259,11 @@ const detail = byId<HTMLParagraphElement>('detail');
 const simFlag = byId<HTMLSpanElement>('sim-flag');
 const stale = byId<HTMLDivElement>('stale');
 const staleDetail = byId<HTMLParagraphElement>('stale-detail');
+const loading = byId<HTMLDivElement>('loading');
+/** How long the spinner may stand in for the first data before NO LIGHTNING DATA shows (BOLT-49). */
+const FIRST_DATA_WAIT_MS = 15_000;
+/** When the display started watching; the first data's wait counts from here. */
+let watchingSinceMs = Date.now();
 const simulateAllClear = byId<HTMLButtonElement>('simulate-all-clear');
 const simulateStrike = byId<HTMLButtonElement>('simulate');
 const simulationInput = byId<HTMLInputElement>('setting-simulation');
@@ -311,7 +316,17 @@ function render(view: ControllerView, connection: ConnectionState, radius: { val
     ? `${view.latestStrike ? `Latest strike ${view.latestStrike.distance} ${view.latestStrike.unit} away. ` : ''}Stay indoors until the countdown ends.`
     : `No lightning within ${radius.value} ${radius.unit} in the last ${minutes} minutes.`;
 
-  stale.hidden = !view.stale;
+  // Until the first data arrives, a spinner instead of NO LIGHTNING DATA: the warning is for data that is really
+  // missing (a failed feed, data gone old, a session that ended, or nothing after FIRST_DATA_WAIT_MS), not for the
+  // moment it takes to load. Either way there is no all-clear.
+  const waitingForFirstData =
+    view.stale &&
+    view.dataAgeSeconds === null &&
+    !view.sessionEnded &&
+    connection !== 'failed' &&
+    Date.now() - watchingSinceMs < FIRST_DATA_WAIT_MS;
+  loading.hidden = !waitingForFirstData;
+  stale.hidden = !view.stale || waitingForFirstData;
   staleDetail.textContent = view.sessionEnded
     ? 'Demo session ended. Reload the page to continue.'
     : connection === 'failed'
@@ -321,7 +336,7 @@ function render(view: ControllerView, connection: ConnectionState, radius: { val
   const live = connection === 'open' ? 'Live' : connection === 'reconnecting' ? 'Reconnecting' : connection === 'connecting' ? 'Connecting' : 'Offline';
   const age = view.dataAgeSeconds === null ? 'no data yet' : `data ${view.dataAgeSeconds} s old`;
   // During a countdown, say what it started at (BOLT-47); the countdown shows only what is left.
-  const countdownFrom = alert ? ` · Countdown from ${minutes} ${minutes === 1 ? 'minute' : 'minutes'}` : '';
+  const countdownFrom = alert ? ` · countdown ${minutes} ${minutes === 1 ? 'minute' : 'minutes'}` : '';
   status.textContent = `${live} · ${age} · watching ${radius.value} ${radius.unit}${countdownFrom}`;
 }
 
@@ -338,6 +353,7 @@ if (location) {
 
 /** Starts watching a point: the weather, the push stream and the state machine. Called once. */
 function watch(watched: UrlSettings): void {
+  watchingSinceMs = Date.now();
   weather = mountWeatherPanel(document.getElementById('weather'), watched.query, () => alerts, (report) => {
     if (!pinnedBackground) showBackground(backgroundScene(report));
     // The Start screen names the place, unless it is saying the session ended.

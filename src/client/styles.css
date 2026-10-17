@@ -245,6 +245,42 @@ button {
   display: none;
 }
 
+/* Waiting for the first data: the same veil as NO LIGHTNING DATA, with a big, slow, quiet spinner. */
+.loading {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(12 35 64 / 0.92);
+  z-index: 10;
+}
+
+.loading[hidden] {
+  display: none;
+}
+
+.spinner {
+  width: 14vh;
+  height: 14vh;
+  border-radius: 50%;
+  border: 1.2vh solid rgb(76 201 240 / 0.18);
+  border-top-color: var(--bolt);
+  animation: spin 1.1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 3s;
+  }
+}
+
 .stale-title {
   margin: 0;
   font-size: 12vh;
