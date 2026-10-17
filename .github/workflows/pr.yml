@@ -44,6 +44,10 @@ jobs:
           cp infra/main.bicepparam.example infra/ci.bicepparam
           bicep build-params infra/ci.bicepparam --stdout > /dev/null
 
+      # The AWS relay (ADR 0004) is CloudFormation; lint it without AWS credentials.
+      - name: Lint the CloudFormation relay
+        run: pipx run cfn-lint infra/aws/relay.yaml
+
       - uses: docker/setup-buildx-action@v4
         if: hashFiles('Dockerfile') != ''
 

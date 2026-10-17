@@ -22,6 +22,11 @@ flowchart TD
   s7[BOLT-7 provision, DNS, domain]
   s8[BOLT-8 logo]
   s10[BOLT-10 stack and scaffold]
+  s12[BOLT-12 audio assets]
+  s14[BOLT-14 demo scale to zero]
+  s15[BOLT-15 webhook ingest and flash storage]
+  s16[BOLT-16 GLM parser]
+  s18[BOLT-18 display state machine]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -29,6 +34,11 @@ flowchart TD
   s3 --> s5
   s3 --> s7
   s5 --> s7
+  s10 --> s12
+  s10 --> s14
+  s14 --> s7
+  s16 --> s15
+  s10 --> s18
 ```
 
 ## Stories
@@ -91,6 +101,41 @@ Blocked by BOLT-4 and BOLT-5.
 
 The deploy identity's Reader assignment on the resource group used a role definition ID that does not exist, so the first deploy failed on it with `RoleDefinitionDoesNotExist`. Use the built-in Reader ID, `acdd72a7-3385-48ef-bd42-f606fba81ae7`, and redeploy.
 
+### BOLT-12 — Audio assets: selectable siren, announcements, chime
+
+The sound files only; playback, sequencing, the autoplay unlock and the settings screen come in a later story.
+
+- **Siren**, chosen in settings: No siren, Two-tone (hi-lo, mildest), Mechanical (slow civil-defense wail) or Yelp (fast sweeps, most urgent). A script synthesizes them, so they are original, and renders them to `assets/audio/`. "No siren" goes straight to the announcement.
+- **Announcements**: whole sentences rendered in advance with ElevenLabs instead of spliced numbers, so the intonation stays natural. "Lightning detected N miles away" for 0–100 and "N kilometers away" for 0–161, with "1 mile", "less than 1 mile" for 0, plus "Lightning detected in the area." without a distance and "No lightning detected in the area." A development-time script fixes the voice, model and settings. The 265 MP3 files are committed as rendered, and the app loads only the clip it needs. `ELEVENLABS_API_KEY` is read from `.env` by the script only, never by the running app.
+- **Chime**: a rising three-note bell before the all-clear, synthesized like the sirens.
+- **Docs**: [audio-plan.md](audio-plan.md) updated for the siren choice and the pre-rendered clips, and the README credits the sounds.
+
+Blocked by BOLT-10.
+
 ### BOLT-13 — Move the GitHub Actions to their Node 24 majors
 
 GitHub warns that the actions in `pr.yml` and `deploy.yml` run on the deprecated Node 20. Move them to the current majors, which run on Node 24: `actions/checkout` v7, `actions/setup-node` v7, `docker/setup-buildx-action` v4, `docker/login-action` v4, `docker/metadata-action` v6, `docker/build-push-action` v7 and `azure/login` v3. Their breaking changes do not touch the inputs the workflows use. `ubuntu-latest` moves to Ubuntu 26.04 from 2026-10-19 and stays: the workflows need only bash, curl, Docker with Buildx and the Azure CLI, which both images have. The deploy gating and the secret names do not change.
+
+### BOLT-14 — Demo hosting: scale to zero and a session time limit
+
+The hosted instance is a demo, so it scales to zero between visits instead of running around the clock ([decisions/0003-demo-scale-to-zero.md](decisions/0003-demo-scale-to-zero.md)). Bicep gains `minReplicas` (0 or 1) with an HTTP scale rule, and `sessionLimitMinutes`, passed to the app as `SESSION_LIMIT_MINUTES`. The server reads and validates it; the push channel story enforces it by ending the stream with a `session ended` event, after which the display stops reconnecting, treats the data as stale and asks for a reload. The deploy workflow wakes a scaled-to-zero revision while it waits for health. The system design, `infra/README.md`, the README and `.env.example` describe it.
+
+Blocked by BOLT-10. Blocks BOLT-7.
+
+### BOLT-15 — Lightning ingest: NOAA SNS via a Lambda relay into an Azure Function, flashes in Table Storage
+
+NOAA's GOES-19 topic for new objects accepts only Lambda and SQS subscribers, so a tiny relay Lambda in the deployer's AWS account (`infra/aws/relay.yaml`) is subscribed to it, filtered to `GLM-L2-LCFA/` keys. The relay forwards each signed SNS record to a small Azure Function on the Flex Consumption plan, so the scale-to-zero container is not woken every 20 seconds. The Function verifies NOAA's signature, parses the file with the BOLT-16 parser and stores one row per flash in Azure Table Storage: one table per UTC hour, PartitionKey a 1° latitude/longitude cell, RowKey the sortable flash time plus its id. A query for strikes within a radius in the last T minutes (the display's time limit, default 30, capped at 120) reads only the cells the circle overlaps, then applies the exact great-circle distance. Data is kept for 120 minutes: the Function deletes older hourly tables as it writes, and readers always filter by time. This story adds the Bicep for the storage account, Function App, Application Insights and roles, the deploy step for the function package, the CloudFormation relay, and ADR 0004. No credentials cross clouds, and no one-per-subscription free offer is used.
+
+Blocked by BOLT-16.
+
+### BOLT-16 — GLM-L2-LCFA parser
+
+`src/server/glm/parse.ts` reads one GOES-19 GLM-L2-LCFA file with `h5wasm` and returns its coverage window and flashes (id, time, latitude, longitude, quality), applying `_Unsigned`, `scale_factor`, `add_offset` and the `units` base time the way a NetCDF reader would. Degraded flashes are left out by default. `src/server/glm/filename.ts` reads times from object names and builds hourly prefixes, across day and year boundaries. Tests compare a committed real file with an independent `xarray` read of it and cover empty files, year rollover and unsigned ids. [glm-format.md](glm-format.md) documents the variables and the flash counts measured for BOLT-15.
+
+Blocks BOLT-15.
+
+### BOLT-18 — Display state machine
+
+`src/shared/display-state.ts` is the display's state machine as a pure module with no DOM, timers or network. It takes flashes, heartbeats, the session-ended signal, the clock and the display settings, and returns the next state, the events to announce (alert, repeat, all-clear) and a view model (state, MM:SS countdown, nearest recent strike in the unit the radius was entered in, stale flag). The countdown runs from the strike time on the server's clock; another strike extends it, with a repeat only when the replay setting is on; all-clear waits while the data is stale (newest GLM file over 3 minutes old, no heartbeat yet, or the session ended). Flashes are deduplicated by id and ignored once older than the time limit. A page load rebuilds the state from the server's replay without announcing; a reconnect's replay is deduplicated. Tests cover each rule.
+
+Blocked by BOLT-10.

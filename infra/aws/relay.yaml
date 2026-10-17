@@ -1,0 +1,165 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  BoltClock lightning relay (ADR 0004). NOAA's GOES-19 SNS topic accepts only Lambda and SQS subscribers, so this
+  function receives its GLM-L2-LCFA notifications and forwards each signed SNS record, unchanged, to the ingest
+  Function in Azure, which verifies NOAA's signature itself. Deploy in us-east-1, next to the topic.
+
+Parameters:
+  FunctionName:
+    Type: String
+    AllowedPattern: '[A-Za-z0-9-_]{1,64}'
+    Description: Name of the relay Lambda function.
+  TargetUrl:
+    Type: String
+    AllowedPattern: 'https://.+'
+    Description: The ingest webhook, https://<function-app>.azurewebsites.net/api/glm (the ingestWebhookUrl Bicep output).
+  ProjectTag:
+    Type: String
+    Description: Value of the Project tag on every resource here; the resource group collects them by it.
+  ResourceGroupName:
+    Type: String
+    Description: Name of the tag-based AWS Resource Group for this project.
+  TopicArn:
+    Type: String
+    Default: arn:aws:sns:us-east-1:123901341784:NewGOES19Object
+    Description: NOAA's public topic for new GOES-19 objects.
+
+Resources:
+  RelayLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${FunctionName}
+      RetentionInDays: 1
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectTag
+
+  RelayRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      # Writing its own logs is all the relay may do in AWS.
+      Policies:
+        - PolicyName: write-own-logs
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub ${RelayLogs.Arn}:*
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectTag
+
+  RelayFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Ref FunctionName
+      Description: Forwards NOAA GOES-19 GLM notifications to the BoltClock ingest function in Azure.
+      Runtime: nodejs24.x
+      Architectures:
+        - arm64
+      Handler: index.handler
+      MemorySize: 128
+      Timeout: 30
+      Role: !GetAtt RelayRole.Arn
+      LoggingConfig:
+        LogGroup: !Ref RelayLogs
+      Environment:
+        Variables:
+          TARGET_URL: !Ref TargetUrl
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectTag
+      Code:
+        # Unit-tested in test/infra/relay.test.ts, which runs this exact text.
+        ZipFile: |
+          'use strict';
+          // Posts each SNS record, as received, to the ingest function. NOAA's signature stays inside the record,
+          // so the receiver verifies NOAA itself and this relay needs no secret.
+          exports.handler = async (event) => {
+            const url = process.env.TARGET_URL;
+            for (const record of event.Records || []) {
+              const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify(record.Sns),
+                signal: AbortSignal.timeout(20000),
+              });
+              if (response.status >= 500 || response.status === 429) {
+                // Throwing makes Lambda retry the event (twice, then it is dropped).
+                throw new Error(`Ingest answered ${response.status} for ${record.Sns && record.Sns.MessageId}`);
+              }
+              if (response.status !== 200) {
+                // 4xx means the receiver refused this message for good; retrying would not help.
+                console.warn(`Ingest refused ${record.Sns && record.Sns.MessageId}: ${response.status}`);
+              }
+            }
+          };
+
+  RelayRetries:
+    Type: AWS::Lambda::EventInvokeConfig
+    Properties:
+      FunctionName: !Ref RelayFunction
+      Qualifier: $LATEST
+      MaximumRetryAttempts: 2
+      # A notification older than the retention window is no longer useful to anyone.
+      MaximumEventAgeInSeconds: 3600
+
+  # Lets NOAA's topic, and only that topic, invoke the relay.
+  RelayInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref RelayFunction
+      Action: lambda:InvokeFunction
+      Principal: sns.amazonaws.com
+      SourceArn: !Ref TopicArn
+
+  RelaySubscription:
+    Type: AWS::SNS::Subscription
+    DependsOn: RelayInvokePermission
+    Properties:
+      TopicArn: !Ref TopicArn
+      Protocol: lambda
+      Endpoint: !GetAtt RelayFunction.Arn
+      Region: us-east-1
+      # The topic announces every GOES-19 object; only lightning files are wanted.
+      FilterPolicyScope: MessageBody
+      FilterPolicy:
+        Records:
+          s3:
+            object:
+              key:
+                - prefix: GLM-L2-LCFA/
+
+  RelayResourceGroup:
+    Type: AWS::ResourceGroups::Group
+    Properties:
+      Name: !Ref ResourceGroupName
+      Description: BoltClock resources collected by their Project tag
+      ResourceQuery:
+        Type: TAG_FILTERS_1_0
+        Query:
+          ResourceTypeFilters:
+            - AWS::AllSupported
+          TagFilters:
+            - Key: Project
+              Values:
+                - !Ref ProjectTag
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectTag
+
+Outputs:
+  RelayFunctionArn:
+    Value: !GetAtt RelayFunction.Arn
+  SubscriptionArn:
+    Value: !Ref RelaySubscription

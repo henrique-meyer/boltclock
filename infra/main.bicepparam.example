@@ -16,6 +16,11 @@ param targetPort = 8080
 param healthPath = '/health'
 param cpuCores = '0.25'
 
+// A display watched around the clock: minReplicas = 1, sessionLimitMinutes = 0.
+// A demo that should cost close to nothing: minReplicas = 0 and a short session limit, e.g. 15 (ADR 0003).
+param minReplicas = 1
+param sessionLimitMinutes = 0
+
 param googleMapsApiKey = readEnvironmentVariable('GOOGLE_MAPS_API_KEY')
 param nwsUserAgent = readEnvironmentVariable('NWS_USER_AGENT')
 param publicBaseUrl = ''
@@ -27,6 +32,14 @@ param customDomainCertificateId = ''
 // GitHub Actions deploy identity. The subject may include immutable owner and repository IDs.
 param githubFederationSubject = ''
 param deployIdentityName = ''
+
+// Lightning ingest (ADR 0004): NOAA SNS -> Function App -> flash tables. Names are globally unique.
+param deployIngest = false
+param ingestStorageAccountName = ''
+param ingestFunctionAppName = ''
+param ingestPlanName = ''
+param ingestInsightsName = ''
+param ingestMaxInstances = 4
 
 // Optional cost guard. Whoever deploys chooses the amount.
 param budgetAmount = 0
