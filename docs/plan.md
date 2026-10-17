@@ -30,6 +30,7 @@ flowchart TD
   s18[BOLT-18 display state machine]
   s19[BOLT-19 location picker]
   s20[BOLT-20 display uses the saved location]
+  s22[BOLT-22 weather relay and panel]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -46,6 +47,7 @@ flowchart TD
   s10 --> s19
   s17 --> s20
   s19 --> s20
+  s10 --> s22
 ```
 
 ## Stories
@@ -164,3 +166,9 @@ Blocked by BOLT-10.
 The display stops requiring `?lat&lon` in the address and watches the point and radius saved by the BOLT-19 picker. `?lat&lon` (with optional `radius`, `unit` and `minutes`) still wins, so a kiosk can be pinned to a point by its URL; otherwise the saved location is used; with neither, the display links to `/location.html`. The saved radius, kept as entered, becomes the stream's `radiusKm` (miles converted, capped at the server limit), and the status line shows it in its own unit. The time window stays at the 30-minute default until the settings screen exists. `src/client/display-settings.ts` resolves this as a pure function, tested for the saved location, the address, both, and neither.
 
 Blocked by BOLT-17 and BOLT-19.
+
+### BOLT-22 — Weather relay and weather panel
+
+Build step 4. Browsers cannot set the User-Agent api.weather.gov requires, so the server relays it. `GET /api/weather?lat&lon` validates the point, then calls NWS `/points` (cached for 6 hours, keyed by the point at NWS's 4-decimal precision), the nearest station's latest observation (every 10 minutes; the next of the three nearest stations when one has no temperature in the last 2 hours) and the hourly forecast (every 30 minutes). It answers the shape in `src/shared/weather.ts`: the current temperature, condition text, NWS icon, a normalized condition (clear day or night, cloudy, rain, thunderstorm, fog, snow, wind) for the backgrounds story, wind speed, gusts and direction, the observation time, and the next 2 forecast hours, in °F and mph. Every NWS request carries `NWS_USER_AGENT`; without it the route answers 503 and the server warns once at startup. Caches are in memory, per process. On 429, a 5xx or a network failure the relay waits about 5 s (longer if Retry-After says so) and tries up to 3 times, then serves the cached copy marked stale and leaves NWS alone for a minute. Points NWS has no grid for get an "outside coverage" answer, cached like any other. Coordinates are never logged. The display's weather panel (`src/client/weather-panel.ts`, its own CSS) shows the temperature, condition, wind and the next 2 hours, readable at 20 ft, refreshes every 10 minutes, shows the observation's age and credits the National Weather Service. It is mounted by one call, `mountWeatherPanel('weather', point)`, so it merges cleanly with the BOLT-21 alarm layout.
+
+Blocked by BOLT-10.

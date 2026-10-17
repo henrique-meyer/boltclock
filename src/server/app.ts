@@ -4,12 +4,15 @@ import Fastify, { LogController, type FastifyInstance } from 'fastify';
 import { registerClientConfig, type ClientConfig } from './client-config.js';
 import { DEMO_MAP_ID } from './config.js';
 import { registerStream, type StreamOptions } from './push/stream.js';
+import { registerWeather, type WeatherOptions } from './weather/route.js';
 
 export interface AppOptions {
   /** Served to the browser at GET /api/client-config. Without it the Maps key is empty and the picker says so. */
   clientConfig?: ClientConfig;
   /** The display's push channel, GET /api/stream. Without it the route answers 503. */
   stream?: StreamOptions;
+  /** The weather relay, GET /api/weather. Without a User-Agent the route answers 503. */
+  weather?: WeatherOptions;
   /** The built client (dist/client). Skipped when missing: `npm run dev` serves the client through Vite. */
   clientDir?: string;
   /** The brand files (assets/), served under /assets/. */
@@ -32,6 +35,7 @@ export async function buildApp(options: AppOptions = {}): Promise<FastifyInstanc
 
   registerClientConfig(app, options.clientConfig ?? { googleMapsApiKey: '', googleMapsMapId: DEMO_MAP_ID });
   registerStream(app, options.stream ?? { sessionLimitMinutes: 0 });
+  registerWeather(app, options.weather ?? { userAgent: '' });
 
   if (options.assetsDir && existsSync(options.assetsDir)) {
     await app.register(fastifyStatic, { root: options.assetsDir, prefix: '/assets/', decorateReply: false });

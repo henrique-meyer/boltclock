@@ -66,7 +66,7 @@ Each deployment brings its own Google Maps Platform key; none is in this reposit
 
 ## Tech stack
 - **Language and runtime:** TypeScript on Node 24 LTS for the server, the ingest function and the browser client ([ADR 0002](docs/decisions/0002-node-typescript.md)).
-- **Server:** Fastify, serving the display, `/health`, the push channel (server-sent events at `/api/stream`) and, as it lands, the weather relay.
+- **Server:** Fastify, serving the display, `/health`, the push channel (server-sent events at `/api/stream`) and the weather relay (`/api/weather`).
 - **Client:** Vite and plain TypeScript, with no UI framework.
 - **Lightning data:** NOAA GOES-19 Geostationary Lightning Mapper (GLM-L2-LCFA) NetCDF4 files, read with `h5wasm` (the HDF5 library compiled to WebAssembly) ([format notes](docs/glm-format.md)).
 - **Ingest:** NOAA's new-object notifications (Amazon SNS) reach an AWS Lambda relay, then an Azure Function that verifies NOAA's signature and stores flashes in Azure Table Storage, partitioned by 1° grid cell ([ADR 0004](docs/decisions/0004-webhook-ingest-table-storage.md)).
@@ -95,15 +95,16 @@ browser display ◀── Azure Container App (Fastify) ◀── reads nearby f
 The sirens and the all-clear chime are generated in code by a script in this repo. The spoken announcements use the voice "Brian" from [ElevenLabs](https://elevenlabs.io).
 
 ## Project layout
-- `src/server/`: the Fastify server (`/health`, the push channel; the weather relay to come). Also:
+- `src/server/`: the Fastify server (`/health`, the push channel, the weather relay). Also:
   - `glm/` reads GOES-19 GLM files;
   - `sns/` verifies SNS signatures;
   - `strikes/` stores and queries flashes;
   - `ingest/` handles notifications;
-  - `push/` streams nearby flashes to displays.
+  - `push/` streams nearby flashes to displays;
+  - `weather/` relays api.weather.gov with the required User-Agent, cached and retried politely.
 - `src/functions/`: the Azure Function entry point for lightning ingest.
-- `src/shared/`: code for both server and browser (great-circle distance, grid cells).
-- `src/client/`: the browser display and the location picker (`location.html`), built with Vite. `stream.ts` is the push channel client. `display-settings.ts` picks the point the display watches: `?lat&lon` in the address, else the location saved by the picker (`location-settings.ts`).
+- `src/shared/`: code for both server and browser (great-circle distance, grid cells, message and weather shapes).
+- `src/client/`: the browser display and the location picker (`location.html`), built with Vite. `stream.ts` is the push channel client. `display-settings.ts` picks the point the display watches: `?lat&lon` in the address, else the location saved by the picker (`location-settings.ts`). `weather-panel.ts` shows the weather for that point.
 - `test/`: Vitest tests.
 - `scripts/audio/`: the scripts that make the sounds ([audio plan](docs/audio-plan.md)).
 - `assets/`: the logo. `logo.svg` is the app icon and favicon, `logo-mark.svg` has a transparent background, and both have PNG copies. The `-yellow` files are an alternate colourway that isn't in use. `assets/audio/` holds the sirens, the chime and the announcements.

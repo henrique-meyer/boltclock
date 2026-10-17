@@ -1,0 +1,93 @@
+/* The weather panel (weather-panel.ts). Sized by screen height like the rest of the display, read from 20 ft. */
+.weather-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2vh;
+  color: var(--paper, #f4f0e6);
+  text-align: center;
+}
+
+.weather-panel p {
+  margin: 0;
+}
+
+.weather-place {
+  font-size: 2.6vh;
+  color: var(--outline, #cdbfa8);
+}
+
+.weather-message {
+  font-size: 3.5vh;
+}
+
+.weather-now {
+  display: flex;
+  align-items: center;
+  gap: 3vw;
+}
+
+.weather-temp {
+  font-size: 12vh;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.weather-words {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.6vh;
+  text-align: left;
+}
+
+.weather-condition {
+  font-size: 4.5vh;
+  font-weight: 600;
+}
+
+.weather-wind {
+  font-size: 3.6vh;
+}
+
+.weather-forecast {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1vh 4vw;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 3.2vh;
+}
+
+.weather-hour {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6em;
+}
+
+.weather-hour-time {
+  color: var(--outline, #cdbfa8);
+}
+
+.weather-hour-temp {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.weather-hour-precip {
+  color: var(--bolt, #4cc9f0);
+}
+
+.weather-credit {
+  font-size: 1.8vh;
+  color: var(--outline, #cdbfa8);
+}
+
+/* Old or cached weather: dimmed, and the credit line says how old. */
+.weather-panel--stale .weather-now,
+.weather-panel--stale .weather-forecast {
+  opacity: 0.6;
+}

@@ -3,6 +3,7 @@ import type { StreamFlash } from '../shared/messages.js';
 import { openStream, type ConnectionState } from './stream.js';
 import { resolveDisplaySettings } from './display-settings.js';
 import type { KeyValueStore } from './location-settings.js';
+import { mountWeatherPanel } from './weather-panel.js';
 
 const status = document.querySelector<HTMLParagraphElement>('#status');
 
@@ -19,6 +20,7 @@ function deviceStore(): KeyValueStore | undefined {
 }
 
 const settings = resolveDisplaySettings(window.location.search, deviceStore());
+if (settings) mountWeatherPanel('weather', settings.query);
 
 if (status && !settings) {
   const link = document.createElement('a');
