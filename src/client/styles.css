@@ -450,6 +450,7 @@ button {
 }
 
 .settings-tests button,
+.settings-reset,
 .settings-close {
   padding: 0.4em 0.9em;
   border-radius: 0.4em;
@@ -458,7 +459,7 @@ button {
   color: var(--paper);
 }
 
-/* Simulation mode on the left, Done on the right. */
+/* Simulation mode on the left; Reset (an outline, quieter than Done) and Done on the right. */
 .settings-footer {
   display: flex;
   align-items: center;
@@ -466,8 +467,11 @@ button {
   gap: 1em;
 }
 
-.settings-close {
+.settings-reset {
   margin-left: auto;
+}
+
+.settings-close {
   background: var(--bolt);
   color: var(--navy);
   border: 0;

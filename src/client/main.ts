@@ -6,6 +6,7 @@ import {
   DISTANCE_LABELS,
   DISTANCE_UNITS,
   loadAlertSettings,
+  DEFAULT_ALERT_SETTINGS,
   saveAlertSettings,
   simulationOn,
   SIREN_LABELS,
@@ -240,6 +241,16 @@ dialog.addEventListener('close', () => {
   }
   // The countdown length is also the stream's replay window, so a change starts the display over.
   if (alerts.timeLimitMinutes !== previousMinutes && location) window.location.reload();
+});
+// Reset (BOLT-52): every setting on this screen back to its default, shown at once. The location stays: a distance
+// unit that changes back is applied on Done like any other, converting the saved radius so the circle stays put.
+byId<HTMLButtonElement>('settings-reset').addEventListener('click', () => {
+  fillSettingsForm(DEFAULT_ALERT_SETTINGS);
+  distanceSelect.value = DEFAULT_ALERT_SETTINGS.distanceUnit;
+  alerts = saveAlertSettings(store, { ...readSettingsForm(), simulation: DEFAULT_ALERT_SETTINGS.simulation });
+  output.setVolume(alerts.volume);
+  applySimulation();
+  weather?.redraw();
 });
 byId<HTMLButtonElement>('test-strike-sound').addEventListener('click', async () => {
   await enableSound();
