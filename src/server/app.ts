@@ -1,9 +1,13 @@
 import { existsSync } from 'node:fs';
 import fastifyStatic from '@fastify/static';
 import Fastify, { LogController, type FastifyInstance } from 'fastify';
+import { registerClientConfig, type ClientConfig } from './client-config.js';
+import { DEMO_MAP_ID } from './config.js';
 import { registerStream, type StreamOptions } from './push/stream.js';
 
 export interface AppOptions {
+  /** Served to the browser at GET /api/client-config. Without it the Maps key is empty and the picker says so. */
+  clientConfig?: ClientConfig;
   /** The display's push channel, GET /api/stream. Without it the route answers 503. */
   stream?: StreamOptions;
   /** The built client (dist/client). Skipped when missing: `npm run dev` serves the client through Vite. */
@@ -26,6 +30,7 @@ export async function buildApp(options: AppOptions = {}): Promise<FastifyInstanc
   // Process health only. It never reflects lightning-data freshness: stale data is a warning on the display.
   app.get('/health', async () => ({ status: 'ok' }));
 
+  registerClientConfig(app, options.clientConfig ?? { googleMapsApiKey: '', googleMapsMapId: DEMO_MAP_ID });
   registerStream(app, options.stream ?? { sessionLimitMinutes: 0 });
 
   if (options.assetsDir && existsSync(options.assetsDir)) {

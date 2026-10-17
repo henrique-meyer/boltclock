@@ -28,6 +28,7 @@ flowchart TD
   s16[BOLT-16 GLM parser]
   s17[BOLT-17 push channel]
   s18[BOLT-18 display state machine]
+  s19[BOLT-19 location picker]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -41,6 +42,7 @@ flowchart TD
   s16 --> s15
   s15 --> s17
   s10 --> s18
+  s10 --> s19
 ```
 
 ## Stories
@@ -145,5 +147,11 @@ Blocked by BOLT-15.
 ### BOLT-18 — Display state machine
 
 `src/shared/display-state.ts` is the display's state machine as a pure module with no DOM, timers or network. It takes flashes, heartbeats, the session-ended signal, the clock and the display settings, and returns the next state, the events to announce (alert, repeat, all-clear) and a view model (state, MM:SS countdown, nearest recent strike in the unit the radius was entered in, stale flag). The countdown runs from the strike time on the server's clock; another strike extends it, with a repeat only when the replay setting is on; all-clear waits while the data is stale (newest GLM file over 3 minutes old, no heartbeat yet, or the session ended). Flashes are deduplicated by id and ignored once older than the time limit. A page load rebuilds the state from the server's replay without announcing; a reconnect's replay is deduplicated. Tests cover each rule.
+
+Blocked by BOLT-10.
+
+### BOLT-19 — Location picker
+
+`/location.html`, linked from the display, is where the user chooses the point and the radius that lightning distances are measured from. A Google Maps JavaScript API map shows a draggable pin and the radius as a circle; a click on the map or a drag of the pin sets the point. The map opens on the browser's location, then the saved point, then a continental-US view with a message. Address search uses Places API (New) `AutocompleteSuggestion` with a session token: typing is debounced and needs three characters, and choosing a result ends the session with one Place Details call that fetches only `location`. A search only moves the pin. The radius is a value and a unit (mi or km) stored exactly as entered, 10 mi by default and at most 100 mi or the km equivalent. Only the coordinates and the radius are saved, in the browser's local storage; the address and the search text are never stored or logged. The browser key and an optional Map ID reach the page from `GET /api/client-config` (`GOOGLE_MAPS_API_KEY`, `GOOGLE_MAPS_MAP_ID`). For local work a gitignored `.env.local` overrides `.env`, so a key restricted to localhost can sit next to the production one. Google's attribution stays on the map, and the page carries the display's credits and disclaimers. Tests cover the config route, saving and loading the point and radius, and the search session. Wiring the display to the saved point comes after BOLT-17.
 
 Blocked by BOLT-10.
