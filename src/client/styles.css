@@ -145,6 +145,15 @@ button {
   display: none;
 }
 
+.button-label {
+  margin-left: 0.4em;
+}
+
+/* BUTTON_ICONS_ONLY: icons alone; the names stay as tooltips and accessible labels. */
+.icons-only .button-label {
+  display: none;
+}
+
 .icon-button svg {
   width: 1.6em;
   height: 1.6em;

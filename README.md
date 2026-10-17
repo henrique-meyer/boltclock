@@ -67,6 +67,8 @@ Press **Start display**. That one click turns on sound, which browsers only allo
 
 The settings also have test buttons for both sounds.
 
+**Button style:** the top-right buttons show an icon and a label. With `BUTTON_ICONS_ONLY=true` (Bicep parameter `buttonIconsOnly`) they show only the icons, with the names as tooltips.
+
 **Test mode:** with `TEST_MODE=true` (Bicep parameter `testMode`), the top bar offers **Simulate a strike** (the bolt). It puts a fake strike at a random distance inside the radius, in a random direction, through the same logic as a real one, labelled as a test on screen. Every test strike sounds the alarm, even during a countdown with replay off. During a countdown, **Simulate all clear** (the sun) ends it at once with the all-clear sound. It lives only in that browser tab: nothing is stored or sent. Keep it off on a real display.
 
 ### Kiosk

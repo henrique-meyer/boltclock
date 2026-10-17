@@ -50,6 +50,9 @@ param sessionLimitMinutes int = 0
 @description('Show the display\'s "Simulate a strike" button, for demos and testing. Keep false for a real display.')
 param testMode bool = false
 
+@description('Show the display\'s top-right buttons as icons only. False shows each icon with its text label.')
+param buttonIconsOnly bool = false
+
 @secure()
 @description('Browser key for the Google Maps JavaScript API and Places. Restrict it by HTTP referrer to your domain.')
 param googleMapsApiKey string
@@ -227,6 +230,10 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = if (deployApp) 
             {
               name: 'TEST_MODE'
               value: testMode ? 'true' : 'false'
+            }
+            {
+              name: 'BUTTON_ICONS_ONLY'
+              value: buttonIconsOnly ? 'true' : 'false'
             }
           ], deployIngest ? [
             {

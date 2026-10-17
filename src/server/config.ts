@@ -20,6 +20,8 @@ export interface Config {
   strikesTableEndpoint: string;
   /** Shows the display's "Simulate a strike" button (BOLT-21). Off unless TEST_MODE is exactly "true". */
   testMode: boolean;
+  /** The display's top-right buttons show only their icons. Off (icons with labels) unless BUTTON_ICONS_ONLY is "true". */
+  buttonIconsOnly: boolean;
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
@@ -44,5 +46,6 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     sessionLimitMinutes,
     strikesTableEndpoint: (env.STRIKES_TABLE_ENDPOINT?.trim() ?? '').replace(/\/+$/, ''),
     testMode: env.TEST_MODE?.trim().toLowerCase() === 'true',
+    buttonIconsOnly: env.BUTTON_ICONS_ONLY?.trim().toLowerCase() === 'true',
   };
 }
