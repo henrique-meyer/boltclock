@@ -2,7 +2,10 @@ import { ALL_CLEAR, strikeAnnouncement, type Clip, type Unit } from '../shared/a
 import type { SirenId } from './alert-settings.js';
 
 /** What the display announces (docs/audio-plan.md). A: siren, then the distance. B: chime, then the all-clear. */
-export type Announcement = { kind: 'strike'; distance: number | null; unit: Unit } | { kind: 'all-clear' };
+export type Announcement =
+  /** `speechOnly`: a repeat with replay off, the sentence without the siren (BOLT-42). */
+  | { kind: 'strike'; distance: number | null; unit: Unit; speechOnly?: true }
+  | { kind: 'all-clear' };
 
 export type Step =
   | { type: 'sound'; file: string }
@@ -28,7 +31,7 @@ export function sequenceFor(announcement: Announcement, siren: SirenId, speak = 
   const sentence: Step[] = speak
     ? [{ type: 'speech', clip: strikeAnnouncement(announcement.distance ?? Number.NaN, announcement.unit) }]
     : [];
-  if (siren === 'none') return sentence;
+  if (siren === 'none' || announcement.speechOnly) return sentence;
   const sound: Step = { type: 'sound', file: SIREN_FILES[siren] };
   return speak ? [sound, { type: 'gap', ms: 400 }, ...sentence] : [sound];
 }
@@ -56,12 +59,15 @@ export class Announcer {
 
   /** Resolves when the announcement finishes or is interrupted. */
   async announce(announcement: Announcement): Promise<void> {
+    const steps = sequenceFor(announcement, this.siren(), this.speak());
+    // Nothing to play (a repeat with replay and the announcement both off): leave any sound already playing alone.
+    if (steps.length === 0) return;
     this.current?.abort();
     const controller = new AbortController();
     this.current = controller;
     const { signal } = controller;
 
-    for (const step of sequenceFor(announcement, this.siren(), this.speak())) {
+    for (const step of steps) {
       if (signal.aborted) return;
       try {
         if (step.type === 'gap') await this.output.wait(step.ms, signal);

@@ -26,6 +26,14 @@ describe('sequenceFor', () => {
     ]);
   });
 
+  it('plays only the sentence for a repeat with replay off, and nothing when the announcement is off too', () => {
+    const repeat = { kind: 'strike', distance: 7, unit: 'mi', speechOnly: true } as const;
+    expect(sequenceFor(repeat, 'yelp')).toEqual([
+      { type: 'speech', clip: { file: 'speech/strike-mi-7.mp3', text: 'Lightning detected 7 miles away.' } },
+    ]);
+    expect(sequenceFor(repeat, 'yelp', false)).toEqual([]);
+  });
+
   it('plays B as chime, then the all-clear sentence', () => {
     expect(sequenceFor({ kind: 'all-clear' }, 'two-tone')).toEqual([
       { type: 'sound', file: 'chime.wav' },
@@ -93,6 +101,18 @@ describe('Announcer', () => {
       'wait 250',
       'play speech/all-clear.mp3',
     ]);
+  });
+
+  it('does not cut off a playing siren for a repeat with nothing to play', async () => {
+    const out = new FakeOutput([], ['siren-yelp.wav']);
+    const announcer = new Announcer(out, () => 'yelp', () => {}, () => false);
+    const first = announcer.announce({ kind: 'strike', distance: 5, unit: 'mi' });
+    await Promise.resolve();
+    await announcer.announce({ kind: 'strike', distance: 3, unit: 'mi', speechOnly: true });
+    out.holds.get('siren-yelp.wav')?.();
+    await first;
+
+    expect(out.log).toEqual(['play siren-yelp.wav']);
   });
 
   it('falls back to the browser voice when a speech clip cannot load', async () => {
