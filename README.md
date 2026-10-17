@@ -59,7 +59,7 @@ Press **Start display**. That one click turns on sound, which browsers only allo
 **Settings** (saved on this device):
 - the siren: two-tone, mechanical, yelp, or none;
 - the volume;
-- whether new strikes replay the siren during a countdown;
+- whether new strikes replay the siren during a countdown (off by default: later strikes only restart the countdown);
 - the countdown length: 30 minutes by default, at most 120. An address with `minutes=` pins it on a kiosk.
 
 The settings also have test buttons for both sounds.
