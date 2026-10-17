@@ -81,18 +81,14 @@ export class DisplayController {
 
   /**
    * Test mode: a flash at a random distance inside the radius (5 to 95% of it) in a random direction, timed now on
-   * the server's clock. It goes through the state machine like a real one (alert, countdown) and exists only in this
-   * page. Unlike a real strike it always sounds, even during a countdown with replay off: the button is there to
-   * test the alarm.
+   * the server's clock. It goes through the state machine like a real one (alert, countdown, and the same sound
+   * rules: during a countdown with replay off, the announcement only) and exists only in this page.
    */
   simulateStrike(nowMs: number): void {
     const km = radiusKm(this.settings) * (0.05 + 0.9 * this.random());
     const { lat, lon } = destinationPoint(this.settings.point.lat, this.settings.point.lon, 360 * this.random(), km);
     const flash: Flash = { id: `${TEST_FLASH_PREFIX}${++this.testCount}`, timeMs: serverNow(this.state, nowMs), lat, lon };
-    const { settings } = this.state;
-    const loud = { ...this.state, settings: { ...settings, replayAudioDuringCountdown: true } };
-    const result = step(loud, { type: 'flashes', flashes: [flash] }, nowMs);
-    this.apply({ state: { ...result.state, settings }, events: result.events });
+    this.apply(step(this.state, { type: 'flashes', flashes: [flash] }, nowMs));
   }
 
   /**
@@ -130,5 +126,7 @@ function toHeartbeat(h: { latestFileEndMs: number; serverTimeMs: number }): Hear
 }
 
 export function toAnnouncement(event: DisplayEvent): Announcement {
-  return event.type === 'all-clear' ? { kind: 'all-clear' } : { kind: 'strike', distance: event.distance, unit: event.unit };
+  if (event.type === 'all-clear') return { kind: 'all-clear' };
+  const strike: Announcement = { kind: 'strike', distance: event.distance, unit: event.unit };
+  return event.type === 'repeat' && !event.siren ? { ...strike, speechOnly: true } : strike;
 }
