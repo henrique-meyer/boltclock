@@ -50,6 +50,7 @@ flowchart TD
   s40[BOLT-40 distance unit applies in place]
   s41[BOLT-41 one forecast hour per line]
   s39[BOLT-39 picker at /location]
+  s44[BOLT-44 picker returns to the main screen]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -89,6 +90,7 @@ flowchart TD
   s36 --> s40
   s22 --> s41
   s19 --> s39
+  s38 --> s44
 ```
 
 ## Stories
@@ -336,3 +338,9 @@ Blocked by BOLT-22.
 Henrique, 2026-10-17. The picker's address is `/location` instead of `/location.html`. The server serves `location.html` there, and `/location.html` redirects permanently (301) to `/location`, keeping its query string, so old links and bookmarks still work. Every link to the picker (the top bar's Location button, "Set location", "Choose a location") uses `/location`, and `npm run dev` rewrites `/location` the same way. The README and the system design use the new address.
 
 Blocked by BOLT-19.
+
+### BOLT-44 — Leaving the location picker opens the main screen
+
+Henrique, 2026-10-17. From the picker, both "Save location" and "Back to the display" land on the display's main screen instead of the Start screen, unless no location is set (then the Start screen offers one). The picker leaves a one-time mark in session storage (`boltclock.returnToDisplay`), and the display skips the Start screen once when it finds it. The Start click is what turns on sound, so if the browser still blocks sound, the display shows its "Sound is off. Click to enable sound." banner.
+
+Blocked by BOLT-38.
