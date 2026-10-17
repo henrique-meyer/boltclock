@@ -6,6 +6,7 @@ describe('loadConfig', () => {
     expect(loadConfig({})).toEqual({
       port: 8080,
       googleMapsApiKey: '',
+      googleMapsMapId: 'DEMO_MAP_ID',
       nwsUserAgent: '',
       publicBaseUrl: 'http://localhost:8080',
       sessionLimitMinutes: 0,
@@ -16,6 +17,7 @@ describe('loadConfig', () => {
     const config = loadConfig({
       PORT: ' 3000 ',
       GOOGLE_MAPS_API_KEY: ' test-key ',
+      GOOGLE_MAPS_MAP_ID: ' test-map-id ',
       NWS_USER_AGENT: ' (BoltClock, you@example.com) ',
       PUBLIC_BASE_URL: 'https://your-domain.example/',
       SESSION_LIMIT_MINUTES: ' 15 ',
@@ -24,10 +26,15 @@ describe('loadConfig', () => {
     expect(config).toEqual({
       port: 3000,
       googleMapsApiKey: 'test-key',
+      googleMapsMapId: 'test-map-id',
       nwsUserAgent: '(BoltClock, you@example.com)',
       publicBaseUrl: 'https://your-domain.example',
       sessionLimitMinutes: 15,
     });
+  });
+
+  it('uses DEMO_MAP_ID when GOOGLE_MAPS_MAP_ID is empty', () => {
+    expect(loadConfig({ GOOGLE_MAPS_MAP_ID: '  ' }).googleMapsMapId).toBe('DEMO_MAP_ID');
   });
 
   it('treats an empty or zero SESSION_LIMIT_MINUTES as no limit', () => {

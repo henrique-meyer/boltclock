@@ -15,7 +15,13 @@ cp .env.example .env
 npm run dev
 ```
 
-Open http://localhost:5173. Vite serves the client and forwards `/health` and the API to the server on port 8080. Fill in `.env` first: an identifying `NWS_USER_AGENT`, and your own `GOOGLE_MAPS_API_KEY` restricted to `http://localhost:5173/*` and `http://localhost:8080/*` (see [infra/README.md](infra/README.md)).
+Open http://localhost:5173. Vite serves the client and forwards `/health` and the API to the server on port 8080. Fill in `.env` first: an identifying `NWS_USER_AGENT` and a `GOOGLE_MAPS_API_KEY` (see [Google Maps key](#google-maps-key)).
+
+`npm run dev` also reads `.env.local`, which git ignores, and its values win over `.env`. Put a key restricted to localhost there, so `.env` can keep the key for your site:
+
+```bash
+echo "GOOGLE_MAPS_API_KEY=<your localhost key>" > .env.local
+```
 
 The production build runs everything from one port:
 
@@ -31,7 +37,25 @@ docker build -t boltclock .
 docker run --rm --publish 8080:8080 --env-file .env boltclock
 ```
 
+Add `--env-file .env.local` after `--env-file .env` to use the localhost key there too.
+
 Checks: `npm run lint`, `npm run typecheck` and `npm test`.
+
+## Choosing the location
+Open `/location.html` (the "Location" link under the display). Search for a place, click the map or drag the pin, set the radius in miles or kilometres (10 mi by default, at most 100 mi or 160.9 km), and save. A search only moves the pin. The map opens on the browser's location if it is allowed, otherwise on the saved point.
+
+Only the pin's coordinates and the radius are saved, in the browser's local storage on the display device. Addresses and search text are never stored or logged.
+
+## Google Maps key
+Each deployment brings its own Google Maps Platform key; none is in this repository. The server reads it from `GOOGLE_MAPS_API_KEY` at runtime and hands it to the location picker, so the same image works anywhere. A browser key is visible to every visitor, which is why its restrictions matter.
+
+1. In the Google Cloud console, create a project with billing, and enable the **Maps JavaScript API** and **Places API (New)**.
+2. Create an API key and restrict it:
+   - Application restrictions: **Websites**, with your site, e.g. `https://your-domain.example/*`.
+   - API restrictions: Maps JavaScript API and Places API (New) only.
+3. For local work, create a second key with the same API restrictions and the websites `http://localhost:5173/*` and `http://localhost:8080/*`, and put it in `.env.local`.
+4. Optional: cap daily usage under Quotas (map loads, `AutocompletePlacesRequest`, `GetPlaceRequest`). The picker waits for a pause in typing and groups each search into one billed session that ends with a details request for the location only.
+5. Optional: create a Map ID (Map Management, JavaScript, vector) and set `GOOGLE_MAPS_MAP_ID`. Without it the map uses Google's `DEMO_MAP_ID`.
 
 ## Data and credits
 - Lightning: NOAA GOES-19 Geostationary Lightning Mapper (GLM-L2-LCFA), public domain, from NOAA Open Data on AWS. No account needed.
@@ -76,7 +100,7 @@ The sirens and the all-clear chime are generated in code by a script in this rep
   - `ingest/` handles notifications.
 - `src/functions/`: the Azure Function entry point for lightning ingest.
 - `src/shared/`: code for both server and browser (great-circle distance, grid cells).
-- `src/client/`: the browser display, built with Vite.
+- `src/client/`: the browser display and the location picker (`location.html`), built with Vite.
 - `test/`: Vitest tests.
 - `scripts/audio/`: the scripts that make the sounds ([audio plan](docs/audio-plan.md)).
 - `assets/`: the logo. `logo.svg` is the app icon and favicon, `logo-mark.svg` has a transparent background, and both have PNG copies. The `-yellow` files are an alternate colourway that isn't in use. `assets/audio/` holds the sirens, the chime and the announcements.

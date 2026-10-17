@@ -4,6 +4,7 @@ import { loadConfig } from './config.js';
 
 const config = loadConfig();
 const app = await buildApp({
+  clientConfig: { googleMapsApiKey: config.googleMapsApiKey, googleMapsMapId: config.googleMapsMapId },
   clientDir: resolve('dist/client'),
   assetsDir: resolve('assets'),
   logger: true,

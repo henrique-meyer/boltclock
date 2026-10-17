@@ -5,7 +5,7 @@
     "lib": ["es2024", "dom", "dom.iterable"],
     "module": "nodenext",
     "moduleResolution": "nodenext",
-    "types": ["node", "vite/client"],
+    "types": ["node", "vite/client", "google.maps"],
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "verbatimModuleSyntax": true,

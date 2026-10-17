@@ -1,0 +1,182 @@
+/* The location picker: a settings panel next to the map. It is used close up, so sizes are ordinary, not 20 ft ones. */
+.picker-page {
+  min-height: 100%;
+  font-size: 16px;
+}
+
+.picker-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+}
+
+.picker-header h1 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.picker-mark {
+  height: 36px;
+}
+
+.picker-back {
+  margin-left: auto;
+  color: var(--bolt);
+}
+
+.picker {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(260px, 340px) 1fr;
+  gap: 16px;
+  padding: 0 20px;
+  min-height: 0;
+}
+
+.picker-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.picker-panel label,
+.picker-panel legend {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.picker-panel input,
+.picker-panel select,
+.picker-panel button {
+  font: inherit;
+  border-radius: 6px;
+}
+
+.picker-panel input,
+.picker-panel select {
+  padding: 8px 10px;
+  border: 1px solid var(--outline);
+  background: #10294a;
+  color: var(--paper);
+}
+
+#search-input {
+  width: 100%;
+}
+
+.search {
+  position: relative;
+}
+
+.search-popup {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background: var(--paper);
+  color: var(--navy);
+  border-radius: 6px;
+  box-shadow: 0 6px 20px rgb(0 0 0 / 40%);
+}
+
+.search-popup[hidden] {
+  display: none;
+}
+
+.search-results {
+  margin: 0;
+  padding: 4px 0 0;
+  list-style: none;
+}
+
+.search-results li {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.search-results li:hover,
+.search-results li[aria-selected='true'] {
+  background: #e4d8c4;
+}
+
+.result-secondary {
+  font-size: 0.85em;
+  opacity: 0.75;
+}
+
+/* Google's attribution for the place results, at the foot of the open list. */
+.search-credit {
+  margin: 0;
+  padding: 6px 12px 8px;
+  font-size: 0.8em;
+  color: #5a6475;
+}
+
+.hint,
+.point,
+.picker-status,
+.field-error {
+  margin: 6px 0 0;
+  font-size: 0.9em;
+}
+
+.hint {
+  color: var(--outline);
+}
+
+.radius {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+#radius-value {
+  width: 8em;
+}
+
+.field-error {
+  color: #ffb4a8;
+}
+
+.picker-status {
+  color: var(--bolt);
+  min-height: 1.4em;
+}
+
+#save {
+  align-self: flex-start;
+  padding: 10px 18px;
+  border: 0;
+  background: var(--bolt);
+  color: var(--navy);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+#save:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* Google's logo and attribution sit inside the map and are never covered or hidden. */
+.map {
+  min-height: 60vh;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #10294a;
+}
+
+@media (max-width: 720px) {
+  .picker {
+    grid-template-columns: 1fr;
+  }
+
+  .map {
+    min-height: 55vh;
+  }
+}
