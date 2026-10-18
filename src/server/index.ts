@@ -16,6 +16,7 @@ const app = await buildApp({
     testMode: config.testMode,
     allowSimulation: config.allowSimulation,
     buttonIconsOnly: config.buttonIconsOnly,
+    gaMeasurementId: config.gaMeasurementId,
   },
   clientDir: resolve('dist/client'),
   assetsDir: resolve('assets'),

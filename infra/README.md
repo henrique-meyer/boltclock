@@ -27,6 +27,7 @@ The image comes from GitHub Container Registry as a public package, so the app n
 - Reads `GOOGLE_MAPS_API_KEY`, `NWS_USER_AGENT`, `PUBLIC_BASE_URL`, `SESSION_LIMIT_MINUTES` and `STRIKES_TABLE_ENDPOINT` from the environment. With the endpoint set, it reads the flash tables with its managed identity; without it, `/api/stream` answers 503.
 - With `SESSION_LIMIT_MINUTES` above 0, ends each display session after that many minutes, so a demo can scale back to zero.
 - With `BUTTON_ICONS_ONLY=true` (Bicep `buttonIconsOnly`, default `false`), the display's top-right buttons show only their icons; otherwise each icon has its label.
+- With `GA_MEASUREMENT_ID` set (Bicep `gaMeasurementId`, default empty), the display and the location picker load Google Analytics 4. The page address sent to Google drops its query string (no coordinates), and Google signals and ad personalization are off.
 - With `ALLOW_SIMULATION=true` (Bicep `allowSimulation`, default `false`), each display's settings offer a Simulation mode checkbox: "Simulate a strike" and, during a countdown, "Simulate all clear", for demos. Simulated strikes are local to the browser tab and never stored. Without it there is no checkbox and no Simulate buttons.
 - `TEST_MODE=true` (Bicep `testMode`, default `false`) makes Simulation mode on by default; each device can turn it off or on, and its choice is saved on that device.
 - Keeps no state on disk. On start it rebuilds the last 60 minutes of flashes from the GLM bucket, so restarts and new revisions lose nothing.

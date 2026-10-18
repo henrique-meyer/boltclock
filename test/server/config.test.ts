@@ -14,6 +14,7 @@ describe('loadConfig', () => {
       testMode: false,
       allowSimulation: false,
       buttonIconsOnly: false,
+      gaMeasurementId: '',
     });
   });
 
@@ -29,6 +30,7 @@ describe('loadConfig', () => {
       TEST_MODE: ' TRUE ',
       ALLOW_SIMULATION: ' true ',
       BUTTON_ICONS_ONLY: ' true ',
+      GA_MEASUREMENT_ID: ' G-ABC123XYZ ',
     });
 
     expect(config).toEqual({
@@ -42,6 +44,7 @@ describe('loadConfig', () => {
       testMode: true,
       allowSimulation: true,
       buttonIconsOnly: true,
+      gaMeasurementId: 'G-ABC123XYZ',
     });
   });
 
@@ -72,5 +75,9 @@ describe('loadConfig', () => {
 
   it.each(['abc', '0', '70000', '80.5'])('rejects PORT=%s', (port) => {
     expect(() => loadConfig({ PORT: port })).toThrow(/PORT must be a port number/);
+  });
+
+  it.each(['', 'UA-12345-1', 'G-', 'G-abc def', 'javascript:alert(1)'])('turns analytics off for GA_MEASUREMENT_ID=%s', (value) => {
+    expect(loadConfig({ GA_MEASUREMENT_ID: value }).gaMeasurementId).toBe('');
   });
 });

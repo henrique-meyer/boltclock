@@ -48,6 +48,8 @@ To change it, open `/location` (the "Location" link under the display). Search f
 
 Only the pin's coordinates and the radius are saved, in the browser's local storage on the display device. Addresses and search text are never stored or logged.
 
+**Analytics:** a deployment can turn on Google Analytics 4 with `GA_MEASUREMENT_ID`. It counts page views and a few actions (Start display, Simulate, Save location). The address sent to Google drops its query string, so no coordinates reach it, and events never carry coordinates, addresses or search text. Without the setting, no analytics script loads.
+
 The display watches the saved location. A kiosk can be pinned to a point by its address instead, which overrides the saved one: `/?lat=28.54&lon=-81.38&radius=10&unit=mi&minutes=30` (`radius`, `unit` and `minutes` are optional).
 
 ## Using the display

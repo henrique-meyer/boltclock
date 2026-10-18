@@ -61,6 +61,7 @@ flowchart TD
   s52[BOLT-52 Settings reset and title]
   s50[BOLT-50 phone layout]
   s51[BOLT-51 session countdown in the footer]
+  s53[BOLT-53 Google Analytics]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -111,6 +112,7 @@ flowchart TD
   s37 --> s52
   s45 --> s50
   s38 --> s51
+  s10 --> s53
 ```
 
 ## Stories
@@ -424,3 +426,9 @@ Blocked by BOLT-45.
 Henrique, 2026-10-17. With a session limit (`SESSION_LIMIT_MINUTES` above 0), the footer's data-sources line ends with "Session expires: H:mm", counting down to the end of the session. Each connection's session runs from its own start, so every heartbeat now carries `sessionEndsAtMs` (null without a limit). The display moves it onto its own clock with the heartbeat's server time, so a display whose clock is off still counts right. It hides without a limit and once the session has ended.
 
 Blocked by BOLT-38.
+
+### BOLT-53 — Google Analytics (GA4)
+
+Henrique, 2026-10-17. A new deployment setting, `GA_MEASUREMENT_ID` (Bicep `gaMeasurementId`, default empty), turns on Google Analytics 4 on the display and the location picker. The server checks the ID's shape (`G-` and letters or digits) and passes it in `GET /api/client-config`; without it no analytics script loads. Privacy follows the project's rules: the page location and referrer sent to Google drop their query string and fragment, so a kiosk's `?lat&lon` never reaches Google, and Google signals and ad personalization are off. Events: `display_start`, `display_start_here`, `set_location`, `session_resume`, `simulate_strike`, `simulate_all_clear`, and `location_saved` (with the radius unit only). No event carries coordinates, addresses or search text.
+
+Blocked by BOLT-10.

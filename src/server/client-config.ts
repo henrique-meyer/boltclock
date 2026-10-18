@@ -14,6 +14,8 @@ export interface ClientConfig {
   allowSimulation: boolean;
   /** The display's top-right buttons show only their icons, without text labels. */
   buttonIconsOnly: boolean;
+  /** The Google Analytics 4 measurement ID, public by design (it is in the page's script URL). Empty: no analytics. */
+  gaMeasurementId: string;
 }
 
 /** GET /api/client-config: read at runtime, so one image serves any deployment and the key is never built in. */
@@ -24,6 +26,7 @@ export function registerClientConfig(app: FastifyInstance, config: ClientConfig)
     testMode: config.testMode === true,
     allowSimulation: config.allowSimulation === true,
     buttonIconsOnly: config.buttonIconsOnly === true,
+    gaMeasurementId: config.gaMeasurementId ?? '',
   };
   app.get('/api/client-config', async (_request, reply) => {
     reply.header('cache-control', 'no-store');

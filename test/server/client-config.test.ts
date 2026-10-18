@@ -18,7 +18,7 @@ describe('GET /api/client-config', () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.headers['cache-control']).toBe('no-store');
-    expect(response.json()).toEqual({ googleMapsApiKey: 'test-key', googleMapsMapId: 'test-map-id', testMode: false, allowSimulation: false, buttonIconsOnly: false });
+    expect(response.json()).toEqual({ googleMapsApiKey: 'test-key', googleMapsMapId: 'test-map-id', testMode: false, allowSimulation: false, buttonIconsOnly: false, gaMeasurementId: '' });
   });
 
   it('shows icons only when BUTTON_ICONS_ONLY is true', async () => {
@@ -51,7 +51,7 @@ describe('GET /api/client-config', () => {
     app = await buildApp({ clientConfig: config });
     const response = await app.inject({ method: 'GET', url: '/api/client-config' });
 
-    expect(Object.keys(response.json()).sort()).toEqual(['allowSimulation', 'buttonIconsOnly', 'googleMapsApiKey', 'googleMapsMapId', 'testMode']);
+    expect(Object.keys(response.json()).sort()).toEqual(['allowSimulation', 'buttonIconsOnly', 'gaMeasurementId', 'googleMapsApiKey', 'googleMapsMapId', 'testMode']);
     expect(response.body).not.toContain('you@example.com');
   });
 
@@ -59,6 +59,6 @@ describe('GET /api/client-config', () => {
     app = await buildApp();
     const response = await app.inject({ method: 'GET', url: '/api/client-config' });
 
-    expect(response.json()).toEqual({ googleMapsApiKey: '', googleMapsMapId: 'DEMO_MAP_ID', testMode: false, allowSimulation: false, buttonIconsOnly: false });
+    expect(response.json()).toEqual({ googleMapsApiKey: '', googleMapsMapId: 'DEMO_MAP_ID', testMode: false, allowSimulation: false, buttonIconsOnly: false, gaMeasurementId: '' });
   });
 });
