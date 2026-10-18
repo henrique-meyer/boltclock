@@ -3,7 +3,41 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>BoltClock</title>
+    <!-- SEO (BOLT-54, local SEO.md). The server fills in __PUBLIC_BASE_URL__ from PUBLIC_BASE_URL. -->
+    <title>BoltClock · Lightning alarm with an all-clear countdown</title>
+    <meta name="description" content="Free full-screen lightning alarm. When NOAA satellite data shows lightning within your radius, BoltClock sounds a siren and counts down to the all-clear.">
+    <meta name="theme-color" content="#0C2340">
+    <link rel="canonical" href="__PUBLIC_BASE_URL__/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="BoltClock">
+    <meta property="og:title" content="BoltClock · Lightning alarm with an all-clear countdown">
+    <meta property="og:description" content="Free full-screen lightning alarm. When NOAA satellite data shows lightning within your radius, BoltClock sounds a siren and counts down to the all-clear.">
+    <meta property="og:url" content="__PUBLIC_BASE_URL__/">
+    <meta property="og:image" content="__PUBLIC_BASE_URL__/assets/logo.png">
+    <meta property="og:image:width" content="1024">
+    <meta property="og:image:height" content="1024">
+    <meta property="og:image:alt" content="BoltClock logo: an alarm clock struck by a lightning bolt">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="BoltClock · Lightning alarm with an all-clear countdown">
+    <meta name="twitter:description" content="Free full-screen lightning alarm. When NOAA satellite data shows lightning within your radius, BoltClock sounds a siren and counts down to the all-clear.">
+    <meta name="twitter:image" content="__PUBLIC_BASE_URL__/assets/logo.png">
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "BoltClock",
+        "url": "__PUBLIC_BASE_URL__/",
+        "image": "__PUBLIC_BASE_URL__/assets/logo.png",
+        "description": "Free full-screen lightning alarm. When NOAA satellite data shows lightning within your radius, BoltClock sounds a siren and counts down to the all-clear.",
+        "applicationCategory": "UtilitiesApplication",
+        "operatingSystem": "Any (web browser)",
+        "browserRequirements": "Requires JavaScript and a modern web browser.",
+        "isAccessibleForFree": true,
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "author": { "@type": "Person", "name": "Henrique Meyer", "url": "https://www.hmeyer.com" },
+        "sameAs": ["https://github.com/henrique-meyer/boltclock"]
+      }
+    </script>
     <link rel="icon" href="/assets/logo.png" type="image/png" sizes="1024x1024">
     <link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/assets/logo.png">
@@ -58,7 +92,7 @@
     <div class="start" id="start">
       <div class="start-main">
         <img class="start-mark" src="/assets/logo-mark.svg" alt="">
-        <p class="start-name">BoltClock</p>
+        <h1 class="start-name">BoltClock</h1>
         <button type="button" class="start-button" id="start-button">Start display</button>
         <!-- The place, or a message such as "session ended". Its space stays when it is empty. -->
         <p class="start-message" id="start-message" role="status"></p>

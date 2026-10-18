@@ -9,6 +9,12 @@ export default defineConfig({
   root: 'src/client',
   plugins: [
     {
+      // `npm run dev` fills the SEO placeholder with the dev address; in production the server does it (BOLT-54).
+      name: 'seo-base-url',
+      apply: 'serve',
+      transformIndexHtml: (html) => html.replaceAll('__PUBLIC_BASE_URL__', 'http://localhost:5173'),
+    },
+    {
       // `npm run dev` serves the picker at /location too, as the server does (BOLT-39).
       name: 'location-route',
       configureServer(devServer) {

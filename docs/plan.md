@@ -62,6 +62,7 @@ flowchart TD
   s50[BOLT-50 phone layout]
   s51[BOLT-51 session countdown in the footer]
   s53[BOLT-53 Google Analytics]
+  s54[BOLT-54 search engine optimization]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -113,6 +114,7 @@ flowchart TD
   s45 --> s50
   s38 --> s51
   s10 --> s53
+  s10 --> s54
 ```
 
 ## Stories
@@ -430,5 +432,11 @@ Blocked by BOLT-38.
 ### BOLT-53 — Google Analytics (GA4)
 
 Henrique, 2026-10-17. A new deployment setting, `GA_MEASUREMENT_ID` (Bicep `gaMeasurementId`, default empty), turns on Google Analytics 4 on the display and the location picker. The server checks the ID's shape (`G-` and letters or digits) and passes it in `GET /api/client-config`; without it no analytics script loads. Privacy follows the project's rules: the page location and referrer sent to Google drop their query string and fragment, so a kiosk's `?lat&lon` never reaches Google, and Google signals and ad personalization are off. Events: `display_start`, `display_start_here`, `set_location`, `session_resume`, `simulate_strike`, `simulate_all_clear`, and `location_saved` (with the radius unit only). No event carries coordinates, addresses or search text.
+
+Blocked by BOLT-10.
+
+### BOLT-54 — Search engine optimization
+
+Henrique, 2026-10-18. The instructions live in a local, gitignored `SEO.md`, so the SEO can be redone the same way when pages change. Both pages get a descriptive title and meta description, a canonical URL, Open Graph and Twitter card tags with the logo as the share image, a theme color and one H1 (the Start screen's "BoltClock" name on the display). The display also carries WebApplication structured data (free, author, source link). The server serves `robots.txt` (everything allowed except `/api/`) and `sitemap.xml` (`/` and `/location`). Absolute URLs come from `PUBLIC_BASE_URL`: the HTML holds a `__PUBLIC_BASE_URL__` placeholder the server fills in when it serves the page (`src/server/seo.ts`), and `npm run dev` fills it with the dev address, so the repository holds no domain.
 
 Blocked by BOLT-10.

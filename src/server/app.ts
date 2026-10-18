@@ -4,6 +4,7 @@ import Fastify, { LogController, type FastifyInstance } from 'fastify';
 import { registerClientConfig, type ClientConfig } from './client-config.js';
 import { DEMO_MAP_ID } from './config.js';
 import { registerStream, type StreamOptions } from './push/stream.js';
+import { registerSeo } from './seo.js';
 import { registerWeather, type WeatherOptions } from './weather/route.js';
 
 export interface AppOptions {
@@ -17,6 +18,8 @@ export interface AppOptions {
   clientDir?: string;
   /** The brand files (assets/), served under /assets/. */
   assetsDir?: string;
+  /** PUBLIC_BASE_URL: the pages' canonical and share URLs, robots.txt and the sitemap (BOLT-54). */
+  publicBaseUrl?: string;
   logger?: boolean;
 }
 
@@ -43,10 +46,13 @@ export async function buildApp(options: AppOptions = {}): Promise<FastifyInstanc
   if (options.assetsDir && existsSync(options.assetsDir)) {
     await app.register(fastifyStatic, { root: options.assetsDir, prefix: '/assets/', decorateReply: false });
   }
-  if (options.clientDir && existsSync(options.clientDir)) {
-    await app.register(fastifyStatic, { root: options.clientDir, prefix: '/' });
+  const clientDir = options.clientDir && existsSync(options.clientDir) ? options.clientDir : undefined;
+  // robots.txt, sitemap.xml and the pages with their absolute URLs filled in (BOLT-54).
+  registerSeo(app, { publicBaseUrl: options.publicBaseUrl ?? 'http://localhost:8080', clientDir });
+  if (clientDir) {
+    // The pages come from registerSeo; the static files serve everything else (bundles under /static/).
+    await app.register(fastifyStatic, { root: clientDir, prefix: '/', index: false });
     // The picker's address is /location (BOLT-39). The old /location.html redirects there, keeping its query.
-    app.get('/location', (_request, reply) => reply.sendFile('location.html'));
     app.get('/location.html', (request, reply) => {
       const query = request.url.indexOf('?');
       return reply.redirect(`/location${query === -1 ? '' : request.url.slice(query)}`, 301);
