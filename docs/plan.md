@@ -63,6 +63,7 @@ flowchart TD
   s51[BOLT-51 session countdown in the footer]
   s53[BOLT-53 Google Analytics]
   s54[BOLT-54 search engine optimization]
+  s55[BOLT-55 WhatsApp link preview]
   s2 --> s3
   s4 --> s10
   s5 --> s10
@@ -115,6 +116,7 @@ flowchart TD
   s38 --> s51
   s10 --> s53
   s10 --> s54
+  s54 --> s55
 ```
 
 ## Stories
@@ -440,3 +442,9 @@ Blocked by BOLT-10.
 Henrique, 2026-10-18. The instructions live in a local, gitignored `SEO.md`, so the SEO can be redone the same way when pages change. Both pages get a descriptive title and meta description, a canonical URL, Open Graph and Twitter card tags with the logo as the share image, a theme color and one H1 (the Start screen's "BoltClock" name on the display). The display also carries WebApplication structured data (free, author, source link). The server serves `robots.txt` (everything allowed except `/api/`) and `sitemap.xml` (`/` and `/location`). Absolute URLs come from `PUBLIC_BASE_URL`: the HTML holds a `__PUBLIC_BASE_URL__` placeholder the server fills in when it serves the page (`src/server/seo.ts`), and `npm run dev` fills it with the dev address, so the repository holds no domain.
 
 Blocked by BOLT-10.
+
+### BOLT-55 — WhatsApp link preview shows the logo
+
+Henrique, 2026-10-18. A shared link should show the existing logo in WhatsApp, which ignores SVG favicons and needs a PNG or JPEG at an absolute https URL, at least 300x300, served as an image without signing in. The share image stays `assets/logo.png` (the existing logo, 1024x1024 PNG, about 55 KB), so no new export is needed. Both public pages add `og:image:type` (`image/png`), and `og:image:alt` is the app name. After deploy, the production HTML carries the absolute og:image URL and that URL answers 200 with `image/png`.
+
+Blocked by BOLT-54.
