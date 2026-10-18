@@ -1,4 +1,5 @@
 import './styles.css';
+import { startAnalytics, track } from './analytics.js';
 import { fetchClientConfig } from './client-config.js';
 import {
   CLOCK_LABELS,
@@ -63,6 +64,8 @@ let weather: WeatherPanel | undefined;
 const clientConfig = fetchClientConfig();
 // BUTTON_ICONS_ONLY: the top-right buttons drop their text labels.
 void clientConfig.then((config) => document.body.classList.toggle('icons-only', config.buttonIconsOnly)).catch(() => {});
+// GA_MEASUREMENT_ID: Google Analytics, without the address's query (no coordinates leave the device).
+void clientConfig.then((config) => startAnalytics(config.gaMeasurementId)).catch(() => {});
 
 const status = byId<HTMLParagraphElement>('status');
 const start = byId<HTMLDivElement>('start');
@@ -133,6 +136,7 @@ if (!location) {
 }
 
 startButton.addEventListener('click', () => {
+  track(resumeSession ? 'session_resume' : location ? 'display_start' : browserLocation ? 'display_start_here' : 'set_location');
   if (resumeSession) {
     resumeSession();
     resumeSession = undefined;
@@ -445,11 +449,13 @@ function watch(watched: UrlSettings): void {
   simulateAllClear.addEventListener('click', () => {
     if (!testMode) return;
     controller.simulateAllClear(Date.now());
+    track('simulate_all_clear');
     redraw();
   });
   simulateStrike.addEventListener('click', () => {
     if (!testMode) return;
     controller.simulateStrike(Date.now());
+    track('simulate_strike');
     redraw();
   });
   redrawDisplay = redraw;

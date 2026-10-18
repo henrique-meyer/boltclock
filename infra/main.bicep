@@ -56,6 +56,9 @@ param allowSimulation bool = false
 @description('Show the display\'s top-right buttons as icons only. False shows each icon with its text label.')
 param buttonIconsOnly bool = false
 
+@description('Google Analytics 4 measurement ID (G-…) for the display and the location picker. Empty: no analytics.')
+param gaMeasurementId string = ''
+
 @secure()
 @description('Browser key for the Google Maps JavaScript API and Places. Restrict it by HTTP referrer to your domain.')
 param googleMapsApiKey string
@@ -241,6 +244,10 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = if (deployApp) 
             {
               name: 'BUTTON_ICONS_ONLY'
               value: buttonIconsOnly ? 'true' : 'false'
+            }
+            {
+              name: 'GA_MEASUREMENT_ID'
+              value: gaMeasurementId
             }
           ], deployIngest ? [
             {

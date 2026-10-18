@@ -8,6 +8,8 @@ export interface ClientConfig {
   allowSimulation: boolean;
   /** The display's top-right buttons show only their icons (BUTTON_ICONS_ONLY). */
   buttonIconsOnly: boolean;
+  /** Google Analytics 4 measurement ID (GA_MEASUREMENT_ID); empty means no analytics. */
+  gaMeasurementId: string;
 }
 
 export async function fetchClientConfig(fetcher: typeof fetch = fetch): Promise<ClientConfig> {
@@ -20,6 +22,7 @@ export async function fetchClientConfig(fetcher: typeof fetch = fetch): Promise<
     testMode: body.testMode === true,
     allowSimulation: body.allowSimulation === true,
     buttonIconsOnly: body.buttonIconsOnly === true,
+    gaMeasurementId: typeof body.gaMeasurementId === 'string' ? body.gaMeasurementId : '',
   };
 }
 

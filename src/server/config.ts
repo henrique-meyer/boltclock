@@ -27,6 +27,8 @@ export interface Config {
   allowSimulation: boolean;
   /** The display's top-right buttons show only their icons. Off (icons with labels) unless BUTTON_ICONS_ONLY is "true". */
   buttonIconsOnly: boolean;
+  /** Google Analytics 4 measurement ID (GA_MEASUREMENT_ID, "G-…"). Empty, or not an ID: no analytics (BOLT-53). */
+  gaMeasurementId: string;
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
@@ -53,5 +55,6 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     testMode: env.TEST_MODE?.trim().toLowerCase() === 'true',
     allowSimulation: env.ALLOW_SIMULATION?.trim().toLowerCase() === 'true',
     buttonIconsOnly: env.BUTTON_ICONS_ONLY?.trim().toLowerCase() === 'true',
+    gaMeasurementId: /^G-[A-Z0-9]{4,20}$/.test(env.GA_MEASUREMENT_ID?.trim() ?? '') ? env.GA_MEASUREMENT_ID!.trim() : '',
   };
 }

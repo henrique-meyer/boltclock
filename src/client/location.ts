@@ -1,6 +1,7 @@
 import './styles.css';
 import './location.css';
 import { loadAlertSettings, saveAlertSettings } from './alert-settings.js';
+import { startAnalytics, track } from './analytics.js';
 import { fetchClientConfig, loadGoogleMaps } from './client-config.js';
 import { currentPosition } from './geolocation.js';
 import {
@@ -65,6 +66,7 @@ async function start(): Promise<void> {
   let config;
   try {
     config = await fetchClientConfig();
+    startAnalytics(config.gaMeasurementId);
   } catch {
     status.textContent = 'Could not reach the server. Reload to try again.';
     return;
@@ -196,6 +198,8 @@ async function start(): Promise<void> {
       saveAlertSettings(localStorage, { ...loadAlertSettings(localStorage), distanceUnit: stored.radius.unit });
       status.textContent = `Saved on this device: ${stored.radius.value} ${stored.radius.unit} around the pin.`;
       // Straight back to the display's main screen, which starts watching the new point. A failed save stays here.
+      // The unit only: never the point.
+      track('location_saved', { radius_unit: stored.radius.unit });
       markReturnToDisplay();
       window.location.assign('/');
     } catch {
