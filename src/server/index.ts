@@ -20,6 +20,7 @@ const app = await buildApp({
   },
   clientDir: resolve('dist/client'),
   assetsDir: resolve('assets'),
+  publicBaseUrl: config.publicBaseUrl,
   logger: true,
   stream: { store, sessionLimitMinutes: config.sessionLimitMinutes },
   weather: { userAgent: config.nwsUserAgent },

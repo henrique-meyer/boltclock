@@ -4,6 +4,7 @@
 /requirements.md
 /infrastructure.md
 /PLAN*.md
+/SEO.md
 
 # ---- Local secrets, deploy config and domain (not published) ----
 .env
