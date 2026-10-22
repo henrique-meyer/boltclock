@@ -1,6 +1,7 @@
-/* Brand colors, matching assets/logo.svg: navy tile, paper, mark outline, light bolt. Alert colors are warning
-   colors, not brand: amber and red read as danger from across a room. No weather scene uses red or amber, so ALERT
-   never looks like weather. The reds are dark enough for amber text at 4.5:1 and paper at 7:1 (tested). */
+/* Navy, paper and the mark outline match assets/logo.svg. The logo bolt is yellow (#ffd93d / #f4a900).
+   --bolt and --bolt-dark are the cyan accent for controls, status, links and the spinner. Alert colors are warning
+   colors, separate from the brand: amber and red read as danger from across a room. No weather scene uses red or
+   amber, so ALERT never looks like weather. The reds are dark enough for amber text at 4.5:1 and paper at 7:1 (tested). */
 :root {
   --navy: #0c2340;
   --paper: #f4f0e6;
