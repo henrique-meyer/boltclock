@@ -163,7 +163,7 @@ Blocked by BOLT-3 and BOLT-5.
 
 `assets/logo.svg` (navy tile, cream alarm clock with beige bells and a `#CDBFA8` rim, two-tone yellow bolt striking to the centre; readable at 16 px), `assets/logo-mark.svg` (transparent, outlined), and PNG copies rendered from the yellow sources: `logo.png` 1024×1024 and `logo-mark.png` 912×1032.
 
-The bolt colours are `#FFD93D` and `#F4A900`, taken from `logo-yellow.svg` and `logo-mark-yellow.svg` (the same two yellows in both). Those files, and their PNG copies, stay next to the canonical names. There is no web app manifest and no separate icon sizes; the favicon, apple-touch icon and share image are this 1024 logo.
+The bolt colours are `#FFD93D` and `#F4A900`, taken from `logo-yellow.svg` and `logo-mark-yellow.svg` (the same two yellows in both). Those files, and their PNG copies, stay next to the canonical names. There is no web app manifest and no separate 1200×630 share card. The favicon, apple-touch icon and share image are this 1024 logo, plus `favicon.ico` (16, 32 and 48) for the `/favicon.ico` request. The pages put `?v=yellow` on those URLs.
 
 ### BOLT-9 — Keep the Jira site out of public text
 

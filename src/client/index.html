@@ -13,7 +13,7 @@
     <meta property="og:title" content="BoltClock · Lightning alarm with an all-clear countdown">
     <meta property="og:description" content="Free full-screen lightning alarm. When NOAA satellite data shows lightning within your radius, BoltClock sounds a siren and counts down to the all-clear.">
     <meta property="og:url" content="__PUBLIC_BASE_URL__/">
-    <meta property="og:image" content="__PUBLIC_BASE_URL__/assets/logo.png">
+    <meta property="og:image" content="__PUBLIC_BASE_URL__/assets/logo.png?v=yellow">
     <meta property="og:image:type" content="image/png">
     <meta property="og:image:width" content="1024">
     <meta property="og:image:height" content="1024">
@@ -21,14 +21,14 @@
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="BoltClock · Lightning alarm with an all-clear countdown">
     <meta name="twitter:description" content="Free full-screen lightning alarm. When NOAA satellite data shows lightning within your radius, BoltClock sounds a siren and counts down to the all-clear.">
-    <meta name="twitter:image" content="__PUBLIC_BASE_URL__/assets/logo.png">
+    <meta name="twitter:image" content="__PUBLIC_BASE_URL__/assets/logo.png?v=yellow">
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@type": "WebApplication",
         "name": "BoltClock",
         "url": "__PUBLIC_BASE_URL__/",
-        "image": "__PUBLIC_BASE_URL__/assets/logo.png",
+        "image": "__PUBLIC_BASE_URL__/assets/logo.png?v=yellow",
         "description": "Free full-screen lightning alarm. When NOAA satellite data shows lightning within your radius, BoltClock sounds a siren and counts down to the all-clear.",
         "applicationCategory": "UtilitiesApplication",
         "operatingSystem": "Any (web browser)",
@@ -39,9 +39,11 @@
         "sameAs": ["https://github.com/henrique-meyer/boltclock"]
       }
     </script>
-    <link rel="icon" href="/assets/logo.png" type="image/png" sizes="1024x1024">
-    <link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/assets/logo.png">
+    <!-- ?v=yellow busts favicon and share caches. Bump it when the bolt artwork changes. -->
+    <link rel="icon" href="/favicon.ico?v=yellow" sizes="48x48">
+    <link rel="icon" href="/assets/logo.png?v=yellow" type="image/png" sizes="1024x1024">
+    <link rel="icon" href="/assets/logo.svg?v=yellow" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/assets/logo.png?v=yellow">
     <script type="module" src="./main.ts"></script>
   </head>
   <body class="mode-normal" data-weather="neutral">

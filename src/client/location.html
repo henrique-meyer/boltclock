@@ -13,7 +13,7 @@
     <meta property="og:title" content="Choose a location · BoltClock lightning alarm">
     <meta property="og:description" content="Pick the point and radius BoltClock watches for lightning: search for a place or drop a pin. Only the coordinates are saved, on your device.">
     <meta property="og:url" content="__PUBLIC_BASE_URL__/location">
-    <meta property="og:image" content="__PUBLIC_BASE_URL__/assets/logo.png">
+    <meta property="og:image" content="__PUBLIC_BASE_URL__/assets/logo.png?v=yellow">
     <meta property="og:image:type" content="image/png">
     <meta property="og:image:width" content="1024">
     <meta property="og:image:height" content="1024">
@@ -21,10 +21,12 @@
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="Choose a location · BoltClock lightning alarm">
     <meta name="twitter:description" content="Pick the point and radius BoltClock watches for lightning: search for a place or drop a pin. Only the coordinates are saved, on your device.">
-    <meta name="twitter:image" content="__PUBLIC_BASE_URL__/assets/logo.png">
-    <link rel="icon" href="/assets/logo.png" type="image/png" sizes="1024x1024">
-    <link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/assets/logo.png">
+    <meta name="twitter:image" content="__PUBLIC_BASE_URL__/assets/logo.png?v=yellow">
+    <!-- ?v=yellow busts favicon and share caches. Bump it when the bolt artwork changes. -->
+    <link rel="icon" href="/favicon.ico?v=yellow" sizes="48x48">
+    <link rel="icon" href="/assets/logo.png?v=yellow" type="image/png" sizes="1024x1024">
+    <link rel="icon" href="/assets/logo.svg?v=yellow" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/assets/logo.png?v=yellow">
     <script type="module" src="./location.ts"></script>
   </head>
   <body class="picker-page">
