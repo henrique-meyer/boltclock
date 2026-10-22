@@ -1,4 +1,6 @@
 import { existsSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import fastifyStatic from '@fastify/static';
 import Fastify, { LogController, type FastifyInstance } from 'fastify';
 import { registerClientConfig, type ClientConfig } from './client-config.js';
@@ -45,6 +47,13 @@ export async function buildApp(options: AppOptions = {}): Promise<FastifyInstanc
 
   if (options.assetsDir && existsSync(options.assetsDir)) {
     await app.register(fastifyStatic, { root: options.assetsDir, prefix: '/assets/', decorateReply: false });
+    // Browsers and some crawlers request /favicon.ico whether or not the page names another icon.
+    const favicon = join(options.assetsDir, 'favicon.ico');
+    if (existsSync(favicon)) {
+      app.get('/favicon.ico', async (_request, reply) => {
+        return reply.type('image/x-icon').header('cache-control', 'no-cache').send(await readFile(favicon));
+      });
+    }
   }
   const clientDir = options.clientDir && existsSync(options.clientDir) ? options.clientDir : undefined;
   // robots.txt, sitemap.xml and the pages with their absolute URLs filled in (BOLT-54).
