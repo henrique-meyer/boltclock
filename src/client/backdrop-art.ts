@@ -1,6 +1,5 @@
 /**
- * Original background art for each weather scene, drawn as inline SVG in the brand colours (navy, paper).
- * Rain keeps the cyan accent. The still lightning bolt uses the logo's light yellow.
+ * Original background art for each weather scene, drawn as inline SVG in the brand colours (navy, paper, bolt cyan).
  * Everything is translucent and kept to the edges where it can be, so the display's large text reads over it. Each
  * scene is a stack of layers: static scenery, slowly drifting layers, and tiled rain or snow that falls. Moving
  * layers move as whole elements, so the browser composites them instead of repainting the SVG every frame.
@@ -10,10 +9,7 @@
 import type { BackgroundScene } from './weather-background.js';
 
 const PAPER = '#f4f0e6';
-/** Cyan accent for rain streaks, the same accent the controls use. */
 const BOLT = '#4cc9f0';
-/** Light half of the logo bolt, from assets/logo-yellow.svg (#FFD93D). */
-const BRAND_BOLT = '#ffd93d';
 
 /** A full-screen layer, 1600 × 900 units, cropped (not squashed) to the screen's shape. */
 function layer(className: string, body: string, defs = ''): string {
@@ -174,7 +170,7 @@ const SCENES: Record<BackgroundScene, () => string> = {
     // (and can trigger seizures).
     layer(
       'bg-static',
-      `<path d="M 262 160 L 182 410 L 236 410 L 170 600 L 318 360 L 258 360 L 312 160 Z" fill="${BRAND_BOLT}" opacity="0.38"/>`,
+      `<path d="M 262 160 L 182 410 L 236 410 L 170 600 L 318 360 L 258 360 L 312 160 Z" fill="${BOLT}" opacity="0.38"/>`,
     ) +
     layer('bg-drift-slow', cloudDeck(250, '#3a3358', 0.6, 31) + cloudDeck(190, '#29233f', 0.97, 32)) +
     precipitation('bg-rain bg-rain--heavy', 60, 240, rainTile(5, 0.26, 41)),
