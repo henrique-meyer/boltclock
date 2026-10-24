@@ -119,3 +119,16 @@ export function saveAlertSettings(store: KeyValueStore | undefined, settings: Al
 export function simulationOn(settings: AlertSettings, deployment: { testMode: boolean; allowSimulation: boolean }): boolean {
   return deployment.allowSimulation && (settings.simulation ?? deployment.testMode);
 }
+
+/** Whether Settings shows the Simulation mode checkbox. Without ALLOW_SIMULATION the row is not in the dialog. */
+export function simulationOptionShown(deployment: { allowSimulation: boolean }): boolean {
+  return deployment.allowSimulation;
+}
+
+/**
+ * Whether the SIMULATION flag shows. It follows a Simulate press still on screen, and it stays hidden where
+ * simulation is not allowed.
+ */
+export function simulationFlagShown(deployment: { allowSimulation: boolean }, screenSimulated: boolean): boolean {
+  return deployment.allowSimulation && screenSimulated;
+}
