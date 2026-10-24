@@ -154,8 +154,10 @@ The sirens and the all-clear chime are generated in code by a script in this rep
 - `infra/`: Bicep and the deploy guide. `infra/aws/` holds the CloudFormation relay.
 - `.github/workflows/`: pull request checks and the deploy.
 
-## Licence
+## License
 
-Boltclock is source-available under the [PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0/). It is not open source. You may use, change, and share it for noncommercial purposes. Commercial use requires permission from the copyright holder.
+BoltClock is source-available for noncommercial use under [PolyForm-Noncommercial-1.0.0](LICENSE) ([https://polyformproject.org/licenses/noncommercial/1.0.0/](https://polyformproject.org/licenses/noncommercial/1.0.0/)). It is not an OSI open source license. Commercial use requires permission from the author.
 
-Required notice: Copyright 2026 Henrique Meyer.
+Required Notice: Copyright (c) 2026 Henrique Meyer / Nitrosoft Technology Inc
+
+The BoltClock name, logos and artwork are not licensed for reuse.

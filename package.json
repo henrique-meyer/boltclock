@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "Full-screen lightning alarm driven by NOAA GOES-19 GLM data.",
-  "license": "PolyForm-Noncommercial-1.0.0",
+  "license": "SEE LICENSE IN LICENSE",
   "type": "module",
   "main": "dist/functions/glm-webhook.js",
   "engines": {
