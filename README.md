@@ -1,4 +1,7 @@
 # boltclock
+
+[![PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue)](https://polyformproject.org/licenses/noncommercial/1.0.0/)
+
 Full-screen lightning alarm for any location. When NOAA satellite data shows a strike within your radius, it sounds a siren, calls out the distance, and runs an all-clear countdown, with live weather readable from across the room.
 
 ## Safety
@@ -101,7 +104,7 @@ The display still shows the Start button once. With that flag, the alarm can sou
 - Lightning: NOAA GOES-19 Geostationary Lightning Mapper (GLM-L2-LCFA), public domain, from NOAA Open Data on AWS. No account needed.
 - Weather: the National Weather Service API (api.weather.gov).
 - Maps: Google Maps Platform, with Google's attribution kept on the map. Each deployer supplies their own key; none is in this repository.
-- Background art: original, drawn in code for this project (`src/client/backdrop-art.ts`) under the project's licence. No stock images.
+- Background art: original, drawn in code for this project (`src/client/backdrop-art.ts`) under the project's [PolyForm Noncommercial License 1.0.0](LICENSE). No stock images.
 
 ## Tech stack
 - **Language and runtime:** TypeScript on Node 24 LTS for the server, the ingest function and the browser client ([ADR 0002](docs/decisions/0002-node-typescript.md)).
@@ -150,3 +153,11 @@ The sirens and the all-clear chime are generated in code by a script in this rep
 - `docs/`: the [system design](docs/system-design.md), the [plan](docs/plan.md), and decisions in [docs/decisions](docs/decisions/).
 - `infra/`: Bicep and the deploy guide. `infra/aws/` holds the CloudFormation relay.
 - `.github/workflows/`: pull request checks and the deploy.
+
+## License
+
+BoltClock is source-available for noncommercial use under [PolyForm-Noncommercial-1.0.0](LICENSE) ([https://polyformproject.org/licenses/noncommercial/1.0.0/](https://polyformproject.org/licenses/noncommercial/1.0.0/)). It is not an OSI open source license. Commercial use requires permission from the author.
+
+Required Notice: Copyright (c) 2026 Henrique Meyer / Nitrosoft Technology Inc
+
+The BoltClock name, logos and artwork are not licensed for reuse.
