@@ -468,6 +468,12 @@ button {
   gap: 1em;
 }
 
+/* After the rules that set display, so the hidden Simulation mode checkbox stays hidden.
+   .settings-form label { display: flex } beats the hidden attribute. */
+.settings-footer [hidden] {
+  display: none;
+}
+
 .settings-reset {
   margin-left: auto;
 }

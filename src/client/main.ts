@@ -9,7 +9,9 @@ import {
   loadAlertSettings,
   DEFAULT_ALERT_SETTINGS,
   saveAlertSettings,
+  simulationFlagShown,
   simulationOn,
+  simulationOptionShown,
   SIREN_LABELS,
   SIRENS,
   TEMPERATURE_LABELS,
@@ -295,8 +297,8 @@ let redrawDisplay: (() => void) | undefined;
 
 function applySimulation(): void {
   testMode = simulationOn(alerts, deployment);
-  // Without ALLOW_SIMULATION there is no checkbox at all.
-  simulationOption.hidden = !deployment.allowSimulation;
+  // Without ALLOW_SIMULATION the checkbox is not in Settings at all.
+  simulationOption.hidden = !simulationOptionShown(deployment);
   simulationInput.checked = testMode;
   simulateStrike.hidden = !testMode || !redrawDisplay;
   if (redrawDisplay) redrawDisplay();
@@ -329,7 +331,7 @@ function render(view: ControllerView, connection: ConnectionState, radius: { val
   headline.textContent = alert ? 'LIGHTNING NEARBY' : 'All clear';
   countdown.hidden = !alert;
   countdown.textContent = view.countdown ?? '';
-  simFlag.hidden = !view.simulation;
+  simFlag.hidden = !simulationFlagShown(deployment, view.simulation);
   // Test mode only: during a countdown, the sun button ends it at once.
   simulateAllClear.hidden = !(testMode && alert);
   detail.textContent = alert

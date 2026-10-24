@@ -5,7 +5,9 @@ import {
   loadAlertSettings,
   normalizeAlertSettings,
   saveAlertSettings,
+  simulationFlagShown,
   simulationOn,
+  simulationOptionShown,
 } from '../../src/client/alert-settings.js';
 
 function memoryStore(initial: Record<string, string> = {}) {
@@ -104,6 +106,17 @@ describe('alert settings', () => {
     const notAllowed = { testMode: true, allowSimulation: false };
     expect(simulationOn(DEFAULT_ALERT_SETTINGS, notAllowed)).toBe(false);
     expect(simulationOn({ ...DEFAULT_ALERT_SETTINGS, simulation: true }, notAllowed)).toBe(false);
+    expect(simulationOptionShown(notAllowed)).toBe(false);
+    expect(simulationFlagShown(notAllowed, true)).toBe(false);
+    expect(simulationFlagShown(notAllowed, false)).toBe(false);
+  });
+
+  it('offers the Simulation mode checkbox when ALLOW_SIMULATION is on, even if this device turns it off', () => {
+    const allowed = { testMode: true, allowSimulation: true };
+    expect(simulationOptionShown(allowed)).toBe(true);
+    expect(simulationOn({ ...DEFAULT_ALERT_SETTINGS, simulation: false }, allowed)).toBe(false);
+    expect(simulationFlagShown(allowed, true)).toBe(true);
+    expect(simulationFlagShown(allowed, false)).toBe(false);
   });
 
   it('survives unreadable storage', () => {
