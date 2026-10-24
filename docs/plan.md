@@ -161,9 +161,9 @@ Blocked by BOLT-3 and BOLT-5.
 
 ### BOLT-8 — Logo
 
-`assets/logo.svg` (navy tile, cream alarm clock with beige bells and a `#CDBFA8` rim, two-tone yellow bolt striking to the centre; readable at 16 px), `assets/logo-mark.svg` (transparent, outlined), and PNG copies rendered from the yellow sources: `logo.png` 1024×1024 and `logo-mark.png` 912×1032.
+`assets/logo.svg` (navy tile, cream alarm clock with beige bells and a `#CDBFA8` rim, two-tone electric-cyan bolt striking to the centre; readable at 16 px), `assets/logo-mark.svg` (transparent, outlined), and PNG copies exported from them: `logo.png` 1024×1024 and `logo-mark.png` 912×1032.
 
-The bolt colours are `#FFD93D` and `#F4A900`, taken from `logo-yellow.svg` and `logo-mark-yellow.svg` (the same two yellows in both). Those files, and their PNG copies, stay next to the canonical names. There is no web app manifest and no separate 1200×630 share card. The favicon, apple-touch icon and share image are this 1024 logo, plus `favicon.ico` (16, 32 and 48) for the `/favicon.ico` request. The pages put `?v=yellow` on those URLs.
+A yellow-bolt alternate is kept next to them but not used: `logo-yellow.svg`, `logo-mark-yellow.svg` and their PNG copies (`#FFD93D` and `#F4A900`). Cyan (`#4CC9F0` and `#1E8FD5`) is the brand. There is no web app manifest and no separate 1200×630 share card. The favicon, apple-touch icon and share image are this 1024 logo, plus `favicon.ico` (16, 32 and 48, rendered from `logo.svg`) for the `/favicon.ico` request. The pages put `?v=blue` on those URLs.
 
 ### BOLT-9 — Keep the Jira site out of public text
 

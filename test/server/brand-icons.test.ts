@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { buildApp } from '../../src/server/app.js';
 
 /** Bump this with the `?v=` on the favicon and share URLs when the bolt artwork changes. */
-const ICON_VERSION = 'v=yellow';
+const ICON_VERSION = 'v=blue';
 
 const PAGES = ['index.html', 'location.html'] as const;
 
